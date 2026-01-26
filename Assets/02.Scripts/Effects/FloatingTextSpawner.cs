@@ -45,7 +45,16 @@ public class FloatingTextSpawner : MonoBehaviour
             0
         );
 
-        text.Show($"+{amount}", _treeTransform.position + _spawnOffset + randomOffset);
+        Vector3 spawnPosition = _treeTransform.position + _spawnOffset + randomOffset;
+
+        // 카메라 방향으로 약간 앞으로 이동 (나무에 가려지지 않도록)
+        if (Camera.main != null)
+        {
+            Vector3 toCamera = (Camera.main.transform.position - spawnPosition).normalized;
+            spawnPosition += toCamera * 1f;
+        }
+
+        text.Show($"+{amount}", spawnPosition);
     }
 
     private void ReturnToPool(FloatingText text)

@@ -252,8 +252,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 586b3b4d32475460e92a5cbcf9ed10f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TreeShake
-  shakeAngle: 15
-  shakeDuration: 0.2
+  _shakeAngle: 15
+  _shakeDuration: 0.2
 --- !u!1 &284663423
 GameObject:
   m_ObjectHideFlags: 0
@@ -265,7 +265,7 @@ GameObject:
   - component: {fileID: 284663426}
   - component: {fileID: 284663425}
   - component: {fileID: 284663424}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Terrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -659,6 +659,53 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4922444305696846, guid: ac1cc01cb5dbf5d4f869c403b38f8a21, type: 3}
   m_PrefabInstance: {fileID: 417343357}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &472194811
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 472194813}
+  - component: {fileID: 472194812}
+  m_Layer: 0
+  m_Name: FloatingTextSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &472194812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 472194811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7402c5e0e7a224169beb3170c7b3e3f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FloatingTextSpawner
+  _prefab: {fileID: 3622375769142373237, guid: b7e2009c2dd074033856d293e7cb1448, type: 3}
+  _poolSize: 20
+  _spawnOffset: {x: 0, y: 2, z: 0}
+--- !u!4 &472194813
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 472194811}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3558.7627, y: 814.869, z: 35.79941}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &500610425
 GameObject:
   m_ObjectHideFlags: 0
@@ -756,50 +803,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4009941363576130, guid: a8cba3361c8f7724e8899289f1efa8cc, type: 3}
   m_PrefabInstance: {fileID: 830003388}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &600820026
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 600820028}
-  - component: {fileID: 600820027}
-  m_Layer: 0
-  m_Name: TestRunner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &600820027
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 600820026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67da40ec0003c4518968e574fda56242, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::M1_1_TestRunner
---- !u!4 &600820028
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 600820026}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 39.21655, y: 1.08766, z: 67.91053}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &607565146
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1377,8 +1380,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab9fd32b235ef499684b1a737aa4d4db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScreenShake
-  shakeDuration: 0.05
-  shakeMagnitude: 0.1
+  _shakeDuration: 0.05
+  _shakeMagnitude: 0.1
 --- !u!4 &971309434 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4075937848129010, guid: 29636f40562819649b730c52f1babbcb, type: 3}
@@ -1729,6 +1732,56 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1730016898
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1730016900}
+  - component: {fileID: 1730016899}
+  m_Layer: 0
+  m_Name: FirewoodSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1730016899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1730016898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6f068c13b35f4ef185553e973ef57ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FirewoodSpawner
+  _prefab: {fileID: 8673012368737541717, guid: 2f41dd4e6503f4b30a1b05a2ae9d31a1, type: 3}
+  _poolSize: 20
+  _spawnCountMin: 3
+  _spawnCountMax: 5
+  _launchForce: 5
+  _spawnOffset: {x: 0, y: 1.5, z: 0}
+--- !u!4 &1730016900
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1730016898}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 38.03082, y: 9.18699, z: 33.67455}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1755235551
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1868,7 +1921,24 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3201947013611667770, guid: 0e403b6a531ac064c9558d91a1be12e8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 244660481}
+    - targetCorrespondingSourceObject: {fileID: 3201947013611667770, guid: 0e403b6a531ac064c9558d91a1be12e8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1765263911}
   m_SourcePrefab: {fileID: 100100000, guid: 0e403b6a531ac064c9558d91a1be12e8, type: 3}
+--- !u!114 &1765263911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 244660475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03be82cc44a724c9a92c03a8b8ab18b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitParticleSpawner
+  _woodChipParticle: {fileID: 0}
+  _leafParticle: {fileID: 0}
 --- !u!1001 &1893182789
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2074,10 +2144,11 @@ SceneRoots:
   - {fileID: 835380437}
   - {fileID: 284663426}
   - {fileID: 1765263909}
+  - {fileID: 1425547854}
+  - {fileID: 1144645825}
   - {fileID: 500610426}
   - {fileID: 1567937177}
   - {fileID: 1073055251}
   - {fileID: 2136500036}
-  - {fileID: 600820028}
-  - {fileID: 1425547854}
-  - {fileID: 1144645825}
+  - {fileID: 472194813}
+  - {fileID: 1730016900}

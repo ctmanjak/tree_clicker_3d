@@ -10,6 +10,23 @@ public class FloatingText : MonoBehaviour
     [SerializeField] private float _fadeDuration = 0.8f;
 
     private Action<FloatingText> _onComplete;
+    private Transform _cameraTransform;
+
+    private void Awake()
+    {
+        if (Camera.main != null)
+        {
+            _cameraTransform = Camera.main.transform;
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (_cameraTransform != null)
+        {
+            transform.rotation = _cameraTransform.rotation;
+        }
+    }
 
     public void Initialize(Action<FloatingText> returnToPool)
     {
