@@ -25,15 +25,13 @@ public class GameManager : MonoBehaviour, ISaveable
         Instance = this;
 
         ServiceLocator.Register(this);
-    }
-
-    private void Start()
-    {
         _gameEvents = GameEvents.Instance;
     }
 
     public void AddWood(long amount)
     {
+        if (amount <= 0) return;
+
         _currentWood += amount;
         _gameEvents?.RaiseWoodAdded(amount);
         _gameEvents?.RaiseWoodChanged(_currentWood);
@@ -41,6 +39,8 @@ public class GameManager : MonoBehaviour, ISaveable
 
     public bool SpendWood(long amount)
     {
+        if (amount <= 0) return false;
+
         if (_currentWood >= amount)
         {
             _currentWood -= amount;
@@ -52,20 +52,23 @@ public class GameManager : MonoBehaviour, ISaveable
 
     public void IncreaseWoodPerClick(long amount)
     {
+        if (amount <= 0) return;
+
         _woodPerClick += amount;
+        _gameEvents?.RaiseWoodPerClickChanged(_woodPerClick);
     }
 
     public object CaptureState()
     {
-        return new SaveData { wood = _currentWood, woodPerClick = _woodPerClick };
+        return new SaveData { Wood = _currentWood, WoodPerClick = _woodPerClick };
     }
 
     public void RestoreState(object state)
     {
         if (state is SaveData data)
         {
-            _currentWood = data.wood;
-            _woodPerClick = data.woodPerClick;
+            _currentWood = data.Wood;
+            _woodPerClick = data.WoodPerClick;
             _gameEvents?.RaiseWoodChanged(_currentWood);
         }
     }
@@ -73,7 +76,7 @@ public class GameManager : MonoBehaviour, ISaveable
     [System.Serializable]
     private class SaveData
     {
-        public long wood;
-        public long woodPerClick;
+        public long Wood;
+        public long WoodPerClick;
     }
 }

@@ -3,6 +3,9 @@ using UnityEngine.InputSystem;
 
 public class InputHandler : MonoBehaviour
 {
+    private const float MaxRaycastDistance = 100f;
+    private const string TreeTag = "Tree";
+
     [SerializeField] private LayerMask _clickableLayers;
 
     private Camera _mainCamera;
@@ -26,24 +29,35 @@ public class InputHandler : MonoBehaviour
 
     private void Update()
     {
-        if (Mouse.current == null) return;
-
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (TryGetClickPosition(out Vector2 screenPosition))
         {
-            HandleClick(Mouse.current.position.ReadValue());
+            HandleClick(screenPosition);
+        }
+    }
+
+    private bool TryGetClickPosition(out Vector2 position)
+    {
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            position = Mouse.current.position.ReadValue();
+            return true;
         }
 
         if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
         {
-            HandleClick(Touchscreen.current.primaryTouch.position.ReadValue());
+            position = Touchscreen.current.primaryTouch.position.ReadValue();
+            return true;
         }
+
+        position = default;
+        return false;
     }
 
     private void HandleClick(Vector2 screenPosition)
     {
         Ray ray = _mainCamera.ScreenPointToRay(screenPosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f, _clickableLayers))
+        if (Physics.Raycast(ray, out RaycastHit hit, MaxRaycastDistance, _clickableLayers))
         {
             _gameEvents.RaiseClickPerformed(hit.point);
 
@@ -52,7 +66,7 @@ public class InputHandler : MonoBehaviour
                 clickable.OnClick(hit.point);
             }
 
-            if (hit.collider.CompareTag("Tree"))
+            if (hit.collider.CompareTag(TreeTag))
             {
                 _gameEvents.RaiseTreeClicked(hit.collider.gameObject);
             }
