@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class TreeShake : MonoBehaviour
 {
-    [SerializeField] private float shakeAngle = 15f;
-    [SerializeField] private float shakeDuration = 0.2f;
+    [SerializeField] private float _shakeAngle = 15f;
+    [SerializeField] private float _shakeDuration = 0.2f;
 
     private Quaternion _originalRotation;
     private Coroutine _shakeCoroutine;
@@ -32,11 +32,11 @@ public class TreeShake : MonoBehaviour
         Quaternion targetRotation = Quaternion.Euler(
             _originalRotation.eulerAngles.x,
             _originalRotation.eulerAngles.y,
-            _originalRotation.eulerAngles.z + shakeAngle * tiltDirection
+            _originalRotation.eulerAngles.z + _shakeAngle * tiltDirection
         );
 
         float elapsed = 0f;
-        float tiltDuration = shakeDuration * 0.3f;
+        float tiltDuration = _shakeDuration * 0.3f;
         while (elapsed < tiltDuration)
         {
             float t = elapsed / tiltDuration;
@@ -47,7 +47,7 @@ public class TreeShake : MonoBehaviour
         }
 
         elapsed = 0f;
-        float returnDuration = shakeDuration * 0.7f;
+        float returnDuration = _shakeDuration * 0.7f;
         while (elapsed < returnDuration)
         {
             float t = elapsed / returnDuration;
