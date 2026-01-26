@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Skill(compound-engineering:plan_review)"
+    ]
+  }
+}
