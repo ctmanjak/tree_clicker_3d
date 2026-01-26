@@ -63,7 +63,7 @@ public class InputHandler : MonoBehaviour
 
             if (hit.collider.TryGetComponent<IClickable>(out var clickable))
             {
-                clickable.OnClick(hit.point);
+                clickable.OnClick(hit.point, hit.normal);
             }
 
             if (hit.collider.CompareTag(TreeTag))
