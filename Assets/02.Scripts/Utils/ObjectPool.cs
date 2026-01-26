@@ -48,9 +48,12 @@ public class ObjectPool<T> where T : Component
 
     public void ReturnAll()
     {
-        foreach (var obj in activeObjects.ToArray())
+        for (int i = activeObjects.Count - 1; i >= 0; i--)
         {
-            Return(obj);
+            var obj = activeObjects[i];
+            obj.gameObject.SetActive(false);
+            pool.Enqueue(obj);
         }
+        activeObjects.Clear();
     }
 }
