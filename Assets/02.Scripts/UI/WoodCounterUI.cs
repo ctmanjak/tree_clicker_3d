@@ -5,25 +5,38 @@ public class WoodCounterUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _woodText;
 
+    private bool _isSubscribed;
+
     private void Start()
     {
+        Subscribe();
         UpdateDisplay(GameManager.Instance.CurrentWood);
     }
 
     private void OnEnable()
     {
-        if (GameEvents.Instance != null)
-        {
-            GameEvents.Instance.OnWoodChanged += UpdateDisplay;
-        }
+        Subscribe();
     }
 
     private void OnDisable()
     {
-        if (GameEvents.Instance != null)
-        {
-            GameEvents.Instance.OnWoodChanged -= UpdateDisplay;
-        }
+        Unsubscribe();
+    }
+
+    private void Subscribe()
+    {
+        if (_isSubscribed || GameEvents.Instance == null) return;
+
+        GameEvents.Instance.OnWoodChanged += UpdateDisplay;
+        _isSubscribed = true;
+    }
+
+    private void Unsubscribe()
+    {
+        if (!_isSubscribed || GameEvents.Instance == null) return;
+
+        GameEvents.Instance.OnWoodChanged -= UpdateDisplay;
+        _isSubscribed = false;
     }
 
     private void UpdateDisplay(long amount)
