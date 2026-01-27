@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour, ISaveable
     public long CurrentWood => _currentWood;
     public long WoodPerClick => _woodPerClick;
 
+    public bool CanAfford(long amount) => _currentWood >= amount;
+
     public string SaveKey => "GameManager";
 
     private void Awake()

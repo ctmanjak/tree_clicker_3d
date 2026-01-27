@@ -8,6 +8,10 @@ public class FloatingText : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _text;
     [SerializeField] private float _floatSpeed = 1f;
     [SerializeField] private float _fadeDuration = 0.8f;
+    [SerializeField] private float _textMinWidth = 0f;
+    [SerializeField] private float _textMaxWidth = 320f;
+
+    private RectTransform _textRectTransform;
 
     private Action<FloatingText> _onComplete;
     private Transform _cameraTransform;
@@ -18,6 +22,8 @@ public class FloatingText : MonoBehaviour
         {
             _cameraTransform = Camera.main.transform;
         }
+
+        _textRectTransform = _text.GetComponent<RectTransform>();
     }
 
     private void LateUpdate()
@@ -37,7 +43,13 @@ public class FloatingText : MonoBehaviour
     {
         _text.text = content;
         _text.color = Color.white;
+
+        float preferredWidth = _text.GetPreferredValues(content).x;
+        float width = Mathf.Clamp(preferredWidth, _textMinWidth, _textMaxWidth);
+        _textRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+
         transform.position = worldPosition;
+        transform.SetAsLastSibling();
         StopAllCoroutines();
         StartCoroutine(AnimateAndHide());
     }
