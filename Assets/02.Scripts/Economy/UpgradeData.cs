@@ -1,5 +1,11 @@
 using UnityEngine;
 
+public enum UpgradeType
+{
+    WoodPerClick,
+    SpawnLumberjack
+}
+
 [CreateAssetMenu(fileName = "Upgrade", menuName = "LumberTycoon/Upgrade")]
 public class UpgradeData : ScriptableObject
 {
@@ -7,6 +13,7 @@ public class UpgradeData : ScriptableObject
     public string UpgradeName;
     [TextArea] public string Description;
     public Sprite Icon;
+    public UpgradeType Type;
 
     [Header("비용")]
     public long BaseCost = 100;

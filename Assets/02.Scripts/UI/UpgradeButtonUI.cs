@@ -117,7 +117,7 @@ public class UpgradeButtonUI : MonoBehaviour
 
         if (_effectText != null)
         {
-            _effectText.text = $"+{_upgradeData.EffectAmount}/클릭";
+            _effectText.text = GetEffectText();
         }
 
         UpdateButtonState();
@@ -130,6 +130,16 @@ public class UpgradeButtonUI : MonoBehaviour
         int level = _upgradeManager.GetLevel(_upgradeData);
         long cost = _upgradeData.GetCost(level);
         _button.interactable = _gameManager.CanAfford(cost);
+    }
+
+    private string GetEffectText()
+    {
+        return _upgradeData.Type switch
+        {
+            UpgradeType.WoodPerClick => $"+{_upgradeData.EffectAmount}/클릭",
+            UpgradeType.SpawnLumberjack => "벌목꾼 +1",
+            _ => ""
+        };
     }
 
     private string FormatNumber(long num)

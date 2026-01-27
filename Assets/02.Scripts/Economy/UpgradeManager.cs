@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UpgradeManager : MonoBehaviour, ISaveable
@@ -8,6 +9,7 @@ public class UpgradeManager : MonoBehaviour, ISaveable
     private Dictionary<string, int> _upgradeLevels = new();
     private GameManager _gameManager;
     private GameEvents _gameEvents;
+    private LumberjackSpawner _lumberjackSpawner;
 
     public string SaveKey => "UpgradeManager";
     public IReadOnlyList<UpgradeData> Upgrades => _upgrades;
@@ -21,6 +23,7 @@ public class UpgradeManager : MonoBehaviour, ISaveable
     {
         _gameManager = GameManager.Instance;
         _gameEvents = GameEvents.Instance;
+        _lumberjackSpawner = ServiceLocator.Get<LumberjackSpawner>();
     }
 
     public bool TryPurchase(UpgradeData upgrade)
@@ -40,12 +43,25 @@ public class UpgradeManager : MonoBehaviour, ISaveable
 
     private void ApplyEffect(UpgradeData upgrade)
     {
-        _gameManager.IncreaseWoodPerClick(upgrade.EffectAmount);
+        switch (upgrade.Type)
+        {
+            case UpgradeType.WoodPerClick:
+                _gameManager.IncreaseWoodPerClick(upgrade.EffectAmount);
+                break;
+            case UpgradeType.SpawnLumberjack:
+                _lumberjackSpawner?.SpawnLumberjack();
+                break;
+        }
     }
 
     public int GetLevel(UpgradeData upgrade)
     {
         return _upgradeLevels.TryGetValue(upgrade.UpgradeName, out int level) ? level : 0;
+    }
+
+    public IEnumerable<UpgradeData> GetUpgradesByType(UpgradeType type)
+    {
+        return _upgrades.Where(u => u.Type == type);
     }
 
     public object CaptureState()
