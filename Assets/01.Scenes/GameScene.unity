@@ -2035,8 +2035,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fb406e5bc7384608b29dcf68e29146d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BGMController
-  _defaultBGM: {fileID: 0}
-  _playOnStart: 0
+  _defaultBGM: {fileID: 8300000, guid: 5b1ed8fbe89154eaf96723b6e5f0aad3, type: 3}
+  _playOnStart: 1
   _volume: 0.7
 --- !u!4 &1379886664
 Transform:
