@@ -3,25 +3,25 @@ using UnityEngine.UI;
 
 public class UpgradePanelToggle : MonoBehaviour
 {
-    [SerializeField] private GameObject upgradePanel;
-    [SerializeField] private Button toggleButton;
+    [SerializeField] private GameObject _upgradePanel;
+    [SerializeField] private Button _toggleButton;
 
     private bool _isOpen;
 
     private void Start()
     {
-        toggleButton.onClick.AddListener(Toggle);
-        upgradePanel.SetActive(_isOpen);
+        _toggleButton.onClick.AddListener(Toggle);
+        _upgradePanel.SetActive(_isOpen);
     }
 
     private void OnDestroy()
     {
-        toggleButton.onClick.RemoveListener(Toggle);
+        _toggleButton.onClick.RemoveListener(Toggle);
     }
 
     private void Toggle()
     {
         _isOpen = !_isOpen;
-        upgradePanel.SetActive(_isOpen);
+        _upgradePanel.SetActive(_isOpen);
     }
 }

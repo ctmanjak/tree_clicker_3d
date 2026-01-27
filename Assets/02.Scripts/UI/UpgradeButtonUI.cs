@@ -5,16 +5,16 @@ using TMPro;
 public class UpgradeButtonUI : MonoBehaviour
 {
     [Header("Data")]
-    [SerializeField] private UpgradeData upgradeData;
+    [SerializeField] private UpgradeData _upgradeData;
 
     [Header("References")]
-    [SerializeField] private UpgradeManager upgradeManager;
-    [SerializeField] private Button button;
-    [SerializeField] private Image iconImage;
-    [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private TextMeshProUGUI costText;
-    [SerializeField] private TextMeshProUGUI levelText;
-    [SerializeField] private TextMeshProUGUI effectText;
+    [SerializeField] private UpgradeManager _upgradeManager;
+    [SerializeField] private Button _button;
+    [SerializeField] private Image _iconImage;
+    [SerializeField] private TextMeshProUGUI _nameText;
+    [SerializeField] private TextMeshProUGUI _costText;
+    [SerializeField] private TextMeshProUGUI _levelText;
+    [SerializeField] private TextMeshProUGUI _effectText;
 
     private GameManager _gameManager;
     private bool _isSubscribed;
@@ -22,8 +22,8 @@ public class UpgradeButtonUI : MonoBehaviour
 
     public void Init(UpgradeData data, UpgradeManager manager)
     {
-        upgradeData = data;
-        upgradeManager = manager;
+        _upgradeData = data;
+        _upgradeManager = manager;
         _isInitialized = true;
 
         if (_gameManager != null)
@@ -36,12 +36,12 @@ public class UpgradeButtonUI : MonoBehaviour
     {
         _gameManager = GameManager.Instance;
 
-        if (upgradeManager == null)
+        if (_upgradeManager == null)
         {
-            ServiceLocator.TryGet(out upgradeManager);
+            ServiceLocator.TryGet(out _upgradeManager);
         }
 
-        button.onClick.AddListener(OnClick);
+        _button.onClick.AddListener(OnClick);
         Subscribe();
         UpdateDisplay();
     }
@@ -58,7 +58,7 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        button.onClick.RemoveListener(OnClick);
+        _button.onClick.RemoveListener(OnClick);
     }
 
     private void Subscribe()
@@ -79,7 +79,7 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void OnClick()
     {
-        if (upgradeManager.TryPurchase(upgradeData))
+        if (_upgradeManager.TryPurchase(_upgradeData))
         {
             UpdateDisplay();
         }
@@ -92,32 +92,32 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void UpdateDisplay()
     {
-        int level = upgradeManager.GetLevel(upgradeData);
-        long cost = upgradeData.GetCost(level);
+        int level = _upgradeManager.GetLevel(_upgradeData);
+        long cost = _upgradeData.GetCost(level);
 
-        if (iconImage != null && upgradeData.icon != null)
+        if (_iconImage != null && _upgradeData.Icon != null)
         {
-            iconImage.sprite = upgradeData.icon;
+            _iconImage.sprite = _upgradeData.Icon;
         }
 
-        if (nameText != null)
+        if (_nameText != null)
         {
-            nameText.text = upgradeData.upgradeName;
+            _nameText.text = _upgradeData.UpgradeName;
         }
 
-        if (costText != null)
+        if (_costText != null)
         {
-            costText.text = $"{FormatNumber(cost)}";
+            _costText.text = $"{FormatNumber(cost)}";
         }
 
-        if (levelText != null)
+        if (_levelText != null)
         {
-            levelText.text = $"Lv.{level}";
+            _levelText.text = $"Lv.{level}";
         }
 
-        if (effectText != null)
+        if (_effectText != null)
         {
-            effectText.text = $"+{upgradeData.effectAmount}/클릭";
+            _effectText.text = $"+{_upgradeData.EffectAmount}/클릭";
         }
 
         UpdateButtonState();
@@ -125,11 +125,11 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void UpdateButtonState()
     {
-        if (upgradeManager == null || _gameManager == null) return;
+        if (_upgradeManager == null || _gameManager == null) return;
 
-        int level = upgradeManager.GetLevel(upgradeData);
-        long cost = upgradeData.GetCost(level);
-        button.interactable = _gameManager.CurrentWood >= cost;
+        int level = _upgradeManager.GetLevel(_upgradeData);
+        long cost = _upgradeData.GetCost(level);
+        _button.interactable = _gameManager.CanAfford(cost);
     }
 
     private string FormatNumber(long num)

@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class UpgradePanelUI : MonoBehaviour
 {
-    [SerializeField] private UpgradeButtonUI buttonPrefab;
-    [SerializeField] private Transform contentParent;
+    [SerializeField] private UpgradeButtonUI _buttonPrefab;
+    [SerializeField] private Transform _contentParent;
 
     private UpgradeManager _upgradeManager;
 
@@ -24,7 +24,7 @@ public class UpgradePanelUI : MonoBehaviour
     {
         foreach (var upgrade in _upgradeManager.Upgrades)
         {
-            var button = Instantiate(buttonPrefab, contentParent);
+            var button = Instantiate(_buttonPrefab, _contentParent);
             button.Init(upgrade, _upgradeManager);
         }
     }

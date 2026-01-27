@@ -4,19 +4,19 @@ using UnityEngine;
 public class UpgradeData : ScriptableObject
 {
     [Header("기본 정보")]
-    public string upgradeName;
-    [TextArea] public string description;
-    public Sprite icon;
+    public string UpgradeName;
+    [TextArea] public string Description;
+    public Sprite Icon;
 
     [Header("비용")]
-    public long baseCost = 100;
-    public float costMultiplier = 1.15f;
+    public long BaseCost = 100;
+    public float CostMultiplier = 1.15f;
 
     [Header("효과")]
-    public long effectAmount = 1;
+    public long EffectAmount = 1;
 
     public long GetCost(int currentLevel)
     {
-        return (long)(baseCost * Mathf.Pow(costMultiplier, currentLevel));
+        return (long)(BaseCost * Mathf.Pow(CostMultiplier, currentLevel));
     }
 }

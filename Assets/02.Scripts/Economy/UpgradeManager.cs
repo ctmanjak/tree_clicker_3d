@@ -30,9 +30,9 @@ public class UpgradeManager : MonoBehaviour, ISaveable
 
         if (_gameManager.SpendWood(cost))
         {
-            _upgradeLevels[upgrade.upgradeName] = currentLevel + 1;
+            _upgradeLevels[upgrade.UpgradeName] = currentLevel + 1;
             ApplyEffect(upgrade);
-            _gameEvents?.RaiseUpgradePurchased(upgrade.upgradeName, currentLevel + 1);
+            _gameEvents?.RaiseUpgradePurchased(upgrade.UpgradeName, currentLevel + 1);
             return true;
         }
         return false;
@@ -40,12 +40,12 @@ public class UpgradeManager : MonoBehaviour, ISaveable
 
     private void ApplyEffect(UpgradeData upgrade)
     {
-        _gameManager.IncreaseWoodPerClick(upgrade.effectAmount);
+        _gameManager.IncreaseWoodPerClick(upgrade.EffectAmount);
     }
 
     public int GetLevel(UpgradeData upgrade)
     {
-        return _upgradeLevels.TryGetValue(upgrade.upgradeName, out int level) ? level : 0;
+        return _upgradeLevels.TryGetValue(upgrade.UpgradeName, out int level) ? level : 0;
     }
 
     public object CaptureState()
