@@ -16,6 +16,6 @@ MonoBehaviour:
   Description: "\uBC8C\uBAA9\uAFBC\uC744 1\uBA85 \uACE0\uC6A9\uD569\uB2C8\uB2E4"
   Icon: {fileID: 0}
   Type: 1
-  BaseCost: 50
-  CostMultiplier: 1.5
+  BaseCost: 1
+  CostMultiplier: 1
   EffectAmount: 1
