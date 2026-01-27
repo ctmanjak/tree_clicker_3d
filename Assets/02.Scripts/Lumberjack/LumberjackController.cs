@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class LumberjackController : MonoBehaviour
 {
+    private const float StopDistance = 0.1f;
+    private const float TreeSearchInterval = 1f;
+
     [Header("Stats")]
     [SerializeField] private float _woodPerSecond = 1f;
     [SerializeField] private float _moveSpeed = 2f;
@@ -13,6 +16,7 @@ public class LumberjackController : MonoBehaviour
 
     private float _attackTimer;
     private float _woodAccumulator;
+    private float _treeSearchTimer = TreeSearchInterval;
     private Vector3 _targetPosition;
     private TreeController _treeController;
 
@@ -41,6 +45,10 @@ public class LumberjackController : MonoBehaviour
     {
         if (_treeController == null)
         {
+            _treeSearchTimer += Time.deltaTime;
+            if (_treeSearchTimer < TreeSearchInterval) return;
+            _treeSearchTimer = 0f;
+
             GameObject treeObj = GameObject.FindWithTag("Tree");
             if (treeObj != null)
             {
@@ -65,7 +73,7 @@ public class LumberjackController : MonoBehaviour
         Vector3 direction = _targetPosition - transform.position;
         direction.y = 0;
 
-        if (direction.magnitude < 0.1f)
+        if (direction.magnitude < StopDistance)
         {
             _currentState = State.Attacking;
             LookAtTree();
@@ -74,7 +82,7 @@ public class LumberjackController : MonoBehaviour
 
         transform.position += direction.normalized * _moveSpeed * Time.deltaTime;
 
-        if (direction.magnitude > 0.1f)
+        if (direction.magnitude > StopDistance)
         {
             transform.rotation = Quaternion.LookRotation(direction.normalized);
         }
@@ -111,7 +119,7 @@ public class LumberjackController : MonoBehaviour
         Vector3 lookDir = _treeController.transform.position - transform.position;
         lookDir.y = 0;
 
-        if (lookDir.magnitude > 0.1f)
+        if (lookDir.magnitude > StopDistance)
         {
             transform.rotation = Quaternion.LookRotation(lookDir);
         }

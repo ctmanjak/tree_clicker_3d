@@ -5,12 +5,12 @@ public class CloseAllPanelsButton : MonoBehaviour
 {
     [SerializeField] private Button _button;
 
-    private void Start()
+    private void OnEnable()
     {
         _button.onClick.AddListener(OnClick);
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         _button.onClick.RemoveListener(OnClick);
     }

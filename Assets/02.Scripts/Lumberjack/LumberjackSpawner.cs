@@ -3,11 +3,13 @@ using System.Collections.Generic;
 
 public class LumberjackSpawner : MonoBehaviour
 {
+    private const float RandomSpawnDistance = 10f;
+
     [SerializeField] private GameObject _lumberjackPrefab;
     [SerializeField] private Transform _spawnPoint;
     [SerializeField] private int _maxLumberjacks = 20;
 
-    private List<LumberjackController> _activeLumberjacks = new();
+    private HashSet<LumberjackController> _activeLumberjacks = new();
 
     public int ActiveCount => _activeLumberjacks.Count;
 
@@ -40,16 +42,16 @@ public class LumberjackSpawner : MonoBehaviour
     private Vector3 GetRandomSpawnPosition()
     {
         float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-        float distance = 10f;
+        float distance = RandomSpawnDistance;
         return new Vector3(Mathf.Cos(angle) * distance, 0, Mathf.Sin(angle) * distance);
     }
 
     public void RemoveLumberjack(LumberjackController lumberjack)
     {
-        if (!_activeLumberjacks.Contains(lumberjack)) return;
-
-        _activeLumberjacks.Remove(lumberjack);
-        Destroy(lumberjack.gameObject);
+        if (_activeLumberjacks.Remove(lumberjack))
+        {
+            Destroy(lumberjack.gameObject);
+        }
     }
 
     public void ClearAll()
