@@ -9,43 +9,73 @@ public class LumberjackController : MonoBehaviour
 
     [Header("Stats")]
     [SerializeField] private float _woodPerSecond = 1f;
-    [SerializeField] private float _moveSpeed = 2f;
-    [SerializeField] private float _attackInterval = 1f;
+    [SerializeField] private float _attackCooldown = 0.5f;
     [SerializeField] private float _attackRange = 2f;
 
     [Header("Animation")]
-    [SerializeField] private bool _useAnimationEvents;
+    [SerializeField] private float _blendDampTime = 0.1f;
+    [SerializeField] private float _rotationSpeed = 10f;
 
     private enum State { Idle, Moving, Attacking }
     private State _currentState = State.Idle;
 
-    private float _attackTimer;
+    public bool IsMoving => _currentState == State.Moving;
+
+    private bool _isAttackAnimPlaying;
+    private float _attackCooldownTimer;
     private float _woodAccumulator;
     private float _treeSearchTimer = TreeSearchInterval;
+    private float _currentBlendValue;
     private Vector3 _targetPosition;
     private TreeController _treeController;
     private AudioManager _audioManager;
+    private LumberjackAnimator _animator;
+
+    private void Awake()
+    {
+        _animator = GetComponent<LumberjackAnimator>();
+    }
 
     private void Start()
     {
         ServiceLocator.TryGet(out _audioManager);
+
+        if (_animator != null)
+        {
+            _animator.OnAttackHit += OnSwingHit;
+        }
+
         FindTree();
+    }
+
+    private void OnDestroy()
+    {
+        if (_animator != null)
+        {
+            _animator.OnAttackHit -= OnSwingHit;
+        }
     }
 
     private void Update()
     {
+        float targetBlend = 0f;
+
         switch (_currentState)
         {
             case State.Idle:
                 FindTree();
                 break;
             case State.Moving:
+                targetBlend = 1f;
                 MoveToTree();
                 break;
             case State.Attacking:
                 Attack();
                 break;
         }
+
+        _currentBlendValue = Mathf.MoveTowards(_currentBlendValue, targetBlend, Time.deltaTime / _blendDampTime);
+        _animator?.SetBlendValue(_currentBlendValue);
     }
 
     private void FindTree()
@@ -83,15 +113,15 @@ public class LumberjackController : MonoBehaviour
         if (direction.magnitude < StopDistance)
         {
             _currentState = State.Attacking;
+            _attackCooldownTimer = 0f;
             LookAtTree();
             return;
         }
 
-        transform.position += direction.normalized * _moveSpeed * Time.deltaTime;
-
         if (direction.magnitude > StopDistance)
         {
-            transform.rotation = Quaternion.LookRotation(direction.normalized);
+            Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
         }
     }
 
@@ -103,27 +133,28 @@ public class LumberjackController : MonoBehaviour
             return;
         }
 
-        if (_useAnimationEvents) return;
+        if (_isAttackAnimPlaying) return;
 
-        _attackTimer += Time.deltaTime;
-        if (_attackTimer < _attackInterval) return;
+        _attackCooldownTimer += Time.deltaTime;
+        if (_attackCooldownTimer < _attackCooldown) return;
 
-        _attackTimer = 0;
+        _attackCooldownTimer = 0f;
+        _isAttackAnimPlaying = true;
+        _animator?.PlayAttack();
         OnSwingStart();
-        OnSwingHit();
     }
-    
+
     public void OnSwingStart()
     {
         _audioManager?.PlaySFX(SfxSwing);
     }
-    
+
     public void OnSwingHit()
     {
         if (_treeController == null) return;
 
         _audioManager?.PlaySFX(SfxHit);
-        _woodAccumulator += _woodPerSecond * _attackInterval;
+        _woodAccumulator += _woodPerSecond;
 
         if (_woodAccumulator >= 1f)
         {
@@ -131,6 +162,12 @@ public class LumberjackController : MonoBehaviour
             _treeController.Hit(woodToAdd, transform.position);
             _woodAccumulator -= woodToAdd;
         }
+    }
+
+    // Animation Event 또는 LumberjackAnimationReceiver에서 호출
+    public void OnAttackAnimationEnd()
+    {
+        _isAttackAnimPlaying = false;
     }
 
     private void LookAtTree()
@@ -153,9 +190,9 @@ public class LumberjackController : MonoBehaviour
         return new Vector3(Mathf.Cos(angle) * distance, 0, Mathf.Sin(angle) * distance);
     }
 
-    public void SetStats(float woodPerSecond, float speed)
+    public void SetStats(float woodPerSecond, float animationSpeed)
     {
         _woodPerSecond = woodPerSecond;
-        _moveSpeed = speed;
+        _animator?.SetAnimationSpeed(animationSpeed);
     }
 }

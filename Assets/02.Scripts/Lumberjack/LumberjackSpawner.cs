@@ -36,6 +36,9 @@ public class LumberjackSpawner : MonoBehaviour
             _activeLumberjacks.Add(controller);
         }
 
+        var spawnEffect = obj.GetComponent<SpawnEffect>();
+        spawnEffect?.PlaySpawnAnimation();
+
         return controller;
     }
 
