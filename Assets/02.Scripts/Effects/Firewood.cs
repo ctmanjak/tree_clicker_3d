@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Firewood : MonoBehaviour
 {
     [SerializeField] private float _lifetime = 1.5f;
@@ -12,10 +13,6 @@ public class Firewood : MonoBehaviour
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
-        if (_rigidbody == null)
-        {
-            _rigidbody = gameObject.AddComponent<Rigidbody>();
-        }
     }
 
     public void Initialize(Action<Firewood> returnToPool)

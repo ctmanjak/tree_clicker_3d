@@ -3,11 +3,11 @@ using UnityEngine;
 public class FloatingTextSpawner : MonoBehaviour
 {
     [SerializeField] private FloatingText _prefab;
+    [SerializeField] private Transform _treeTransform;
     [SerializeField] private int _poolSize = 20;
     [SerializeField] private Vector3 _spawnOffset = new Vector3(0, 2f, 0);
 
     private ObjectPool<FloatingText> _pool;
-    private Transform _treeTransform;
 
     private void Awake()
     {
@@ -16,8 +16,6 @@ public class FloatingTextSpawner : MonoBehaviour
 
     private void Start()
     {
-        _treeTransform = GameObject.FindWithTag("Tree")?.transform;
-
         if (GameEvents.Instance != null)
         {
             GameEvents.Instance.OnWoodAdded += SpawnText;

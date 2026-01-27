@@ -3,6 +3,7 @@ using UnityEngine;
 public class FirewoodSpawner : MonoBehaviour
 {
     [SerializeField] private Firewood _prefab;
+    [SerializeField] private Transform _treeTransform;
     [SerializeField] private int _poolSize = 20;
     [SerializeField] private int _spawnCountMin = 3;
     [SerializeField] private int _spawnCountMax = 5;
@@ -10,7 +11,6 @@ public class FirewoodSpawner : MonoBehaviour
     [SerializeField] private Vector3 _spawnOffset = new Vector3(0, 1.5f, 0);
 
     private ObjectPool<Firewood> _pool;
-    private Transform _treeTransform;
 
     private void Awake()
     {
@@ -19,8 +19,6 @@ public class FirewoodSpawner : MonoBehaviour
 
     private void Start()
     {
-        _treeTransform = GameObject.FindWithTag("Tree")?.transform;
-
         if (GameEvents.Instance != null)
         {
             GameEvents.Instance.OnTreeHit += SpawnFirewood;
