@@ -16,18 +16,37 @@ public class TreeShake : MonoBehaviour
 
     public void Shake()
     {
+        Shake(null);
+    }
+
+    public void Shake(Vector3? attackerPosition)
+    {
         if (_shakeCoroutine != null)
         {
             StopCoroutine(_shakeCoroutine);
             transform.rotation = _originalRotation;
         }
-        _shakeCoroutine = StartCoroutine(ShakeCoroutine());
+
+        float tiltDirection = CalculateTiltDirection(attackerPosition);
+        _shakeCoroutine = StartCoroutine(ShakeCoroutine(tiltDirection));
     }
 
-    private IEnumerator ShakeCoroutine()
+    private float CalculateTiltDirection(Vector3? attackerPosition)
     {
-        // 카메라 기준 왼쪽으로 기울임 (오른쪽에서 도끼가 찍으니까)
-        float tiltDirection = -1f;
+        if (attackerPosition == null)
+        {
+            return -1f;
+        }
+
+        Vector3 toAttacker = attackerPosition.Value - transform.position;
+        Vector3 right = Vector3.Cross(Vector3.up, toAttacker).normalized;
+        float dot = Vector3.Dot(right, Vector3.right);
+
+        return dot >= 0 ? -1f : 1f;
+    }
+
+    private IEnumerator ShakeCoroutine(float tiltDirection)
+    {
 
         Quaternion targetRotation = Quaternion.Euler(
             _originalRotation.eulerAngles.x,

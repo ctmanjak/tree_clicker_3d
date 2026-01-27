@@ -15,12 +15,13 @@ public class TreeController : MonoBehaviour, IClickable
 
     public void OnClick(Vector3 hitPoint, Vector3 hitNormal)
     {
-        _gameManager.AddWood(_gameManager.WoodPerClick);
-        _gameEvents.RaiseTreeHit();
+        Hit(_gameManager.WoodPerClick);
+    }
 
-        if (_treeShake != null)
-        {
-            _treeShake.Shake();
-        }
+    public void Hit(long woodAmount, Vector3? attackerPosition = null)
+    {
+        _gameManager.AddWood(woodAmount);
+        _gameEvents.RaiseTreeHit();
+        _treeShake?.Shake(attackerPosition);
     }
 }

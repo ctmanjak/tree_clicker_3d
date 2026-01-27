@@ -1032,14 +1032,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cae848c4f9854a7b8eee392428137ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeButtonUI
-  upgradeData: {fileID: 0}
-  upgradeManager: {fileID: 0}
-  button: {fileID: 5041978769044233352}
-  iconImage: {fileID: 0}
-  nameText: {fileID: 2827282137906261945}
-  costText: {fileID: 3658279419037215231}
-  levelText: {fileID: 5860626196403533087}
-  effectText: {fileID: 0}
+  _upgradeData: {fileID: 0}
+  _upgradeManager: {fileID: 0}
+  _button: {fileID: 5041978769044233352}
+  _iconImage: {fileID: 0}
+  _nameText: {fileID: 2827282137906261945}
+  _costText: {fileID: 3658279419037215231}
+  _levelText: {fileID: 5860626196403533087}
+  _effectText: {fileID: 0}
 --- !u!224 &2363356054326408361 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6627454922221197994, guid: 9131cd3cfebc44a1898aaca34bbfedba, type: 3}
