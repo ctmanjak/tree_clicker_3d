@@ -10,6 +10,15 @@ public static class ServiceLocator
         services[typeof(T)] = service;
     }
 
+    public static void Unregister<T>(T service) where T : class
+    {
+        var type = typeof(T);
+        if (services.TryGetValue(type, out var registered) && ReferenceEquals(registered, service))
+        {
+            services.Remove(type);
+        }
+    }
+
     public static T Get<T>() where T : class
     {
         if (services.TryGetValue(typeof(T), out var service))

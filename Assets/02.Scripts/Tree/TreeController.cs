@@ -9,6 +9,18 @@ public class TreeController : MonoBehaviour, IClickable
     private TreeShake _treeShake;
     private AudioManager _audioManager;
 
+    public Vector3 Position => transform.position;
+
+    private void Awake()
+    {
+        ServiceLocator.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister(this);
+    }
+
     private void Start()
     {
         _gameManager = GameManager.Instance;

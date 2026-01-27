@@ -17,6 +17,12 @@ public class LumberjackSpawner : MonoBehaviour
     {
         ServiceLocator.Register(this);
     }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister(this);
+    }
+
     public bool CanSpawn => _activeLumberjacks.Count < _maxLumberjacks;
 
     public LumberjackController SpawnLumberjack()
@@ -30,10 +36,14 @@ public class LumberjackSpawner : MonoBehaviour
         Vector3 spawnPos = _spawnPoint != null ? _spawnPoint.position : GetRandomSpawnPosition();
         GameObject obj = Instantiate(_lumberjackPrefab, spawnPos, Quaternion.identity);
 
-        var controller = obj.GetComponent<LumberjackController>();
-        if (controller != null)
+        if (obj.TryGetComponent(out LumberjackController controller))
         {
             _activeLumberjacks.Add(controller);
+        }
+
+        if (obj.TryGetComponent(out SpawnEffect spawnEffect))
+        {
+            spawnEffect.PlaySpawnAnimation();
         }
 
         return controller;

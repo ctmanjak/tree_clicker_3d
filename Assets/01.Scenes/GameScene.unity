@@ -1988,7 +1988,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fbf56379d09d49c388515ce2c4ddf0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LumberjackSpawner
-  _lumberjackPrefab: {fileID: 7062651815069211154, guid: d61cddd377d64473f83288daf5e5c73f, type: 3}
+  _lumberjackPrefab: {fileID: 2655352125574554167, guid: eb22f1deeed5d4d0493af054ae622d10, type: 3}
   _spawnPoint: {fileID: 225370205}
   _maxLumberjacks: 20
 --- !u!4 &1275844176
