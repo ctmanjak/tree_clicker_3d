@@ -4,6 +4,8 @@ using TMPro;
 
 public class UpgradeButtonUI : MonoBehaviour
 {
+    private const string SFX_UPGRADE_BUY = "upgrade_buy";
+
     [Header("Data")]
     [SerializeField] private UpgradeData _upgradeData;
 
@@ -17,6 +19,7 @@ public class UpgradeButtonUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _effectText;
 
     private GameManager _gameManager;
+    private AudioManager _audioManager;
     private bool _isSubscribed;
     private bool _isInitialized;
 
@@ -35,6 +38,7 @@ public class UpgradeButtonUI : MonoBehaviour
     private void Start()
     {
         _gameManager = GameManager.Instance;
+        ServiceLocator.TryGet(out _audioManager);
 
         if (_upgradeManager == null)
         {
@@ -81,6 +85,7 @@ public class UpgradeButtonUI : MonoBehaviour
     {
         if (_upgradeManager.TryPurchase(_upgradeData))
         {
+            _audioManager?.PlaySFX(SFX_UPGRADE_BUY);
             UpdateDisplay();
         }
     }
