@@ -11,26 +11,12 @@ public class LumberjackAnimator : MonoBehaviour
 
     public event Action OnAttackHit;
 
-    private float _animationSpeed = 1f;
-
     private void Awake()
     {
         if (_animator == null)
         {
             _animator = GetComponent<Animator>();
         }
-    }
-
-    public void PlayIdle()
-    {
-        if (_animator == null) return;
-        _animator.SetFloat(BlendParam, 0f);
-    }
-
-    public void PlayWalk()
-    {
-        if (_animator == null) return;
-        _animator.SetFloat(BlendParam, 1f);
     }
 
     public void PlayAttack()
@@ -41,11 +27,8 @@ public class LumberjackAnimator : MonoBehaviour
 
     public void SetAnimationSpeed(float speed)
     {
-        _animationSpeed = speed;
-        if (_animator != null)
-        {
-            _animator.SetFloat(SpeedParam, speed);
-        }
+        if (_animator == null) return;
+        _animator.SetFloat(SpeedParam, speed);
     }
 
     public void SetBlendValue(float value)

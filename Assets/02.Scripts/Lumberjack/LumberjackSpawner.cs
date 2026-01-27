@@ -36,14 +36,15 @@ public class LumberjackSpawner : MonoBehaviour
         Vector3 spawnPos = _spawnPoint != null ? _spawnPoint.position : GetRandomSpawnPosition();
         GameObject obj = Instantiate(_lumberjackPrefab, spawnPos, Quaternion.identity);
 
-        var controller = obj.GetComponent<LumberjackController>();
-        if (controller != null)
+        if (obj.TryGetComponent(out LumberjackController controller))
         {
             _activeLumberjacks.Add(controller);
         }
 
-        var spawnEffect = obj.GetComponent<SpawnEffect>();
-        spawnEffect?.PlaySpawnAnimation();
+        if (obj.TryGetComponent(out SpawnEffect spawnEffect))
+        {
+            spawnEffect.PlaySpawnAnimation();
+        }
 
         return controller;
     }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 
@@ -7,8 +6,6 @@ public class SpawnEffect : MonoBehaviour
     [SerializeField] private float _spawnDuration = 0.5f;
     [SerializeField] private AnimationCurve _scaleCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     [SerializeField] private ParticleSystem _dustParticle;
-
-    public event Action OnSpawnComplete;
 
     private Vector3 _originalScale;
     private Coroutine _spawnCoroutine;
@@ -57,11 +54,5 @@ public class SpawnEffect : MonoBehaviour
 
         transform.localScale = _originalScale;
         _spawnCoroutine = null;
-        OnSpawnComplete?.Invoke();
-    }
-
-    public void SetOriginalScale(Vector3 scale)
-    {
-        _originalScale = scale;
     }
 }
