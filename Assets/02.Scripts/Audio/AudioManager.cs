@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    private const int SFX_POOL_SIZE = 10;
+    private const int SfxPoolSize = 10;
 
     [Header("Config")]
     [SerializeField] private SFXConfig _sfxConfig;
@@ -54,7 +54,7 @@ public class AudioManager : MonoBehaviour
 
     private void InitializeSFXPool()
     {
-        for (int i = 0; i < SFX_POOL_SIZE; i++)
+        for (int i = 0; i < SfxPoolSize; i++)
         {
             CreatePooledAudioSource();
         }

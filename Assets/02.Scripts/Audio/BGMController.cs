@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class BGMController : MonoBehaviour
 {
-    private const float DEFAULT_FADE_TIME = 0.5f;
+    private const float DefaultFadeTime = 0.5f;
 
     [Header("Config")]
     [SerializeField] private AudioClip _defaultBGM;
@@ -57,7 +57,7 @@ public class BGMController : MonoBehaviour
         return source;
     }
 
-    public void Play(AudioClip clip, float fadeTime = DEFAULT_FADE_TIME)
+    public void Play(AudioClip clip, float fadeTime = DefaultFadeTime)
     {
         if (clip == null) return;
 
@@ -76,7 +76,7 @@ public class BGMController : MonoBehaviour
         _isPaused = false;
     }
 
-    public void Stop(float fadeTime = DEFAULT_FADE_TIME)
+    public void Stop(float fadeTime = DefaultFadeTime)
     {
         if (_fadeCoroutine != null)
         {

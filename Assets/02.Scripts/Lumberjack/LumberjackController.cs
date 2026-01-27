@@ -4,8 +4,8 @@ public class LumberjackController : MonoBehaviour
 {
     private const float StopDistance = 0.1f;
     private const float TreeSearchInterval = 1f;
-    private const string SFX_SWING = "lumberjack_swing";
-    private const string SFX_HIT = "lumberjack_hit";
+    private const string SfxSwing = "lumberjack_swing";
+    private const string SfxHit = "lumberjack_hit";
 
     [Header("Stats")]
     [SerializeField] private float _woodPerSecond = 1f;
@@ -112,23 +112,17 @@ public class LumberjackController : MonoBehaviour
         OnSwingStart();
         OnSwingHit();
     }
-
-    /// <summary>
-    /// 도끼 휘두르기 시작 - Animation Event에서 호출 가능
-    /// </summary>
+    
     public void OnSwingStart()
     {
-        _audioManager?.PlaySFX(SFX_SWING);
+        _audioManager?.PlaySFX(SfxSwing);
     }
-
-    /// <summary>
-    /// 도끼 타격 시점 - Animation Event에서 호출 가능
-    /// </summary>
+    
     public void OnSwingHit()
     {
         if (_treeController == null) return;
 
-        _audioManager?.PlaySFX(SFX_HIT);
+        _audioManager?.PlaySFX(SfxHit);
         _woodAccumulator += _woodPerSecond * _attackInterval;
 
         if (_woodAccumulator >= 1f)

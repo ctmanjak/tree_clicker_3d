@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class AmbientSoundController : MonoBehaviour
 {
-    private const float DEFAULT_FADE_TIME = 1f;
+    private const float DefaultFadeTime = 1f;
 
     [Header("Config")]
     [SerializeField] private AudioClip _defaultAmbient;
@@ -44,7 +44,7 @@ public class AmbientSoundController : MonoBehaviour
         }
     }
 
-    public void Play(AudioClip clip, float fadeTime = DEFAULT_FADE_TIME)
+    public void Play(AudioClip clip, float fadeTime = DefaultFadeTime)
     {
         if (clip == null) return;
 
@@ -60,7 +60,7 @@ public class AmbientSoundController : MonoBehaviour
         _fadeCoroutine = StartCoroutine(FadeInCoroutine(fadeTime));
     }
 
-    public void Stop(float fadeTime = DEFAULT_FADE_TIME)
+    public void Stop(float fadeTime = DefaultFadeTime)
     {
         if (_fadeCoroutine != null)
         {
