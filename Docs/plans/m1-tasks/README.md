@@ -13,8 +13,8 @@ M1 프로토타입 구현을 8개의 작은 태스크로 분리했습니다.
 | 2 | M1.1 | 입력 및 재화 시스템 | 2 | M1.0 | ✅ |
 | 3 | M1.2 | 나무 및 기본 UI | 2 | M1.1 | ✅ |
 | 4 | M1.3 | 게임 필 - 화면/나무 흔들림 | 2 | M1.2 | ✅ |
-| 5 | M1.4 | 게임 필 - 플로팅 텍스트/파티클 | 4 | M1.2 | 🔄 |
-| 6 | M1.5 | 업그레이드 시스템 | 3 | M1.1 | ⬜ |
+| 5 | M1.4 | 게임 필 - 플로팅 텍스트/파티클 | 4 | M1.2 | ✅ |
+| 6 | M1.5 | 업그레이드 시스템 | 5 | M1.1 | ✅ |
 | 7 | M1.6 | 벌목꾼 시스템 | 2 | M1.1 | ⬜ |
 | 8 | M1.7 | 통합 테스트 및 밸런싱 | 0 | M1.0~M1.6 | ⬜ |
 
@@ -74,10 +74,12 @@ graph TD
 - `Effects/HitParticleSpawner.cs`
 - (파티클 프리팹 설정)
 
-### M1.5 - 업그레이드 (3개)
+### M1.5 - 업그레이드 (5개)
 - `Economy/UpgradeData.cs`
 - `Economy/UpgradeManager.cs`
 - `UI/UpgradeButtonUI.cs`
+- `UI/UpgradePanelUI.cs`
+- `UI/UpgradePanelToggle.cs`
 
 ### M1.6 - 벌목꾼 (2개)
 - `Lumberjack/LumberjackController.cs`
@@ -87,7 +89,7 @@ graph TD
 - 전체 시스템 연동 테스트
 - 밸런싱 조정
 
-## 총 스크립트: 17개
+## 총 스크립트: 19개
 
 ## 태스크 파일 위치
 
