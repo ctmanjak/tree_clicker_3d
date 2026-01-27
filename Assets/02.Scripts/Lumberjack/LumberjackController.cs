@@ -86,11 +86,7 @@ public class LumberjackController : MonoBehaviour
             if (_treeSearchTimer < TreeSearchInterval) return;
             _treeSearchTimer = 0f;
 
-            GameObject treeObj = GameObject.FindWithTag("Tree");
-            if (treeObj != null)
-            {
-                _treeController = treeObj.GetComponent<TreeController>();
-            }
+            ServiceLocator.TryGet(out _treeController);
         }
 
         if (_treeController == null) return;
