@@ -18,6 +18,15 @@ public class SpawnEffect : MonoBehaviour
         _originalScale = transform.localScale;
     }
 
+    private void OnDisable()
+    {
+        if (_spawnCoroutine != null)
+        {
+            StopCoroutine(_spawnCoroutine);
+            _spawnCoroutine = null;
+        }
+    }
+
     public void PlaySpawnAnimation()
     {
         if (_spawnCoroutine != null)

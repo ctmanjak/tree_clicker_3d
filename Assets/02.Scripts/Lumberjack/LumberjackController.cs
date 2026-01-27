@@ -91,7 +91,7 @@ public class LumberjackController : MonoBehaviour
 
         if (_treeController == null) return;
 
-        _targetPosition = _treeController.transform.position + GetRandomOffset();
+        _targetPosition = _treeController.Position + GetRandomOffset();
         _currentState = State.Moving;
     }
 
@@ -114,11 +114,8 @@ public class LumberjackController : MonoBehaviour
             return;
         }
 
-        if (direction.magnitude > StopDistance)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
-        }
+        Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
     }
 
     private void Attack()
@@ -137,7 +134,6 @@ public class LumberjackController : MonoBehaviour
         _attackCooldownTimer = 0f;
         _isAttackAnimPlaying = true;
         _animator?.PlayAttack();
-        OnSwingStart();
     }
 
     public void OnSwingStart()
@@ -170,7 +166,7 @@ public class LumberjackController : MonoBehaviour
     {
         if (_treeController == null) return;
 
-        Vector3 lookDir = _treeController.transform.position - transform.position;
+        Vector3 lookDir = _treeController.Position - transform.position;
         lookDir.y = 0;
 
         if (lookDir.magnitude > StopDistance)

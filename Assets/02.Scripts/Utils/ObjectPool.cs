@@ -56,4 +56,25 @@ public class ObjectPool<T> where T : Component
         }
         activeObjects.Clear();
     }
+
+    public void Clear()
+    {
+        foreach (var obj in activeObjects)
+        {
+            if (obj != null)
+            {
+                Object.Destroy(obj.gameObject);
+            }
+        }
+        activeObjects.Clear();
+
+        while (pool.Count > 0)
+        {
+            var obj = pool.Dequeue();
+            if (obj != null)
+            {
+                Object.Destroy(obj.gameObject);
+            }
+        }
+    }
 }

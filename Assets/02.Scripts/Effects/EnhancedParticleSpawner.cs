@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnhancedParticleSpawner : MonoBehaviour
@@ -17,11 +18,21 @@ public class EnhancedParticleSpawner : MonoBehaviour
     private ObjectPool<ParticleSystem> _woodChipsPool;
     private ObjectPool<ParticleSystem> _leavesPool;
     private ObjectPool<ParticleSystem> _criticalPool;
+    private Dictionary<float, WaitForSeconds> _waitCache = new();
 
     private void Awake()
     {
         ServiceLocator.Register(this);
         InitializePools();
+    }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister(this);
+        _woodChipsPool?.Clear();
+        _leavesPool?.Clear();
+        _criticalPool?.Clear();
+        _waitCache.Clear();
     }
 
     private void InitializePools()
@@ -89,10 +100,21 @@ public class EnhancedParticleSpawner : MonoBehaviour
 
     private System.Collections.IEnumerator ReturnAfterDelay(ParticleSystem particle, ObjectPool<ParticleSystem> pool, float delay)
     {
-        yield return new WaitForSeconds(delay);
+        yield return GetCachedWait(delay);
         if (particle != null && particle.gameObject.activeSelf)
         {
             pool.Return(particle);
         }
+    }
+
+    private WaitForSeconds GetCachedWait(float seconds)
+    {
+        float key = Mathf.Round(seconds * 10f) / 10f;
+        if (!_waitCache.TryGetValue(key, out var wait))
+        {
+            wait = new WaitForSeconds(key);
+            _waitCache[key] = wait;
+        }
+        return wait;
     }
 }

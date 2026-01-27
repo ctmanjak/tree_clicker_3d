@@ -17,6 +17,12 @@ public class LumberjackSpawner : MonoBehaviour
     {
         ServiceLocator.Register(this);
     }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister(this);
+    }
+
     public bool CanSpawn => _activeLumberjacks.Count < _maxLumberjacks;
 
     public LumberjackController SpawnLumberjack()
