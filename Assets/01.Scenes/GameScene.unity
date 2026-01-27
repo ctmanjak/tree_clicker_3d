@@ -745,9 +745,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FloatingTextSpawner
   _prefab: {fileID: 3622375769142373237, guid: b7e2009c2dd074033856d293e7cb1448, type: 3}
-  _treeTransform: {fileID: 0}
+  _treeTransform: {fileID: 1765263910}
   _poolSize: 20
-  _spawnOffset: {x: 0, y: 2, z: 0}
+  _spawnOffset: {x: 0, y: 5, z: 0}
+  _randomRangeX: {x: -2, y: 2}
+  _randomRangeY: {x: -2, y: 2}
+  _cameraOffsetDistance: 1
 --- !u!4 &472194813
 Transform:
   m_ObjectHideFlags: 0
@@ -1972,7 +1975,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FirewoodSpawner
   _prefab: {fileID: 8673012368737541717, guid: 2f41dd4e6503f4b30a1b05a2ae9d31a1, type: 3}
-  _treeTransform: {fileID: 0}
+  _treeTransform: {fileID: 1765263910}
   _poolSize: 20
   _spawnCountMin: 3
   _spawnCountMax: 5
@@ -2208,24 +2211,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3201947013611667770, guid: 0e403b6a531ac064c9558d91a1be12e8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 244660481}
-    - targetCorrespondingSourceObject: {fileID: 3201947013611667770, guid: 0e403b6a531ac064c9558d91a1be12e8, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1765263911}
   m_SourcePrefab: {fileID: 100100000, guid: 0e403b6a531ac064c9558d91a1be12e8, type: 3}
---- !u!114 &1765263911
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+--- !u!4 &1765263910 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2820460031441509248, guid: 0e403b6a531ac064c9558d91a1be12e8, type: 3}
+  m_PrefabInstance: {fileID: 1765263909}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 244660475}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03be82cc44a724c9a92c03a8b8ab18b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HitParticleSpawner
-  _woodChipParticle: {fileID: 0}
-  _leafParticle: {fileID: 0}
 --- !u!1 &1959507688
 GameObject:
   m_ObjectHideFlags: 0
