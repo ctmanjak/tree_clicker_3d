@@ -27,8 +27,9 @@ MonoBehaviour:
     PitchMin: 1
     PitchMax: 1
   - Id: lumberjack_swing
-    Clips: []
-    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: b548819017092417e8d958d93f7d14ab, type: 3}
+    Volume: 0.25
     PitchMin: 1
     PitchMax: 1
   - Id: lumberjack_hit
