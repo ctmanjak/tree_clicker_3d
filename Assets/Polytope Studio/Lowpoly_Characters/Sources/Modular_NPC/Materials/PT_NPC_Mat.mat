@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PT_NPC_Mat
-  m_Shader: {fileID: 4800000, guid: 5fdb92501eac48d4a87329098a14e790, type: 3}
+  m_Shader: {fileID: 4800000, guid: 6c95633aa456f440cbe877e10e1de6d8, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -74,6 +74,7 @@ Material:
     - _CEL2SIZE: 0.4
     - _CEL3POWER: 0.15
     - _CEL3SIZE: 0.8
+    - _DebugMode: 0
     - _EYESSMOOTHNESS: 0.7
     - _EnvironmentReflections: 1
     - _HAIRSMOOTHNESS: 0.1

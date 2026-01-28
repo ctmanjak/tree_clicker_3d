@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2048899993722784089}
   - component: {fileID: 6293948628687072838}
   - component: {fileID: 3658279419037215231}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: CostText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 999
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: cb8a2201668684d7e99143217771fb68, type: 2}
-  m_sharedMaterial: {fileID: 7562527052800145385, guid: cb8a2201668684d7e99143217771fb68, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a13ab5c68be784593891a32d35c71a0a, type: 2}
+  m_sharedMaterial: {fileID: -3289800091912636765, guid: a13ab5c68be784593891a32d35c71a0a, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -284,7 +284,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8546779511809017323}
   - component: {fileID: 2534841377270106753}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Group
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -364,7 +364,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5823844441272280699}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.0000019073486}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -632,7 +632,7 @@ GameObject:
   - component: {fileID: 2162063048422873708}
   - component: {fileID: 8302875444608219682}
   - component: {fileID: 7295280183325413725}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -728,6 +728,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Button_02_Yellow
       objectReference: {fileID: 0}
+    - target: {fileID: 2103124822572054393, guid: 79026e63d48e9406895afdd779ae7f82, type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 2383830855581467416, guid: 79026e63d48e9406895afdd779ae7f82, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -816,9 +820,25 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 2.6409607
       objectReference: {fileID: 0}
+    - target: {fileID: 4053567489964406185, guid: 79026e63d48e9406895afdd779ae7f82, type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4196425845842560918, guid: 79026e63d48e9406895afdd779ae7f82, type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5274498410075082944, guid: 79026e63d48e9406895afdd779ae7f82, type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 5274498410075082944, guid: 79026e63d48e9406895afdd779ae7f82, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5468042253154790932, guid: 79026e63d48e9406895afdd779ae7f82, type: 3}
+      propertyPath: m_Layer
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -940,7 +960,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6627454922180007309, guid: 9131cd3cfebc44a1898aaca34bbfedba, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 1080
       objectReference: {fileID: 0}
     - target: {fileID: 6627454922180007309, guid: 9131cd3cfebc44a1898aaca34bbfedba, type: 3}
       propertyPath: m_SizeDelta.y
@@ -956,7 +976,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6627454922180007309, guid: 9131cd3cfebc44a1898aaca34bbfedba, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 22.788713
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6627454922180007309, guid: 9131cd3cfebc44a1898aaca34bbfedba, type: 3}
       propertyPath: m_LocalRotation.w
