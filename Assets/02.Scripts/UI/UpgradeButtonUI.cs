@@ -21,13 +21,11 @@ public class UpgradeButtonUI : MonoBehaviour
     private GameManager _gameManager;
     private AudioManager _audioManager;
     private bool _isSubscribed;
-    private bool _isInitialized;
 
     public void Init(UpgradeData data, UpgradeManager manager)
     {
         _upgradeData = data;
         _upgradeManager = manager;
-        _isInitialized = true;
 
         if (_gameManager != null)
         {
