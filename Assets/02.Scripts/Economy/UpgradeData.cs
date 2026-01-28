@@ -22,6 +22,14 @@ public class UpgradeData : ScriptableObject
     [Header("효과")]
     public long EffectAmount = 1;
 
+    [Header("레벨 제한")]
+    public int MaxLevel = 0;
+
+    public bool IsMaxLevel(int currentLevel)
+    {
+        return MaxLevel > 0 && currentLevel >= MaxLevel;
+    }
+
     public long GetCost(int currentLevel)
     {
         return (long)(BaseCost * Mathf.Pow(CostMultiplier, currentLevel));

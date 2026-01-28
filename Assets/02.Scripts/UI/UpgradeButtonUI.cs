@@ -98,7 +98,7 @@ public class UpgradeButtonUI : MonoBehaviour
     private void UpdateDisplay()
     {
         int level = _upgradeManager.GetLevel(_upgradeData);
-        long cost = _upgradeData.GetCost(level);
+        bool isMaxLevel = _upgradeData.IsMaxLevel(level);
 
         if (_iconImage != null && _upgradeData.Icon != null)
         {
@@ -112,12 +112,12 @@ public class UpgradeButtonUI : MonoBehaviour
 
         if (_costText != null)
         {
-            _costText.text = $"{FormatNumber(cost)}";
+            _costText.text = isMaxLevel ? "MAX" : FormatNumber(_upgradeData.GetCost(level));
         }
 
         if (_levelText != null)
         {
-            _levelText.text = $"Lv.{level}";
+            _levelText.text = isMaxLevel ? "MAX" : $"Lv.{level}";
         }
 
         if (_effectText != null)
@@ -133,6 +133,13 @@ public class UpgradeButtonUI : MonoBehaviour
         if (_upgradeManager == null || _gameManager == null) return;
 
         int level = _upgradeManager.GetLevel(_upgradeData);
+
+        if (_upgradeData.IsMaxLevel(level))
+        {
+            _button.interactable = false;
+            return;
+        }
+
         long cost = _upgradeData.GetCost(level);
         _button.interactable = _gameManager.CanAfford(cost);
     }

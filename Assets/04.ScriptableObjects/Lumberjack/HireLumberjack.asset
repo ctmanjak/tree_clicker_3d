@@ -19,3 +19,4 @@ MonoBehaviour:
   BaseCost: 1
   CostMultiplier: 1
   EffectAmount: 1
+  MaxLevel: 20

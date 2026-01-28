@@ -29,6 +29,10 @@ public class UpgradeManager : MonoBehaviour, ISaveable
     public bool TryPurchase(UpgradeData upgrade)
     {
         int currentLevel = GetLevel(upgrade);
+
+        if (upgrade.IsMaxLevel(currentLevel))
+            return false;
+
         long cost = upgrade.GetCost(currentLevel);
 
         if (_gameManager.SpendWood(cost))
