@@ -9,7 +9,7 @@ public enum UpgradeType
 [CreateAssetMenu(fileName = "Upgrade", menuName = "LumberTycoon/Upgrade")]
 public class UpgradeData : ScriptableObject
 {
-    public const int UNLIMITED_LEVEL = 0;
+    private const int UnlimitedLevel = 0;
 
     [Header("기본 정보")]
     [SerializeField] private string _upgradeName;
@@ -26,7 +26,7 @@ public class UpgradeData : ScriptableObject
 
     [Header("레벨 제한")]
     [Tooltip("0 = 무제한")]
-    [SerializeField] private int _maxLevel = UNLIMITED_LEVEL;
+    [SerializeField] private int _maxLevel = UnlimitedLevel;
 
     public string UpgradeName => _upgradeName;
     public string Description => _description;
@@ -37,7 +37,7 @@ public class UpgradeData : ScriptableObject
     public long EffectAmount => _effectAmount;
     public int MaxLevel => _maxLevel;
 
-    public bool HasMaxLevel => _maxLevel > UNLIMITED_LEVEL;
+    private bool HasMaxLevel => _maxLevel > UnlimitedLevel;
 
     public bool IsMaxLevel(int currentLevel)
     {
