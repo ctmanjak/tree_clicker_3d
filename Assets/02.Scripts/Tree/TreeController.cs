@@ -29,12 +29,12 @@ public class TreeController : MonoBehaviour, IClickable
 
     public void OnClick(Vector3 hitPoint, Vector3 hitNormal)
     {
-        Hit(_currencyManager.WoodPerClick);
+        Hit(_currencyManager.GetPerClick(CurrencyType.Wood));
     }
 
     public void Hit(CurrencyValue woodAmount, Vector3? attackerPosition = null)
     {
-        _currencyManager.AddWood(woodAmount);
+        _currencyManager.Add(CurrencyType.Wood, woodAmount);
         _gameEvents.RaiseTreeHit();
         _treeShake?.Shake(attackerPosition);
         _audioManager?.PlaySFX(SFXType.HitWood);

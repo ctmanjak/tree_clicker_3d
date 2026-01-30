@@ -40,7 +40,7 @@ public class UpgradeManager : MonoBehaviour
 
         CurrencyValue cost = upgrade.GetCost(currentLevel);
 
-        if (_currencyManager.SpendWood(cost))
+        if (_currencyManager.Spend(CurrencyType.Wood, cost))
         {
             var state = _repository.GetState(upgrade.UpgradeName);
             state.IncrementLevel();
@@ -58,7 +58,7 @@ public class UpgradeManager : MonoBehaviour
         switch (upgrade.Type)
         {
             case UpgradeType.WoodPerClick:
-                _currencyManager.IncreaseWoodPerClick(upgrade.EffectAmount);
+                _currencyManager.IncreasePerClick(CurrencyType.Wood, upgrade.EffectAmount);
                 break;
             case UpgradeType.SpawnLumberjack:
                 _lumberjackSpawner?.SpawnLumberjack();

@@ -49,7 +49,7 @@ public struct CurrencyValue : IEquatable<CurrencyValue>, IComparable<CurrencyVal
     public static CurrencyValue One => new(1);
 
     // 상태 확인
-    public bool IsZero => Value == 0;
+    public bool IsZero => this == Zero;
     public bool IsPositive => Value > 0;
     public bool IsNegative => Value < 0;
 

@@ -5,8 +5,8 @@ public class CurrencyManager : MonoBehaviour
     private ICurrencyRepository _repository;
     private GameEvents _gameEvents;
 
-    public CurrencyValue CurrentWood => GetCurrency(CurrencyType.Wood).Amount;
-    public CurrencyValue WoodPerClick => GetCurrency(CurrencyType.Wood).PerClick;
+    public CurrencyValue GetAmount(CurrencyType type) => GetCurrency(type).Amount;
+    public CurrencyValue GetPerClick(CurrencyType type) => GetCurrency(type).PerClick;
 
     private void Awake()
     {
@@ -34,40 +34,40 @@ public class CurrencyManager : MonoBehaviour
         return GetCurrency(type).CanAfford(amount);
     }
 
-    public void AddWood(CurrencyValue amount)
+    public void Add(CurrencyType type, CurrencyValue amount)
     {
         if (!amount.IsPositive) return;
 
-        var currency = GetCurrency(CurrencyType.Wood);
+        var currency = GetCurrency(type);
         currency.Add(amount);
         _repository.SaveCurrency(currency);
 
-        _gameEvents?.RaiseCurrencyAdded(CurrencyType.Wood, amount);
-        _gameEvents?.RaiseCurrencyChanged(CurrencyType.Wood, currency.Amount);
+        _gameEvents?.RaiseCurrencyAdded(type, amount);
+        _gameEvents?.RaiseCurrencyChanged(type, currency.Amount);
     }
 
-    public bool SpendWood(CurrencyValue amount)
+    public bool Spend(CurrencyType type, CurrencyValue amount)
     {
         if (!amount.IsPositive) return false;
 
-        var currency = GetCurrency(CurrencyType.Wood);
+        var currency = GetCurrency(type);
         if (currency.TrySpend(amount))
         {
             _repository.SaveCurrency(currency);
-            _gameEvents?.RaiseCurrencyChanged(CurrencyType.Wood, currency.Amount);
+            _gameEvents?.RaiseCurrencyChanged(type, currency.Amount);
             return true;
         }
         return false;
     }
 
-    public void IncreaseWoodPerClick(CurrencyValue amount)
+    public void IncreasePerClick(CurrencyType type, CurrencyValue amount)
     {
         if (!amount.IsPositive) return;
 
-        var currency = GetCurrency(CurrencyType.Wood);
+        var currency = GetCurrency(type);
         currency.IncreasePerClick(amount);
         _repository.SaveCurrency(currency);
 
-        _gameEvents?.RaisePerClickChanged(CurrencyType.Wood, currency.PerClick);
+        _gameEvents?.RaisePerClickChanged(type, currency.PerClick);
     }
 }

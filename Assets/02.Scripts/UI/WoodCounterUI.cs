@@ -14,7 +14,7 @@ public class WoodCounterUI : MonoBehaviour
         ServiceLocator.TryGet(out _currencyManager);
         ServiceLocator.TryGet(out _gameEvents);
         Subscribe();
-        UpdateDisplay(_currencyManager?.CurrentWood ?? CurrencyValue.Zero);
+        UpdateDisplay(_currencyManager?.GetAmount(CurrencyType.Wood) ?? CurrencyValue.Zero);
     }
 
     private void OnEnable()
