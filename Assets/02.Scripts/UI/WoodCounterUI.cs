@@ -56,21 +56,24 @@ public class WoodCounterUI : MonoBehaviour
             _woodText.text = FormatNumber(amount);
         }
 
-        if (_animator != null && amount > _previousAmount)
-        {
-            long currentMilestone = GetCurrentMilestone(amount);
-            if (currentMilestone > _lastMilestone)
-            {
-                _animator.PlayMilestoneAnimation();
-                _lastMilestone = currentMilestone;
-            }
-            else
-            {
-                _animator.PlayGainAnimation(amount - _previousAmount);
-            }
-        }
-
+        TryPlayGainAnimation(amount);
         _previousAmount = amount;
+    }
+
+    private void TryPlayGainAnimation(long amount)
+    {
+        if (_animator == null || amount <= _previousAmount) return;
+
+        long currentMilestone = GetCurrentMilestone(amount);
+        if (currentMilestone > _lastMilestone)
+        {
+            _animator.PlayMilestoneAnimation();
+            _lastMilestone = currentMilestone;
+        }
+        else
+        {
+            _animator.PlayGainAnimation(amount - _previousAmount);
+        }
     }
 
     private long GetCurrentMilestone(long amount)

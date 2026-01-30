@@ -45,8 +45,12 @@ public class ToastMessage : MonoBehaviour
     [SerializeField] private Sprite _warningIcon;
     [SerializeField] private Sprite _errorIcon;
 
+    [Header("Audio")]
+    [SerializeField] private bool _playSound = true;
+
     private static ToastMessage _instance;
     private Queue<ToastData> _messageQueue = new Queue<ToastData>();
+    private AudioManager _audioManager;
     private bool _isShowing;
     private Sequence _currentSequence;
 
@@ -78,6 +82,11 @@ public class ToastMessage : MonoBehaviour
         }
 
         HideImmediate();
+    }
+
+    private void Start()
+    {
+        ServiceLocator.TryGet(out _audioManager);
     }
 
     private void OnDestroy()
@@ -155,36 +164,29 @@ public class ToastMessage : MonoBehaviour
         };
         _backgroundImage.color = bgColor;
 
-        if (data.CustomIcon != null)
+        Sprite icon = data.CustomIcon ?? data.Type switch
         {
-            _iconImage.sprite = data.CustomIcon;
-            _iconImage.gameObject.SetActive(true);
-        }
-        else
-        {
-            Sprite icon = data.Type switch
-            {
-                ToastType.Success => _successIcon,
-                ToastType.Warning => _warningIcon,
-                ToastType.Error => _errorIcon,
-                _ => _infoIcon
-            };
+            ToastType.Success => _successIcon,
+            ToastType.Warning => _warningIcon,
+            ToastType.Error => _errorIcon,
+            _ => _infoIcon
+        };
 
-            if (icon != null)
-            {
-                _iconImage.sprite = icon;
-                _iconImage.gameObject.SetActive(true);
-            }
-            else
-            {
-                _iconImage.gameObject.SetActive(false);
-            }
+        _iconImage.gameObject.SetActive(icon != null);
+        if (icon != null)
+        {
+            _iconImage.sprite = icon;
         }
     }
 
     private void PlayShowAnimation()
     {
         _currentSequence?.Kill();
+
+        if (_playSound)
+        {
+            _audioManager?.PlaySFX(SFXType.Notification);
+        }
 
         gameObject.SetActive(true);
         _canvasGroup.alpha = 1f;

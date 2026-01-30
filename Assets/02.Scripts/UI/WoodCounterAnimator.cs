@@ -24,6 +24,7 @@ public class WoodCounterAnimator : MonoBehaviour
     [SerializeField] private RectTransform _targetTransform;
 
     private Sequence _currentSequence;
+    private AudioManager _audioManager;
 
     private void Awake()
     {
@@ -36,6 +37,11 @@ public class WoodCounterAnimator : MonoBehaviour
         {
             _text = GetComponent<TextMeshProUGUI>();
         }
+    }
+
+    private void Start()
+    {
+        ServiceLocator.TryGet(out _audioManager);
     }
 
     private void OnDestroy()
@@ -63,6 +69,8 @@ public class WoodCounterAnimator : MonoBehaviour
     public void PlayMilestoneAnimation()
     {
         if (_targetTransform == null) return;
+
+        _audioManager?.PlaySFX(SFXType.Milestone);
 
         _currentSequence?.Kill();
         _targetTransform.localScale = Vector3.one;

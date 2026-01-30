@@ -92,20 +92,36 @@ public class FloatingText : MonoBehaviour
         Vector3 startScale = transform.localScale;
         Color startColor = _text.color;
 
-        float duration = _styleAnimator != null ? _styleAnimator.Duration : _fadeDuration;
-        float floatDistance = _styleAnimator != null ? _styleAnimator.FloatDistance : _floatSpeed;
+        float duration;
+        float floatDistance;
+        Func<float, float> evaluateMove;
+        Func<float, float> evaluateAlpha;
+        Func<float, float> evaluateScale;
+
+        if (_styleAnimator != null)
+        {
+            duration = _styleAnimator.Duration;
+            floatDistance = _styleAnimator.FloatDistance;
+            evaluateMove = _styleAnimator.MoveCurve.Evaluate;
+            evaluateAlpha = _styleAnimator.AlphaCurve.Evaluate;
+            evaluateScale = _styleAnimator.ScaleCurve.Evaluate;
+        }
+        else
+        {
+            duration = _fadeDuration;
+            floatDistance = _floatSpeed;
+            evaluateMove = t => t;
+            evaluateAlpha = t => 1f - t;
+            evaluateScale = _ => 1f;
+        }
 
         while (elapsed < duration)
         {
             float t = elapsed / duration;
 
-            float moveT = _styleAnimator != null ? _styleAnimator.MoveCurve.Evaluate(t) : t;
-            float alphaT = _styleAnimator != null ? _styleAnimator.AlphaCurve.Evaluate(t) : (1 - t);
-            float scaleT = _styleAnimator != null ? _styleAnimator.ScaleCurve.Evaluate(t) : 1f;
-
-            transform.position = startPos + Vector3.up * floatDistance * moveT;
-            transform.localScale = startScale * scaleT;
-            _text.color = new Color(startColor.r, startColor.g, startColor.b, alphaT);
+            transform.position = startPos + Vector3.up * floatDistance * evaluateMove(t);
+            transform.localScale = startScale * evaluateScale(t);
+            _text.color = new Color(startColor.r, startColor.g, startColor.b, evaluateAlpha(t));
 
             elapsed += Time.deltaTime;
             yield return null;

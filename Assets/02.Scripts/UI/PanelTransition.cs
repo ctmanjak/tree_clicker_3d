@@ -25,6 +25,9 @@ public class PanelTransition : MonoBehaviour
     [SerializeField] private CanvasGroup _backdrop;
     [SerializeField] private float _backdropAlpha = 0.5f;
 
+    [Header("Audio")]
+    [SerializeField] private bool _playSound = true;
+
     [Header("References")]
     [SerializeField] private RectTransform _panelTransform;
     [SerializeField] private CanvasGroup _panelCanvasGroup;
@@ -34,6 +37,7 @@ public class PanelTransition : MonoBehaviour
 
     private Vector2 _originalPosition;
     private Sequence _currentSequence;
+    private AudioManager _audioManager;
     private bool _isOpen;
 
     private void Awake()
@@ -51,6 +55,11 @@ public class PanelTransition : MonoBehaviour
         _originalPosition = _panelTransform.anchoredPosition;
     }
 
+    private void Start()
+    {
+        ServiceLocator.TryGet(out _audioManager);
+    }
+
     private void OnDestroy()
     {
         _currentSequence?.Kill();
@@ -62,6 +71,11 @@ public class PanelTransition : MonoBehaviour
 
         _isOpen = true;
         gameObject.SetActive(true);
+
+        if (_playSound)
+        {
+            _audioManager?.PlaySFX(SFXType.UIOpen);
+        }
 
         _currentSequence?.Kill();
         _currentSequence = DOTween.Sequence();
@@ -83,6 +97,11 @@ public class PanelTransition : MonoBehaviour
         if (!_isOpen) return;
 
         _isOpen = false;
+
+        if (_playSound)
+        {
+            _audioManager?.PlaySFX(SFXType.UIClose);
+        }
 
         _currentSequence?.Kill();
         _currentSequence = DOTween.Sequence();

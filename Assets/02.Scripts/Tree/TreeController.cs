@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class TreeController : MonoBehaviour, IClickable
 {
-    private const string SfxHitWood = "hit_wood";
-
     private GameManager _gameManager;
     private GameEvents _gameEvents;
     private TreeShake _treeShake;
@@ -39,6 +37,6 @@ public class TreeController : MonoBehaviour, IClickable
         _gameManager.AddWood(woodAmount);
         _gameEvents.RaiseTreeHit();
         _treeShake?.Shake(attackerPosition);
-        _audioManager?.PlaySFX(SfxHitWood);
+        _audioManager?.PlaySFX(SFXType.HitWood);
     }
 }

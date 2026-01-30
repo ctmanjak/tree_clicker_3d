@@ -4,8 +4,6 @@ using TMPro;
 
 public class UpgradeButtonUI : MonoBehaviour
 {
-    private const string SfxUpgradeBuy = "upgrade_buy";
-
     [Header("Data")]
     [SerializeField] private UpgradeData _upgradeData;
 
@@ -93,7 +91,7 @@ public class UpgradeButtonUI : MonoBehaviour
     {
         if (_upgradeManager.TryPurchase(_upgradeData))
         {
-            _audioManager?.PlaySFX(SfxUpgradeBuy);
+            _audioManager?.PlaySFX(SFXType.UpgradeBuy);
             _animator?.PlayPurchaseAnimation();
             UpdateDisplay();
         }

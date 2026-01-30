@@ -407,19 +407,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _normalFontSize: 72
-  _normalColor: {r: 1, g: 1, b: 1, a: 1}
-  _normalFloatDistance: 1
-  _normalDuration: 0.8
-  _criticalFontSize: 80
-  _criticalColor: {r: 1, g: 0.9, b: 0, a: 1}
-  _criticalFloatDistance: 1.5
-  _criticalDuration: 1
-  _criticalScalePunch: 1.3
-  _bonusFontSize: 72
-  _bonusColor: {r: 0.3, g: 1, b: 0.3, a: 1}
-  _bonusFloatDistance: 1.2
-  _bonusDuration: 0.9
+  _styleConfig: {fileID: 11400000, guid: 75870a135e2bd4d97a7df727746c4174, type: 2}
 --- !u!1 &3867051177556536840
 GameObject:
   m_ObjectHideFlags: 0
