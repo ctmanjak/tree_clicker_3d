@@ -247,7 +247,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &8592993819236789144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -282,7 +282,7 @@ MonoBehaviour:
   _fadeDuration: 0.8
   _textMinWidth: 0
   _textMaxWidth: 320
-  _styleAnimator: {fileID: 8553878636900652454}
+  _styleProvider: {fileID: 0}
 --- !u!114 &5330618178632034206
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,7 +364,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.01
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -373,7 +373,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 1
-      value: 0.01
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

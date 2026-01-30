@@ -22,7 +22,7 @@ public class FloatingTextSpawner : MonoBehaviour
     {
         if (ServiceLocator.TryGet(out _gameEvents))
         {
-            _gameEvents.OnWoodAdded += SpawnText;
+            _gameEvents.OnCurrencyAdded += OnCurrencyAdded;
         }
     }
 
@@ -30,11 +30,17 @@ public class FloatingTextSpawner : MonoBehaviour
     {
         if (_gameEvents != null)
         {
-            _gameEvents.OnWoodAdded -= SpawnText;
+            _gameEvents.OnCurrencyAdded -= OnCurrencyAdded;
         }
     }
 
-    private void SpawnText(long amount)
+    private void OnCurrencyAdded(CurrencyType type, CurrencyValue amount)
+    {
+        if (type != CurrencyType.Wood) return;
+        SpawnText(amount);
+    }
+
+    private void SpawnText(CurrencyValue amount)
     {
         if (_treeTransform == null) return;
 

@@ -6,7 +6,7 @@ public class LumberjackController : MonoBehaviour
     private const float TreeSearchInterval = 1f;
 
     [Header("Stats")]
-    [SerializeField] private float _woodPerSecond = 1f;
+    [SerializeField] private CurrencyValue _woodPerSecond = CurrencyValue.One;
     [SerializeField] private float _attackCooldown = 0.5f;
     [SerializeField] private float _attackRange = 2f;
 
@@ -21,7 +21,7 @@ public class LumberjackController : MonoBehaviour
 
     private bool _isAttackAnimPlaying;
     private float _attackCooldownTimer;
-    private float _woodAccumulator;
+    private CurrencyValue _woodAccumulator;
     private float _treeSearchTimer = TreeSearchInterval;
     private float _currentBlendValue;
     private Vector3 _targetPosition;
@@ -146,9 +146,9 @@ public class LumberjackController : MonoBehaviour
         _audioManager?.PlaySFX(SFXType.Hit);
         _woodAccumulator += _woodPerSecond;
 
-        if (_woodAccumulator >= 1f)
+        if (_woodAccumulator >= CurrencyValue.One)
         {
-            long woodToAdd = (long)_woodAccumulator;
+            CurrencyValue woodToAdd = _woodAccumulator.Floor();
             _treeController.Hit(woodToAdd, transform.position);
             _woodAccumulator -= woodToAdd;
         }
@@ -180,7 +180,7 @@ public class LumberjackController : MonoBehaviour
         return new Vector3(Mathf.Cos(angle) * distance, 0, Mathf.Sin(angle) * distance);
     }
 
-    public void SetStats(float woodPerSecond, float animationSpeed)
+    public void SetStats(CurrencyValue woodPerSecond, float animationSpeed)
     {
         _woodPerSecond = woodPerSecond;
         _animator?.SetAnimationSpeed(animationSpeed);

@@ -5,27 +5,16 @@ public class WoodCounterUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _woodText;
 
-    private WoodCounterAnimator _animator;
-    private GameManager _gameManager;
+    private CurrencyManager _currencyManager;
     private GameEvents _gameEvents;
     private bool _isSubscribed;
-    private long _previousAmount;
-    private long _lastMilestone;
-
-    private void Awake()
-    {
-        _animator = GetComponent<WoodCounterAnimator>();
-    }
 
     private void Start()
     {
-        ServiceLocator.TryGet(out _gameManager);
+        ServiceLocator.TryGet(out _currencyManager);
         ServiceLocator.TryGet(out _gameEvents);
         Subscribe();
-
-        _previousAmount = _gameManager?.CurrentWood ?? 0;
-        _lastMilestone = GetCurrentMilestone(_previousAmount);
-        UpdateDisplay(_previousAmount);
+        UpdateDisplay(_currencyManager?.GetAmount(CurrencyType.Wood) ?? CurrencyValue.Zero);
     }
 
     private void OnEnable()
@@ -42,7 +31,7 @@ public class WoodCounterUI : MonoBehaviour
     {
         if (_isSubscribed || _gameEvents == null) return;
 
-        _gameEvents.OnWoodChanged += UpdateDisplay;
+        _gameEvents.OnCurrencyChanged += OnCurrencyChanged;
         _isSubscribed = true;
     }
 
@@ -50,50 +39,21 @@ public class WoodCounterUI : MonoBehaviour
     {
         if (!_isSubscribed || _gameEvents == null) return;
 
-        _gameEvents.OnWoodChanged -= UpdateDisplay;
+        _gameEvents.OnCurrencyChanged -= OnCurrencyChanged;
         _isSubscribed = false;
     }
 
-    private void UpdateDisplay(long amount)
+    private void OnCurrencyChanged(CurrencyType type, CurrencyValue amount)
+    {
+        if (type != CurrencyType.Wood) return;
+        UpdateDisplay(amount);
+    }
+
+    private void UpdateDisplay(CurrencyValue amount)
     {
         if (_woodText != null)
         {
-            _woodText.text = FormatNumber(amount);
+            _woodText.text = amount.ToFormattedString();
         }
-
-        TryPlayGainAnimation(amount);
-        _previousAmount = amount;
-    }
-
-    private void TryPlayGainAnimation(long amount)
-    {
-        if (_animator == null || amount <= _previousAmount) return;
-
-        long currentMilestone = GetCurrentMilestone(amount);
-        if (currentMilestone > _lastMilestone)
-        {
-            _animator.PlayMilestoneAnimation();
-            _lastMilestone = currentMilestone;
-        }
-        else
-        {
-            _animator.PlayGainAnimation(amount - _previousAmount);
-        }
-    }
-
-    private long GetCurrentMilestone(long amount)
-    {
-        if (amount >= 1_000_000_000) return amount / 1_000_000_000 * 1_000_000_000;
-        if (amount >= 1_000_000) return amount / 1_000_000 * 1_000_000;
-        if (amount >= 1_000) return amount / 1_000 * 1_000;
-        return 0;
-    }
-
-    private string FormatNumber(long num)
-    {
-        if (num >= 1_000_000_000) return $"{num / 1_000_000_000f:F1}B";
-        if (num >= 1_000_000) return $"{num / 1_000_000f:F1}M";
-        if (num >= 1_000) return $"{num / 1_000f:F1}K";
-        return num.ToString();
     }
 }
