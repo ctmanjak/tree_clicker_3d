@@ -5,12 +5,22 @@ public class WoodCounterUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _woodText;
 
+    private WoodCounterAnimator _animator;
     private bool _isSubscribed;
+    private long _previousAmount;
+    private long _lastMilestone;
+
+    private void Awake()
+    {
+        _animator = GetComponent<WoodCounterAnimator>();
+    }
 
     private void Start()
     {
         Subscribe();
-        UpdateDisplay(GameManager.Instance.CurrentWood);
+        _previousAmount = GameManager.Instance.CurrentWood;
+        _lastMilestone = GetCurrentMilestone(_previousAmount);
+        UpdateDisplay(_previousAmount);
     }
 
     private void OnEnable()
@@ -45,6 +55,30 @@ public class WoodCounterUI : MonoBehaviour
         {
             _woodText.text = FormatNumber(amount);
         }
+
+        if (_animator != null && amount > _previousAmount)
+        {
+            long currentMilestone = GetCurrentMilestone(amount);
+            if (currentMilestone > _lastMilestone)
+            {
+                _animator.PlayMilestoneAnimation();
+                _lastMilestone = currentMilestone;
+            }
+            else
+            {
+                _animator.PlayGainAnimation(amount - _previousAmount);
+            }
+        }
+
+        _previousAmount = amount;
+    }
+
+    private long GetCurrentMilestone(long amount)
+    {
+        if (amount >= 1_000_000_000) return amount / 1_000_000_000 * 1_000_000_000;
+        if (amount >= 1_000_000) return amount / 1_000_000 * 1_000_000;
+        if (amount >= 1_000) return amount / 1_000 * 1_000;
+        return 0;
     }
 
     private string FormatNumber(long num)

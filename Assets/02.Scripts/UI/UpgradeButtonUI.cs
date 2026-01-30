@@ -20,7 +20,9 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private GameManager _gameManager;
     private AudioManager _audioManager;
+    private UpgradeButtonAnimator _animator;
     private bool _isSubscribed;
+    private bool _wasAffordable;
 
     public void Init(UpgradeData data, UpgradeManager manager)
     {
@@ -37,6 +39,7 @@ public class UpgradeButtonUI : MonoBehaviour
     {
         _gameManager = GameManager.Instance;
         ServiceLocator.TryGet(out _audioManager);
+        _animator = GetComponent<UpgradeButtonAnimator>();
 
         if (_upgradeManager == null)
         {
@@ -51,6 +54,13 @@ public class UpgradeButtonUI : MonoBehaviour
     private void OnEnable()
     {
         Subscribe();
+        ResetAnimationState();
+    }
+
+    private void ResetAnimationState()
+    {
+        _wasAffordable = false;
+        _animator?.StopPulseAnimation();
     }
 
     private void OnDisable()
@@ -84,7 +94,12 @@ public class UpgradeButtonUI : MonoBehaviour
         if (_upgradeManager.TryPurchase(_upgradeData))
         {
             _audioManager?.PlaySFX(SfxUpgradeBuy);
+            _animator?.PlayPurchaseAnimation();
             UpdateDisplay();
+        }
+        else
+        {
+            _animator?.PlayDeniedAnimation();
         }
     }
 
@@ -135,11 +150,28 @@ public class UpgradeButtonUI : MonoBehaviour
         if (_upgradeData.IsMaxLevel(level))
         {
             _button.interactable = false;
+            _animator?.StopPulseAnimation();
             return;
         }
 
         long cost = _upgradeData.GetCost(level);
-        _button.interactable = _gameManager.CanAfford(cost);
+        bool canAfford = _gameManager.CanAfford(cost);
+
+        _button.interactable = true;
+
+        if (_animator != null)
+        {
+            if (canAfford && !_wasAffordable)
+            {
+                _animator.StartPulseAnimation();
+            }
+            else if (!canAfford && _wasAffordable)
+            {
+                _animator.StopPulseAnimation();
+            }
+        }
+
+        _wasAffordable = canAfford;
     }
 
     private string GetEffectText()
