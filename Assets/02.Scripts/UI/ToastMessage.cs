@@ -48,7 +48,6 @@ public class ToastMessage : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private bool _playSound = true;
 
-    private static ToastMessage _instance;
     private Queue<ToastData> _messageQueue = new Queue<ToastData>();
     private AudioManager _audioManager;
     private bool _isShowing;
@@ -63,14 +62,6 @@ public class ToastMessage : MonoBehaviour
 
     private void Awake()
     {
-        if (_instance != null && _instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        _instance = this;
-
         if (_toastContainer == null)
         {
             _toastContainer = GetComponent<RectTransform>();
@@ -81,6 +72,7 @@ public class ToastMessage : MonoBehaviour
             _canvasGroup = GetComponent<CanvasGroup>();
         }
 
+        ServiceLocator.Register(this);
         HideImmediate();
     }
 
@@ -92,33 +84,29 @@ public class ToastMessage : MonoBehaviour
     private void OnDestroy()
     {
         _currentSequence?.Kill();
-
-        if (_instance == this)
-        {
-            _instance = null;
-        }
+        ServiceLocator.Unregister(this);
     }
 
     public static void Show(string message, ToastType type = ToastType.Info)
     {
-        if (_instance == null)
+        if (!ServiceLocator.TryGet<ToastMessage>(out var instance))
         {
             Debug.LogWarning("ToastMessage instance not found");
             return;
         }
 
-        _instance.EnqueueMessage(message, type, null);
+        instance.EnqueueMessage(message, type, null);
     }
 
     public static void Show(string message, Sprite icon)
     {
-        if (_instance == null)
+        if (!ServiceLocator.TryGet<ToastMessage>(out var instance))
         {
             Debug.LogWarning("ToastMessage instance not found");
             return;
         }
 
-        _instance.EnqueueMessage(message, ToastType.Info, icon);
+        instance.EnqueueMessage(message, ToastType.Info, icon);
     }
 
     private void EnqueueMessage(string message, ToastType type, Sprite customIcon)

@@ -17,6 +17,7 @@ public class UpgradeButtonUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _effectText;
 
     private GameManager _gameManager;
+    private GameEvents _gameEvents;
     private AudioManager _audioManager;
     private UpgradeButtonAnimator _animator;
     private bool _isSubscribed;
@@ -35,7 +36,8 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void Start()
     {
-        _gameManager = GameManager.Instance;
+        ServiceLocator.TryGet(out _gameManager);
+        ServiceLocator.TryGet(out _gameEvents);
         ServiceLocator.TryGet(out _audioManager);
         _animator = GetComponent<UpgradeButtonAnimator>();
 
@@ -73,17 +75,17 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void Subscribe()
     {
-        if (_isSubscribed || GameEvents.Instance == null) return;
+        if (_isSubscribed || _gameEvents == null) return;
 
-        GameEvents.Instance.OnWoodChanged += OnWoodChanged;
+        _gameEvents.OnWoodChanged += OnWoodChanged;
         _isSubscribed = true;
     }
 
     private void Unsubscribe()
     {
-        if (!_isSubscribed || GameEvents.Instance == null) return;
+        if (!_isSubscribed || _gameEvents == null) return;
 
-        GameEvents.Instance.OnWoodChanged -= OnWoodChanged;
+        _gameEvents.OnWoodChanged -= OnWoodChanged;
         _isSubscribed = false;
     }
 

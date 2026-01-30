@@ -6,6 +6,8 @@ public class WoodCounterUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _woodText;
 
     private WoodCounterAnimator _animator;
+    private GameManager _gameManager;
+    private GameEvents _gameEvents;
     private bool _isSubscribed;
     private long _previousAmount;
     private long _lastMilestone;
@@ -17,8 +19,11 @@ public class WoodCounterUI : MonoBehaviour
 
     private void Start()
     {
+        ServiceLocator.TryGet(out _gameManager);
+        ServiceLocator.TryGet(out _gameEvents);
         Subscribe();
-        _previousAmount = GameManager.Instance.CurrentWood;
+
+        _previousAmount = _gameManager?.CurrentWood ?? 0;
         _lastMilestone = GetCurrentMilestone(_previousAmount);
         UpdateDisplay(_previousAmount);
     }
@@ -35,17 +40,17 @@ public class WoodCounterUI : MonoBehaviour
 
     private void Subscribe()
     {
-        if (_isSubscribed || GameEvents.Instance == null) return;
+        if (_isSubscribed || _gameEvents == null) return;
 
-        GameEvents.Instance.OnWoodChanged += UpdateDisplay;
+        _gameEvents.OnWoodChanged += UpdateDisplay;
         _isSubscribed = true;
     }
 
     private void Unsubscribe()
     {
-        if (!_isSubscribed || GameEvents.Instance == null) return;
+        if (!_isSubscribed || _gameEvents == null) return;
 
-        GameEvents.Instance.OnWoodChanged -= UpdateDisplay;
+        _gameEvents.OnWoodChanged -= UpdateDisplay;
         _isSubscribed = false;
     }
 

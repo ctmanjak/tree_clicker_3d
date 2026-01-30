@@ -2,13 +2,10 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour, ISaveable
 {
-    public static GameManager Instance { get; private set; }
-
     [SerializeField] private long _currentWood = 0;
     [SerializeField] private long _woodPerClick = 1;
 
     private GameEvents _gameEvents;
-    private GameEvents GameEvents => _gameEvents ??= GameEvents.Instance;
 
     public long CurrentWood => _currentWood;
     public long WoodPerClick => _woodPerClick;
@@ -19,15 +16,17 @@ public class GameManager : MonoBehaviour, ISaveable
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Debug.LogWarning("Duplicate GameManager detected. Destroying this instance.");
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-
         ServiceLocator.Register(this);
+    }
+
+    private void Start()
+    {
+        ServiceLocator.TryGet(out _gameEvents);
+    }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister(this);
     }
 
     public void AddWood(long amount)

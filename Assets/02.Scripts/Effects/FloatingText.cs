@@ -12,7 +12,7 @@ public class FloatingText : MonoBehaviour
     [SerializeField] private float _textMaxWidth = 320f;
 
     [Header("Style Settings")]
-    [SerializeField] private FloatingTextAnimator _styleAnimator;
+    [SerializeField] private FloatingTextStyleProvider _styleProvider;
 
     private RectTransform _textRectTransform;
 
@@ -67,12 +67,12 @@ public class FloatingText : MonoBehaviour
 
     private void ApplyStyle()
     {
-        if (_styleAnimator != null)
+        if (_styleProvider != null)
         {
-            _styleAnimator.SetStyle(_currentStyle);
-            _text.color = _styleAnimator.TextColor;
-            _text.fontSize = _styleAnimator.FontSize;
-            transform.localScale = Vector3.one * _styleAnimator.InitialScale;
+            _styleProvider.SetStyle(_currentStyle);
+            _text.color = _styleProvider.TextColor;
+            _text.fontSize = _styleProvider.FontSize;
+            transform.localScale = Vector3.one * _styleProvider.InitialScale;
         }
         else
         {
@@ -98,13 +98,13 @@ public class FloatingText : MonoBehaviour
         Func<float, float> evaluateAlpha;
         Func<float, float> evaluateScale;
 
-        if (_styleAnimator != null)
+        if (_styleProvider != null)
         {
-            duration = _styleAnimator.Duration;
-            floatDistance = _styleAnimator.FloatDistance;
-            evaluateMove = _styleAnimator.MoveCurve.Evaluate;
-            evaluateAlpha = _styleAnimator.AlphaCurve.Evaluate;
-            evaluateScale = _styleAnimator.ScaleCurve.Evaluate;
+            duration = _styleProvider.Duration;
+            floatDistance = _styleProvider.FloatDistance;
+            evaluateMove = _styleProvider.MoveCurve.Evaluate;
+            evaluateAlpha = _styleProvider.AlphaCurve.Evaluate;
+            evaluateScale = _styleProvider.ScaleCurve.Evaluate;
         }
         else
         {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class FloatingTextAnimator : MonoBehaviour
+public class FloatingTextStyleProvider : MonoBehaviour
 {
     [Header("Animation Curves")]
     [SerializeField] private AnimationCurve _moveCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);

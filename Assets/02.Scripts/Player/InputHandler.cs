@@ -25,7 +25,7 @@ public class InputHandler : MonoBehaviour
 
     private void Start()
     {
-        _gameEvents = GameEvents.Instance;
+        ServiceLocator.TryGet(out _gameEvents);
     }
 
     private void Update()

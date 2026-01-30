@@ -21,8 +21,8 @@ public class TreeController : MonoBehaviour, IClickable
 
     private void Start()
     {
-        _gameManager = GameManager.Instance;
-        _gameEvents = GameEvents.Instance;
+        ServiceLocator.TryGet(out _gameManager);
+        ServiceLocator.TryGet(out _gameEvents);
         _treeShake = GetComponent<TreeShake>();
         ServiceLocator.TryGet(out _audioManager);
     }
