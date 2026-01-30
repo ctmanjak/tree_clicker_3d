@@ -16,8 +16,8 @@ public class UpgradeButtonUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private TextMeshProUGUI _effectText;
 
-    private GameManager _gameManager;
     private GameEvents _gameEvents;
+    private CurrencyManager _currencyManager;
     private AudioManager _audioManager;
     private UpgradeButtonAnimator _animator;
     private bool _isSubscribed;
@@ -28,7 +28,7 @@ public class UpgradeButtonUI : MonoBehaviour
         _upgradeData = data;
         _upgradeManager = manager;
 
-        if (_gameManager != null)
+        if (_currencyManager != null)
         {
             UpdateDisplay();
         }
@@ -36,8 +36,8 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void Start()
     {
-        ServiceLocator.TryGet(out _gameManager);
         ServiceLocator.TryGet(out _gameEvents);
+        ServiceLocator.TryGet(out _currencyManager);
         ServiceLocator.TryGet(out _audioManager);
         _animator = GetComponent<UpgradeButtonAnimator>();
 
@@ -77,7 +77,7 @@ public class UpgradeButtonUI : MonoBehaviour
     {
         if (_isSubscribed || _gameEvents == null) return;
 
-        _gameEvents.OnWoodChanged += OnWoodChanged;
+        _gameEvents.OnCurrencyChanged += OnCurrencyChanged;
         _isSubscribed = true;
     }
 
@@ -85,7 +85,7 @@ public class UpgradeButtonUI : MonoBehaviour
     {
         if (!_isSubscribed || _gameEvents == null) return;
 
-        _gameEvents.OnWoodChanged -= OnWoodChanged;
+        _gameEvents.OnCurrencyChanged -= OnCurrencyChanged;
         _isSubscribed = false;
     }
 
@@ -103,8 +103,9 @@ public class UpgradeButtonUI : MonoBehaviour
         }
     }
 
-    private void OnWoodChanged(long _)
+    private void OnCurrencyChanged(CurrencyType type, CurrencyValue _)
     {
+        if (type != CurrencyType.Wood) return;
         UpdateButtonState();
     }
 
@@ -125,7 +126,7 @@ public class UpgradeButtonUI : MonoBehaviour
 
         if (_costText != null)
         {
-            _costText.text = isMaxLevel ? "MAX" : FormatNumber(_upgradeData.GetCost(level));
+            _costText.text = isMaxLevel ? "MAX" : _upgradeData.GetCost(level).ToFormattedString();
         }
 
         if (_levelText != null)
@@ -143,7 +144,7 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void UpdateButtonState()
     {
-        if (_upgradeManager == null || _gameManager == null) return;
+        if (_upgradeManager == null || _currencyManager == null) return;
 
         int level = _upgradeManager.GetLevel(_upgradeData);
 
@@ -154,10 +155,8 @@ public class UpgradeButtonUI : MonoBehaviour
             return;
         }
 
-        long cost = _upgradeData.GetCost(level);
-        bool canAfford = _gameManager.CanAfford(cost);
-
-        _button.interactable = true;
+        CurrencyValue cost = _upgradeData.GetCost(level);
+        bool canAfford = _currencyManager.CanAfford(CurrencyType.Wood, cost);
 
         if (_animator != null)
         {
@@ -184,10 +183,4 @@ public class UpgradeButtonUI : MonoBehaviour
         };
     }
 
-    private string FormatNumber(long num)
-    {
-        if (num >= 1_000_000) return $"{num / 1_000_000f:F1}M";
-        if (num >= 1_000) return $"{num / 1_000f:F1}K";
-        return num.ToString();
-    }
 }

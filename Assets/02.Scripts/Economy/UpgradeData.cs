@@ -18,11 +18,11 @@ public class UpgradeData : ScriptableObject
     [SerializeField] private UpgradeType _type;
 
     [Header("비용")]
-    [SerializeField] private long _baseCost = 100;
-    [SerializeField] private float _costMultiplier = 1.15f;
+    [SerializeField] private CurrencyValue _baseCost = 100;
+    [SerializeField] private double _costMultiplier = 1.15;
 
     [Header("효과")]
-    [SerializeField] private long _effectAmount = 1;
+    [SerializeField] private CurrencyValue _effectAmount = 1;
 
     [Header("레벨 제한")]
     [Tooltip("0 = 무제한")]
@@ -32,9 +32,9 @@ public class UpgradeData : ScriptableObject
     public string Description => _description;
     public Sprite Icon => _icon;
     public UpgradeType Type => _type;
-    public long BaseCost => _baseCost;
-    public float CostMultiplier => _costMultiplier;
-    public long EffectAmount => _effectAmount;
+    public CurrencyValue BaseCost => _baseCost;
+    public double CostMultiplier => _costMultiplier;
+    public CurrencyValue EffectAmount => _effectAmount;
     public int MaxLevel => _maxLevel;
 
     private bool HasMaxLevel => _maxLevel > UnlimitedLevel;
@@ -44,8 +44,8 @@ public class UpgradeData : ScriptableObject
         return HasMaxLevel && currentLevel >= _maxLevel;
     }
 
-    public long GetCost(int currentLevel)
+    public CurrencyValue GetCost(int currentLevel)
     {
-        return (long)(_baseCost * Mathf.Pow(_costMultiplier, currentLevel));
+        return _baseCost * CurrencyValue.Pow(_costMultiplier, currentLevel);
     }
 }

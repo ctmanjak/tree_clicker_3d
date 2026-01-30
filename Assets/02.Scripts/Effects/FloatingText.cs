@@ -15,6 +15,7 @@ public class FloatingText : MonoBehaviour
     [SerializeField] private FloatingTextStyleProvider _styleProvider;
 
     private RectTransform _textRectTransform;
+    private Vector3 _baseScale;
 
     private Action<FloatingText> _onComplete;
     private Transform _cameraTransform;
@@ -28,6 +29,7 @@ public class FloatingText : MonoBehaviour
         }
 
         _textRectTransform = _text.GetComponent<RectTransform>();
+        _baseScale = transform.localScale;
     }
 
     private void LateUpdate()
@@ -72,7 +74,7 @@ public class FloatingText : MonoBehaviour
             _styleProvider.SetStyle(_currentStyle);
             _text.color = _styleProvider.TextColor;
             _text.fontSize = _styleProvider.FontSize;
-            transform.localScale = Vector3.one * _styleProvider.InitialScale;
+            transform.localScale = _baseScale * _styleProvider.InitialScale;
         }
         else
         {
@@ -82,6 +84,7 @@ public class FloatingText : MonoBehaviour
                 FloatingTextStyle.Bonus => new Color(0.3f, 1f, 0.3f),
                 _ => Color.white
             };
+            transform.localScale = _baseScale;
         }
     }
 
@@ -127,7 +130,7 @@ public class FloatingText : MonoBehaviour
             yield return null;
         }
 
-        transform.localScale = Vector3.one;
+        transform.localScale = _baseScale;
         _onComplete?.Invoke(this);
     }
 }

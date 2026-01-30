@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class TreeController : MonoBehaviour, IClickable
 {
-    private GameManager _gameManager;
+    private CurrencyManager _currencyManager;
     private GameEvents _gameEvents;
     private TreeShake _treeShake;
     private AudioManager _audioManager;
@@ -21,20 +21,20 @@ public class TreeController : MonoBehaviour, IClickable
 
     private void Start()
     {
-        ServiceLocator.TryGet(out _gameManager);
         ServiceLocator.TryGet(out _gameEvents);
+        ServiceLocator.TryGet(out _currencyManager);
         _treeShake = GetComponent<TreeShake>();
         ServiceLocator.TryGet(out _audioManager);
     }
 
     public void OnClick(Vector3 hitPoint, Vector3 hitNormal)
     {
-        Hit(_gameManager.WoodPerClick);
+        Hit(_currencyManager.WoodPerClick);
     }
 
-    public void Hit(long woodAmount, Vector3? attackerPosition = null)
+    public void Hit(CurrencyValue woodAmount, Vector3? attackerPosition = null)
     {
-        _gameManager.AddWood(woodAmount);
+        _currencyManager.AddWood(woodAmount);
         _gameEvents.RaiseTreeHit();
         _treeShake?.Shake(attackerPosition);
         _audioManager?.PlaySFX(SFXType.HitWood);

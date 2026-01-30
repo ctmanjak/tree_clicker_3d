@@ -49,7 +49,7 @@ public class WoodCounterAnimator : MonoBehaviour
         _currentSequence?.Kill();
     }
 
-    public void PlayGainAnimation(long amount)
+    public void PlayGainAnimation(CurrencyValue amount)
     {
         if (_targetTransform == null) return;
 
