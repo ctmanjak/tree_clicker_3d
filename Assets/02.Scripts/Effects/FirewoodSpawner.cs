@@ -11,6 +11,7 @@ public class FirewoodSpawner : MonoBehaviour
     [SerializeField] private Vector3 _spawnOffset = new Vector3(0, 1.5f, 0);
 
     private ObjectPool<Firewood> _pool;
+    private GameEvents _gameEvents;
 
     private void Awake()
     {
@@ -19,17 +20,17 @@ public class FirewoodSpawner : MonoBehaviour
 
     private void Start()
     {
-        if (GameEvents.Instance != null)
+        if (ServiceLocator.TryGet(out _gameEvents))
         {
-            GameEvents.Instance.OnTreeHit += SpawnFirewood;
+            _gameEvents.OnTreeHit += SpawnFirewood;
         }
     }
 
     private void OnDestroy()
     {
-        if (GameEvents.Instance != null)
+        if (_gameEvents != null)
         {
-            GameEvents.Instance.OnTreeHit -= SpawnFirewood;
+            _gameEvents.OnTreeHit -= SpawnFirewood;
         }
     }
 

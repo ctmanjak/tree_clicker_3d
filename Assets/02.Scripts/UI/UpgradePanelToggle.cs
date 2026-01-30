@@ -10,6 +10,7 @@ public class UpgradePanelToggle : MonoBehaviour
     private static event Action<UpgradePanelToggle> OnPanelOpened;
     private static event Action OnAllPanelsClosed;
 
+    private PanelTransition _panelTransition;
     private bool _isOpen;
 
     public static void CloseAllPanels()
@@ -17,10 +18,15 @@ public class UpgradePanelToggle : MonoBehaviour
         OnAllPanelsClosed?.Invoke();
     }
 
+    private void Awake()
+    {
+        _panelTransition = _upgradePanel.GetComponent<PanelTransition>();
+    }
+
     private void Start()
     {
         _toggleButton.onClick.AddListener(Toggle);
-        _upgradePanel.SetActive(_isOpen);
+        _upgradePanel.SetActive(false);
     }
 
     private void OnEnable()
@@ -35,12 +41,6 @@ public class UpgradePanelToggle : MonoBehaviour
         OnAllPanelsClosed -= ClosePanel;
     }
 
-    private void ClosePanel()
-    {
-        _isOpen = false;
-        _upgradePanel.SetActive(false);
-    }
-
     private void OnDestroy()
     {
         _toggleButton.onClick.RemoveListener(Toggle);
@@ -48,20 +48,51 @@ public class UpgradePanelToggle : MonoBehaviour
 
     private void Toggle()
     {
-        _isOpen = !_isOpen;
-        _upgradePanel.SetActive(_isOpen);
-
         if (_isOpen)
         {
-            OnPanelOpened?.Invoke(this);
+            ClosePanel();
+        }
+        else
+        {
+            OpenPanel();
+        }
+    }
+
+    private void OpenPanel()
+    {
+        _isOpen = true;
+
+        if (_panelTransition != null)
+        {
+            _panelTransition.Open();
+        }
+        else
+        {
+            _upgradePanel.SetActive(true);
+        }
+
+        OnPanelOpened?.Invoke(this);
+    }
+
+    private void ClosePanel()
+    {
+        if (!_isOpen) return;
+
+        _isOpen = false;
+
+        if (_panelTransition != null)
+        {
+            _panelTransition.Close();
+        }
+        else
+        {
+            _upgradePanel.SetActive(false);
         }
     }
 
     private void HandleOtherPanelOpened(UpgradePanelToggle sender)
     {
         if (sender == this) return;
-
-        _isOpen = false;
-        _upgradePanel.SetActive(false);
+        ClosePanel();
     }
 }

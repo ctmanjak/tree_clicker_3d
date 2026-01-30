@@ -71,14 +71,14 @@ public class AudioManager : MonoBehaviour
         return source;
     }
 
-    public void PlaySFX(string sfxId)
+    public void PlaySFX(SFXType type)
     {
         if (_sfxConfig == null) return;
 
-        var entry = _sfxConfig.GetEntry(sfxId);
+        var entry = _sfxConfig.GetEntry(type);
         if (entry == null) return;
 
-        var clip = _sfxConfig.GetRandomClip(sfxId);
+        var clip = _sfxConfig.GetRandomClip(type);
         if (clip == null) return;
 
         PlaySFXInternal(clip, entry.Volume, entry.PitchMin, entry.PitchMax);
@@ -90,14 +90,14 @@ public class AudioManager : MonoBehaviour
         PlaySFXInternal(clip, volume, 0.95f, 1.05f);
     }
 
-    public void PlaySFXAtPosition(string sfxId, Vector3 position)
+    public void PlaySFXAtPosition(SFXType type, Vector3 position)
     {
         if (_sfxConfig == null) return;
 
-        var entry = _sfxConfig.GetEntry(sfxId);
+        var entry = _sfxConfig.GetEntry(type);
         if (entry == null) return;
 
-        var clip = _sfxConfig.GetRandomClip(sfxId);
+        var clip = _sfxConfig.GetRandomClip(type);
         if (clip == null) return;
 
         PlaySFXInternal(clip, entry.Volume, entry.PitchMin, entry.PitchMax, position);

@@ -4,8 +4,6 @@ using TMPro;
 
 public class UpgradeButtonUI : MonoBehaviour
 {
-    private const string SfxUpgradeBuy = "upgrade_buy";
-
     [Header("Data")]
     [SerializeField] private UpgradeData _upgradeData;
 
@@ -19,8 +17,11 @@ public class UpgradeButtonUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _effectText;
 
     private GameManager _gameManager;
+    private GameEvents _gameEvents;
     private AudioManager _audioManager;
+    private UpgradeButtonAnimator _animator;
     private bool _isSubscribed;
+    private bool _wasAffordable;
 
     public void Init(UpgradeData data, UpgradeManager manager)
     {
@@ -35,8 +36,10 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void Start()
     {
-        _gameManager = GameManager.Instance;
+        ServiceLocator.TryGet(out _gameManager);
+        ServiceLocator.TryGet(out _gameEvents);
         ServiceLocator.TryGet(out _audioManager);
+        _animator = GetComponent<UpgradeButtonAnimator>();
 
         if (_upgradeManager == null)
         {
@@ -51,6 +54,13 @@ public class UpgradeButtonUI : MonoBehaviour
     private void OnEnable()
     {
         Subscribe();
+        ResetAnimationState();
+    }
+
+    private void ResetAnimationState()
+    {
+        _wasAffordable = false;
+        _animator?.StopPulseAnimation();
     }
 
     private void OnDisable()
@@ -65,17 +75,17 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void Subscribe()
     {
-        if (_isSubscribed || GameEvents.Instance == null) return;
+        if (_isSubscribed || _gameEvents == null) return;
 
-        GameEvents.Instance.OnWoodChanged += OnWoodChanged;
+        _gameEvents.OnWoodChanged += OnWoodChanged;
         _isSubscribed = true;
     }
 
     private void Unsubscribe()
     {
-        if (!_isSubscribed || GameEvents.Instance == null) return;
+        if (!_isSubscribed || _gameEvents == null) return;
 
-        GameEvents.Instance.OnWoodChanged -= OnWoodChanged;
+        _gameEvents.OnWoodChanged -= OnWoodChanged;
         _isSubscribed = false;
     }
 
@@ -83,8 +93,13 @@ public class UpgradeButtonUI : MonoBehaviour
     {
         if (_upgradeManager.TryPurchase(_upgradeData))
         {
-            _audioManager?.PlaySFX(SfxUpgradeBuy);
+            _audioManager?.PlaySFX(SFXType.UpgradeBuy);
+            _animator?.PlayPurchaseAnimation();
             UpdateDisplay();
+        }
+        else
+        {
+            _animator?.PlayDeniedAnimation();
         }
     }
 
@@ -135,11 +150,28 @@ public class UpgradeButtonUI : MonoBehaviour
         if (_upgradeData.IsMaxLevel(level))
         {
             _button.interactable = false;
+            _animator?.StopPulseAnimation();
             return;
         }
 
         long cost = _upgradeData.GetCost(level);
-        _button.interactable = _gameManager.CanAfford(cost);
+        bool canAfford = _gameManager.CanAfford(cost);
+
+        _button.interactable = true;
+
+        if (_animator != null)
+        {
+            if (canAfford && !_wasAffordable)
+            {
+                _animator.StartPulseAnimation();
+            }
+            else if (!canAfford && _wasAffordable)
+            {
+                _animator.StopPulseAnimation();
+            }
+        }
+
+        _wasAffordable = canAfford;
     }
 
     private string GetEffectText()

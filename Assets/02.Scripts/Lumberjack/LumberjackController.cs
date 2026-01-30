@@ -4,8 +4,6 @@ public class LumberjackController : MonoBehaviour
 {
     private const float StopDistance = 0.1f;
     private const float TreeSearchInterval = 1f;
-    private const string SfxSwing = "lumberjack_swing";
-    private const string SfxHit = "lumberjack_hit";
 
     [Header("Stats")]
     [SerializeField] private float _woodPerSecond = 1f;
@@ -138,14 +136,14 @@ public class LumberjackController : MonoBehaviour
 
     public void OnSwingStart()
     {
-        _audioManager?.PlaySFX(SfxSwing);
+        _audioManager?.PlaySFX(SFXType.Swing);
     }
 
     public void OnSwingHit()
     {
         if (_treeController == null) return;
 
-        _audioManager?.PlaySFX(SfxHit);
+        _audioManager?.PlaySFX(SFXType.Hit);
         _woodAccumulator += _woodPerSecond;
 
         if (_woodAccumulator >= 1f)

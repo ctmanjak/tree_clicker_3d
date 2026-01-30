@@ -11,6 +11,7 @@ public class FloatingTextSpawner : MonoBehaviour
     [SerializeField] private float _cameraOffsetDistance = 1f;
 
     private ObjectPool<FloatingText> _pool;
+    private GameEvents _gameEvents;
 
     private void Awake()
     {
@@ -19,17 +20,17 @@ public class FloatingTextSpawner : MonoBehaviour
 
     private void Start()
     {
-        if (GameEvents.Instance != null)
+        if (ServiceLocator.TryGet(out _gameEvents))
         {
-            GameEvents.Instance.OnWoodAdded += SpawnText;
+            _gameEvents.OnWoodAdded += SpawnText;
         }
     }
 
     private void OnDestroy()
     {
-        if (GameEvents.Instance != null)
+        if (_gameEvents != null)
         {
-            GameEvents.Instance.OnWoodAdded -= SpawnText;
+            _gameEvents.OnWoodAdded -= SpawnText;
         }
     }
 

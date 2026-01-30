@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class InputHandler : MonoBehaviour
@@ -24,7 +25,7 @@ public class InputHandler : MonoBehaviour
 
     private void Start()
     {
-        _gameEvents = GameEvents.Instance;
+        ServiceLocator.TryGet(out _gameEvents);
     }
 
     private void Update()
@@ -37,6 +38,12 @@ public class InputHandler : MonoBehaviour
 
     private bool TryGetClickPosition(out Vector2 position)
     {
+        if (IsPointerOverUI())
+        {
+            position = default;
+            return false;
+        }
+
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             position = Mouse.current.position.ReadValue();
@@ -51,6 +58,21 @@ public class InputHandler : MonoBehaviour
 
         position = default;
         return false;
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null)
+            return false;
+
+        if (Touchscreen.current != null &&
+            Touchscreen.current.primaryTouch.press.isPressed)
+        {
+            int touchId = Touchscreen.current.primaryTouch.touchId.ReadValue();
+            return EventSystem.current.IsPointerOverGameObject(touchId);
+        }
+
+        return EventSystem.current.IsPointerOverGameObject();
     }
 
     private void HandleClick(Vector2 screenPosition)

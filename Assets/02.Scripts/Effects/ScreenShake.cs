@@ -8,22 +8,23 @@ public class ScreenShake : MonoBehaviour
 
     private Vector3 _originalPosition;
     private Coroutine _shakeCoroutine;
+    private GameEvents _gameEvents;
 
     private void Start()
     {
         _originalPosition = transform.localPosition;
 
-        if (GameEvents.Instance != null)
+        if (ServiceLocator.TryGet(out _gameEvents))
         {
-            GameEvents.Instance.OnTreeHit += Shake;
+            _gameEvents.OnTreeHit += Shake;
         }
     }
 
     private void OnDestroy()
     {
-        if (GameEvents.Instance != null)
+        if (_gameEvents != null)
         {
-            GameEvents.Instance.OnTreeHit -= Shake;
+            _gameEvents.OnTreeHit -= Shake;
         }
     }
 

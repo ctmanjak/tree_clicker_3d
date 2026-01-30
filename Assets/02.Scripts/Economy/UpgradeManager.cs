@@ -21,9 +21,9 @@ public class UpgradeManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
-        _gameManager = GameManager.Instance;
-        _gameEvents = GameEvents.Instance;
-        _lumberjackSpawner = ServiceLocator.Get<LumberjackSpawner>();
+        ServiceLocator.TryGet(out _gameManager);
+        ServiceLocator.TryGet(out _gameEvents);
+        ServiceLocator.TryGet(out _lumberjackSpawner);
     }
 
     public bool TryPurchase(UpgradeData upgrade)

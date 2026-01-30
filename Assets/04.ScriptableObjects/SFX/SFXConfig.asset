@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SFXConfig
   m_EditorClassIdentifier: Assembly-CSharp::SFXConfig
   _entries:
-  - Id: hit_wood
+  - Type: 0
     Clips:
     - {fileID: 8300000, guid: 6d29c9ef9cd2845008fbbb1f635d61ad, type: 3}
     - {fileID: 8300000, guid: c685bab427e124c78b28a107253a58f5, type: 3}
@@ -26,19 +26,9 @@ MonoBehaviour:
     Volume: 1
     PitchMin: 1
     PitchMax: 1
-  - Id: lumberjack_swing
+  - Type: 1
     Clips:
     - {fileID: 8300000, guid: b548819017092417e8d958d93f7d14ab, type: 3}
     Volume: 0.25
-    PitchMin: 1
-    PitchMax: 1
-  - Id: lumberjack_hit
-    Clips: []
-    Volume: 1
-    PitchMin: 1
-    PitchMax: 1
-  - Id: upgrade_buy
-    Clips: []
-    Volume: 1
     PitchMin: 1
     PitchMax: 1
