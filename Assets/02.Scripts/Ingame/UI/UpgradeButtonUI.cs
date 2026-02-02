@@ -1,0 +1,184 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class UpgradeButtonUI : MonoBehaviour
+{
+    [Header("Data")]
+    [SerializeField] private UpgradeData _upgradeData;
+
+    [Header("References")]
+    [SerializeField] private UpgradeManager _upgradeManager;
+    [SerializeField] private Button _button;
+    [SerializeField] private Image _iconImage;
+    [SerializeField] private TextMeshProUGUI _nameText;
+    [SerializeField] private TextMeshProUGUI _costText;
+    [SerializeField] private TextMeshProUGUI _levelText;
+    [SerializeField] private TextMeshProUGUI _effectText;
+
+    private CurrencyManager _currencyManager;
+    private AudioManager _audioManager;
+    private UpgradeButtonAnimator _animator;
+    private bool _isSubscribed;
+    private bool _wasAffordable;
+
+    public void Init(UpgradeData data, UpgradeManager manager)
+    {
+        _upgradeData = data;
+        _upgradeManager = manager;
+
+        if (_currencyManager != null)
+        {
+            UpdateDisplay();
+        }
+    }
+
+    private void Start()
+    {
+        ServiceLocator.TryGet(out _currencyManager);
+        ServiceLocator.TryGet(out _audioManager);
+        _animator = GetComponent<UpgradeButtonAnimator>();
+
+        if (_upgradeManager == null)
+        {
+            ServiceLocator.TryGet(out _upgradeManager);
+        }
+
+        _button.onClick.AddListener(OnClick);
+        Subscribe();
+        UpdateDisplay();
+    }
+
+    private void OnEnable()
+    {
+        Subscribe();
+        ResetAnimationState();
+    }
+
+    private void ResetAnimationState()
+    {
+        _wasAffordable = false;
+        _animator?.StopPulseAnimation();
+    }
+
+    private void OnDisable()
+    {
+        Unsubscribe();
+    }
+
+    private void OnDestroy()
+    {
+        _button.onClick.RemoveListener(OnClick);
+    }
+
+    private void Subscribe()
+    {
+        if (_isSubscribed || _currencyManager == null) return;
+
+        _currencyManager.OnCurrencyChanged += OnCurrencyChanged;
+        _isSubscribed = true;
+    }
+
+    private void Unsubscribe()
+    {
+        if (!_isSubscribed || _currencyManager == null) return;
+
+        _currencyManager.OnCurrencyChanged -= OnCurrencyChanged;
+        _isSubscribed = false;
+    }
+
+    private void OnClick()
+    {
+        if (_upgradeManager.TryPurchase(_upgradeData))
+        {
+            _audioManager?.PlaySFX(SFXType.UpgradeBuy);
+            _animator?.PlayPurchaseAnimation();
+            UpdateDisplay();
+        }
+        else
+        {
+            _animator?.PlayDeniedAnimation();
+        }
+    }
+
+    private void OnCurrencyChanged(CurrencyType type, CurrencyValue _)
+    {
+        if (type != CurrencyType.Wood) return;
+        UpdateButtonState();
+    }
+
+    private void UpdateDisplay()
+    {
+        int level = _upgradeManager.GetLevel(_upgradeData);
+        bool isMaxLevel = _upgradeData.IsMaxLevel(level);
+
+        if (_iconImage != null && _upgradeData.Icon != null)
+        {
+            _iconImage.sprite = _upgradeData.Icon;
+        }
+
+        if (_nameText != null)
+        {
+            _nameText.text = _upgradeData.UpgradeName;
+        }
+
+        if (_costText != null)
+        {
+            _costText.text = isMaxLevel ? "MAX" : _upgradeData.GetCost(level).ToFormattedString();
+        }
+
+        if (_levelText != null)
+        {
+            _levelText.text = isMaxLevel ? "MAX" : $"Lv.{level}";
+        }
+
+        if (_effectText != null)
+        {
+            _effectText.text = GetEffectText();
+        }
+
+        UpdateButtonState();
+    }
+
+    private void UpdateButtonState()
+    {
+        if (_upgradeManager == null || _currencyManager == null) return;
+
+        int level = _upgradeManager.GetLevel(_upgradeData);
+
+        if (_upgradeData.IsMaxLevel(level))
+        {
+            _button.interactable = false;
+            _animator?.StopPulseAnimation();
+            return;
+        }
+
+        CurrencyValue cost = _upgradeData.GetCost(level);
+        bool canAfford = _currencyManager.CanAfford(CurrencyType.Wood, cost);
+
+        if (_animator != null)
+        {
+            if (canAfford && !_wasAffordable)
+            {
+                _animator.StartPulseAnimation();
+            }
+            else if (!canAfford && _wasAffordable)
+            {
+                _animator.StopPulseAnimation();
+            }
+        }
+
+        _wasAffordable = canAfford;
+    }
+
+    private string GetEffectText()
+    {
+        return _upgradeData.Type switch
+        {
+            UpgradeType.WoodPerClick => $"+{_upgradeData.EffectAmount}/클릭",
+            UpgradeType.SpawnLumberjack => "벌목꾼 +1",
+            _ => ""
+        };
+    }
+
+}

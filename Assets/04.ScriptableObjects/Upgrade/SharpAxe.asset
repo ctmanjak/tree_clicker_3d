@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 280eea38c14804b5aaa2bbcff3a393d3, type: 3}
+  m_Name: SharpAxe
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
+  _upgradeName: "\uB0A0\uCE74\uB85C\uC6B4 \uB3C4\uB07C"
+  _description: "\uB3C4\uB07C\uB97C \uAC08\uC544 \uB354 \uB9CE\uC740 \uBAA9\uC7AC\uB97C
+    \uD68D\uB4DD\uD569\uB2C8\uB2E4."
+  _icon: {fileID: 0}
+  _type: 0
+  _baseCost:
+    _value: 1
+  _costMultiplier: 1.01
+  _effectAmount:
+    _value: 1
+  _maxLevel: 0

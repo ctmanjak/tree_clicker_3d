@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18820ba5ad80245dfa133fe67c1db26f, type: 3}
+  m_Name: SFXConfig
+  m_EditorClassIdentifier: Assembly-CSharp::SFXConfig
+  _entries:
+  - Type: 0
+    Clips:
+    - {fileID: 8300000, guid: 6d29c9ef9cd2845008fbbb1f635d61ad, type: 3}
+    - {fileID: 8300000, guid: c685bab427e124c78b28a107253a58f5, type: 3}
+    - {fileID: 8300000, guid: f71a5f9b58aeb4332aff06fcc95e312e, type: 3}
+    - {fileID: 8300000, guid: 1908f68acd09540cfbf8ce3ae91739fe, type: 3}
+    - {fileID: 8300000, guid: 507d4d3edde6a4f55bf3e6a110ebeeaa, type: 3}
+    - {fileID: 8300000, guid: 595a5d0a4d75149928a0d80e6cbc4ef6, type: 3}
+    - {fileID: 8300000, guid: c1fe0708fde304ede8e3ea6d915453dd, type: 3}
+    - {fileID: 8300000, guid: fbfc9534c3a5c4a34953c9fe818623cf, type: 3}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+  - Type: 1
+    Clips:
+    - {fileID: 8300000, guid: b548819017092417e8d958d93f7d14ab, type: 3}
+    Volume: 0.25
+    PitchMin: 1
+    PitchMax: 1

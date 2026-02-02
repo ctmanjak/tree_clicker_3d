@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>{{{ PRODUCT_NAME }}}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #1a1a1a;
+      overflow: hidden;
+    }
+
+    #unity-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #unity-canvas {
+      width: 450px;
+      height: 800px;
+      background: #000;
+      cursor: default;
+    }
+
+    #unity-canvas.fullscreen {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    #unity-controls {
+      margin-top: 10px;
+    }
+
+    #fullscreen-button {
+      padding: 10px 20px;
+      font-size: 14px;
+      background: #4a4a4a;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #fullscreen-button:hover {
+      background: #5a5a5a;
+    }
+
+    #fullscreen-button:active {
+      background: #3a3a3a;
+    }
+
+    .fullscreen #unity-controls {
+      display: none;
+    }
+
+    #unity-loading-bar {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      text-align: center;
+    }
+
+    #unity-progress-bar-empty {
+      width: 100%;
+      height: 18px;
+      background: #333;
+      border-radius: 9px;
+      overflow: hidden;
+    }
+
+    #unity-progress-bar-full {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #4CAF50, #8BC34A);
+      transition: width 0.1s;
+    }
+
+    #unity-loading-text {
+      color: #888;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    #unity-warning {
+      position: absolute;
+      left: 50%;
+      top: 5%;
+      transform: translateX(-50%);
+      background: rgba(200, 0, 0, 0.9);
+      padding: 10px 20px;
+      border-radius: 5px;
+      display: none;
+    }
+
+    #unity-warning span {
+      color: #fff;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="unity-container">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <div id="unity-controls">
+      <button id="fullscreen-button">전체화면</button>
+    </div>
+    <div id="unity-loading-bar">
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
+      </div>
+      <div id="unity-loading-text">로딩 중...</div>
+    </div>
+    <div id="unity-warning">
+      <span id="unity-warning-message"></span>
+    </div>
+  </div>
+
+  <script>
+    const buildUrl = "Build";
+    const loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+    const config = {
+      dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+      frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_THREADS
+      workerUrl: buildUrl + "/{{{ WORKER_FILENAME }}}",
+#endif
+#if USE_WASM
+      codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#endif
+#if MEMORY_FILENAME
+      memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+      symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "{{{ COMPANY_NAME }}}",
+      productName: "{{{ PRODUCT_NAME }}}",
+      productVersion: "{{{ PRODUCT_VERSION }}}",
+    };
+
+    const container = document.querySelector("#unity-container");
+    const canvas = document.querySelector("#unity-canvas");
+    const loadingBar = document.querySelector("#unity-loading-bar");
+    const progressBarFull = document.querySelector("#unity-progress-bar-full");
+    const loadingText = document.querySelector("#unity-loading-text");
+    const fullscreenButton = document.querySelector("#fullscreen-button");
+    const warningBanner = document.querySelector("#unity-warning");
+    
+    const BASE_WIDTH = 450;
+    const BASE_HEIGHT = 800;
+    const FULL_WIDTH = 1080;
+    const FULL_HEIGHT = 1920;
+    const ASPECT_RATIO = 9 / 16;
+
+    function unityShowBanner(msg, type) {
+      warningBanner.style.display = "block";
+      document.querySelector("#unity-warning-message").textContent = msg;
+      setTimeout(() => {
+        warningBanner.style.display = "none";
+      }, 5000);
+    }
+
+    function updateCanvasSize() {
+      const isFullscreen = document.fullscreenElement != null;
+
+      if (isFullscreen) {
+        container.classList.add("fullscreen");
+
+        // 전체화면: 고해상도로 렌더링
+        canvas.width = FULL_WIDTH;
+        canvas.height = FULL_HEIGHT;
+
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const screenAspect = screenWidth / screenHeight;
+
+        let displayWidth, displayHeight;
+
+        if (screenAspect > ASPECT_RATIO) {
+          displayHeight = screenHeight;
+          displayWidth = screenHeight * ASPECT_RATIO;
+        } else {
+          displayWidth = screenWidth;
+          displayHeight = screenWidth / ASPECT_RATIO;
+        }
+
+        canvas.style.width = displayWidth + "px";
+        canvas.style.height = displayHeight + "px";
+      } else {
+        container.classList.remove("fullscreen");
+
+        // 기본: 저해상도로 렌더링
+        canvas.width = BASE_WIDTH;
+        canvas.height = BASE_HEIGHT;
+
+        canvas.style.width = BASE_WIDTH + "px";
+        canvas.style.height = BASE_HEIGHT + "px";
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        container.requestFullscreen().catch(err => {
+          unityShowBanner("전체화면 전환 실패: " + err.message, "error");
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    fullscreenButton.addEventListener("click", toggleFullscreen);
+    document.addEventListener("fullscreenchange", updateCanvasSize);
+    window.addEventListener("resize", updateCanvasSize);
+    
+    canvas.addEventListener("click", () => canvas.focus());
+
+    const script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = () => {
+      createUnityInstance(canvas, config, (progress) => {
+        progressBarFull.style.width = 100 * progress + "%";
+        loadingText.textContent = "로딩 중... " + Math.round(100 * progress) + "%";
+      }).then((unityInstance) => {
+        loadingBar.style.display = "none";
+      }).catch((message) => {
+        alert(message);
+      });
+    };
+
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
