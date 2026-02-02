@@ -39,6 +39,11 @@ public class LumberjackSpawner : MonoBehaviour
         if (obj.TryGetComponent(out LumberjackController controller))
         {
             _activeLumberjacks.Add(controller);
+
+            if (ServiceLocator.TryGet(out UpgradeManager upgradeManager))
+            {
+                controller.SetStats(upgradeManager.GetLumberjackProduction(), 1f);
+            }
         }
 
         if (obj.TryGetComponent(out SpawnEffect spawnEffect))
@@ -74,5 +79,13 @@ public class LumberjackSpawner : MonoBehaviour
             }
         }
         _activeLumberjacks.Clear();
+    }
+
+    public void UpdateAllLumberjackStats(CurrencyValue woodPerSecond)
+    {
+        foreach (var lumberjack in _activeLumberjacks)
+        {
+            lumberjack.SetStats(woodPerSecond, 1f);
+        }
     }
 }

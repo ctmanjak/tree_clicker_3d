@@ -177,6 +177,7 @@ public class UpgradeButtonUI : MonoBehaviour
         {
             UpgradeType.WoodPerClick => $"+{_upgradeData.EffectAmount}/클릭",
             UpgradeType.SpawnLumberjack => "벌목꾼 +1",
+            UpgradeType.LumberjackProduction => $"+{_upgradeData.EffectAmount}/벌목꾼",
             _ => ""
         };
     }

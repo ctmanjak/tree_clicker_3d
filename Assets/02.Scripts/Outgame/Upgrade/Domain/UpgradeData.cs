@@ -3,7 +3,8 @@ using UnityEngine;
 public enum UpgradeType
 {
     WoodPerClick,
-    SpawnLumberjack
+    SpawnLumberjack,
+    LumberjackProduction
 }
 
 [CreateAssetMenu(fileName = "Upgrade", menuName = "Lumberman/Upgrade")]
@@ -46,6 +47,6 @@ public class UpgradeData : ScriptableObject
 
     public CurrencyValue GetCost(int currentLevel)
     {
-        return _baseCost * CurrencyValue.Pow(_costMultiplier, currentLevel);
+        return (_baseCost * CurrencyValue.Pow(_costMultiplier, currentLevel)).Floor();
     }
 }

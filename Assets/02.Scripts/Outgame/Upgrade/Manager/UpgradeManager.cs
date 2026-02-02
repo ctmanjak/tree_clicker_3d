@@ -15,6 +15,7 @@ public class UpgradeManager : MonoBehaviour
     private LumberjackSpawner _lumberjackSpawner;
 
     private CurrencyValue _cachedWoodPerClick = CurrencyValue.One;
+    private CurrencyValue _cachedLumberjackProduction = CurrencyValue.One;
 
     public IReadOnlyList<UpgradeData> Upgrades => _upgrades;
 
@@ -29,6 +30,7 @@ public class UpgradeManager : MonoBehaviour
     private void Start()
     {
         RecalculateWoodPerClick();
+        RecalculateLumberjackProduction();
     }
 
     private void OnDestroy()
@@ -67,6 +69,10 @@ public class UpgradeManager : MonoBehaviour
             case UpgradeType.SpawnLumberjack:
                 _lumberjackSpawner?.SpawnLumberjack();
                 break;
+            case UpgradeType.LumberjackProduction:
+                RecalculateLumberjackProduction();
+                _lumberjackSpawner?.UpdateAllLumberjackStats(_cachedLumberjackProduction);
+                break;
         }
     }
 
@@ -81,6 +87,7 @@ public class UpgradeManager : MonoBehaviour
     }
 
     public CurrencyValue GetWoodPerClick() => _cachedWoodPerClick;
+    public CurrencyValue GetLumberjackProduction() => _cachedLumberjackProduction;
 
     private void RecalculateWoodPerClick()
     {
@@ -93,5 +100,18 @@ public class UpgradeManager : MonoBehaviour
         }
 
         _cachedWoodPerClick = total;
+    }
+
+    private void RecalculateLumberjackProduction()
+    {
+        CurrencyValue total = CurrencyValue.One;
+
+        foreach (var upgrade in GetUpgradesByType(UpgradeType.LumberjackProduction))
+        {
+            int level = GetLevel(upgrade);
+            total += upgrade.EffectAmount * level;
+        }
+
+        _cachedLumberjackProduction = total;
     }
 }
