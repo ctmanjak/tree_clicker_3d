@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 280eea38c14804b5aaa2bbcff3a393d3, type: 3}
-  m_Name: LumberEfficiency
+  m_Name: LumberjackEfficiency
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  _upgradeName: "\uBC8C\uBAA9 \uD6A8\uC728"
+  _upgradeName: "\uBC8C\uBAA9\uAFBC \uD6A8\uC728"
   _description: "\uBC8C\uBAA9\uAFBC\uC758 \uB098\uBB34 \uC218\uD655\uB7C9\uC774 \uC99D\uAC00\uD569\uB2C8\uB2E4"
   _icon: {fileID: 0}
   _type: 2

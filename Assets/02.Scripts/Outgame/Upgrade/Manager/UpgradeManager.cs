@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+[DefaultExecutionOrder(-50)]
 public class UpgradeManager : MonoBehaviour
 {
-    public event Action<string, int> OnUpgradePurchased;
+    public event Action<Upgrade> OnUpgradePurchased;
     public event Action<CurrencyType, CurrencyValue> OnPerClickChanged;
 
-    [SerializeField] private List<UpgradeData> _upgrades = new();
+    [SerializeField] private List<UpgradeSpecData> _upgradeSpecs = new();
 
+    private readonly Dictionary<string, Upgrade> _upgrades = new();
     private IUpgradeRepository _repository;
     private CurrencyManager _currencyManager;
     private LumberjackSpawner _lumberjackSpawner;
 
     private CurrencyValue _cachedWoodPerClick = CurrencyValue.One;
     private CurrencyValue _cachedLumberjackProduction = CurrencyValue.One;
-
-    public IReadOnlyList<UpgradeData> Upgrades => _upgrades;
 
     private void Awake()
     {
@@ -30,18 +30,26 @@ public class UpgradeManager : MonoBehaviour
         ServiceLocator.TryGet(out _currencyManager);
         ServiceLocator.TryGet(out _lumberjackSpawner);
 
+        InitializeUpgrades();
         RecalculateWoodPerClick();
         RecalculateLumberjackProduction();
         SpawnSavedLumberjacks();
     }
 
+    private void InitializeUpgrades()
+    {
+        foreach (var spec in _upgradeSpecs)
+        {
+            int level = _repository.GetLevel(spec.UpgradeName);
+            var upgrade = new Upgrade(spec, level);
+            _upgrades[spec.UpgradeName] = upgrade;
+        }
+    }
+
     private void SpawnSavedLumberjacks()
     {
-        int totalLevel = 0;
-        foreach (var upgrade in GetUpgradesByType(UpgradeType.SpawnLumberjack))
-        {
-            totalLevel += GetLevel(upgrade);
-        }
+        int totalLevel = GetUpgradesByType(UpgradeType.SpawnLumberjack)
+            .Sum(u => u.Level);
 
         for (int i = 0; i < totalLevel; i++)
         {
@@ -54,27 +62,46 @@ public class UpgradeManager : MonoBehaviour
         ServiceLocator.Unregister(this);
     }
 
-    public bool TryPurchase(UpgradeData upgrade)
+    public Upgrade GetUpgrade(string upgradeName)
     {
-        int currentLevel = _repository.GetLevel(upgrade.UpgradeName);
+        return _upgrades.TryGetValue(upgradeName, out var upgrade) ? upgrade : null;
+    }
 
-        if (upgrade.IsMaxLevel(currentLevel))
+    public IEnumerable<Upgrade> GetUpgradesByType(UpgradeType type)
+    {
+        return _upgrades.Values.Where(u => u.Type == type);
+    }
+
+    public IEnumerable<Upgrade> GetAllUpgrades()
+    {
+        return _upgrades.Values;
+    }
+
+    public bool CanPurchase(Upgrade upgrade)
+    {
+        if (upgrade == null) return false;
+        if (upgrade.IsMaxLevel) return false;
+
+        return _currencyManager.CanAfford(CurrencyType.Wood, upgrade.CurrentCost);
+    }
+
+    public bool TryPurchase(Upgrade upgrade)
+    {
+        if (!CanPurchase(upgrade))
             return false;
 
-        CurrencyValue cost = upgrade.GetCost(currentLevel);
-
-        if (!_currencyManager.Spend(CurrencyType.Wood, cost))
+        if (!_currencyManager.Spend(CurrencyType.Wood, upgrade.CurrentCost))
             return false;
 
-        int newLevel = currentLevel + 1;
-        _repository.SetLevel(upgrade.UpgradeName, newLevel);
+        upgrade.IncrementLevel();
+        _repository.SetLevel(upgrade.Name, upgrade.Level);
 
         ApplyEffect(upgrade);
-        OnUpgradePurchased?.Invoke(upgrade.UpgradeName, newLevel);
+        OnUpgradePurchased?.Invoke(upgrade);
         return true;
     }
 
-    private void ApplyEffect(UpgradeData upgrade)
+    private void ApplyEffect(Upgrade upgrade)
     {
         switch (upgrade.Type)
         {
@@ -90,16 +117,6 @@ public class UpgradeManager : MonoBehaviour
                 _lumberjackSpawner?.UpdateAllLumberjackStats(_cachedLumberjackProduction);
                 break;
         }
-    }
-
-    public int GetLevel(UpgradeData upgrade)
-    {
-        return _repository.GetLevel(upgrade.UpgradeName);
-    }
-
-    public IEnumerable<UpgradeData> GetUpgradesByType(UpgradeType type)
-    {
-        return _upgrades.Where(u => u.Type == type);
     }
 
     public CurrencyValue GetWoodPerClick() => _cachedWoodPerClick;
@@ -121,8 +138,7 @@ public class UpgradeManager : MonoBehaviour
 
         foreach (var upgrade in GetUpgradesByType(type))
         {
-            int level = GetLevel(upgrade);
-            total += upgrade.EffectAmount * level;
+            total += upgrade.EffectAmount * upgrade.Level;
         }
 
         return total;

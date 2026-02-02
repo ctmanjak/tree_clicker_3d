@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[DefaultExecutionOrder(-50)]
 public class CurrencyManager : MonoBehaviour
 {
     public event Action<CurrencyType, CurrencyValue> OnCurrencyChanged;

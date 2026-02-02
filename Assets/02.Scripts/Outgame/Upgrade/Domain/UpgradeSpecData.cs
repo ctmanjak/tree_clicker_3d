@@ -9,7 +9,7 @@ public enum UpgradeType
 }
 
 [CreateAssetMenu(fileName = "Upgrade", menuName = "Lumberman/Upgrade")]
-public class UpgradeData : ScriptableObject
+public class UpgradeSpecData : ScriptableObject
 {
     private const int UnlimitedLevel = 0;
 
