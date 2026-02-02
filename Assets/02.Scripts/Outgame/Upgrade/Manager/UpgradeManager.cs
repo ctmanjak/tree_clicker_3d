@@ -91,27 +91,24 @@ public class UpgradeManager : MonoBehaviour
 
     private void RecalculateWoodPerClick()
     {
-        CurrencyValue total = CurrencyValue.One;
-
-        foreach (var upgrade in GetUpgradesByType(UpgradeType.WoodPerClick))
-        {
-            int level = GetLevel(upgrade);
-            total += upgrade.EffectAmount * level;
-        }
-
-        _cachedWoodPerClick = total;
+        _cachedWoodPerClick = CalculateTotalEffect(UpgradeType.WoodPerClick);
     }
 
     private void RecalculateLumberjackProduction()
     {
+        _cachedLumberjackProduction = CalculateTotalEffect(UpgradeType.LumberjackProduction);
+    }
+
+    private CurrencyValue CalculateTotalEffect(UpgradeType type)
+    {
         CurrencyValue total = CurrencyValue.One;
 
-        foreach (var upgrade in GetUpgradesByType(UpgradeType.LumberjackProduction))
+        foreach (var upgrade in GetUpgradesByType(type))
         {
             int level = GetLevel(upgrade);
             total += upgrade.EffectAmount * level;
         }
 
-        _cachedLumberjackProduction = total;
+        return total;
     }
 }

@@ -10,12 +10,14 @@ public class LumberjackSpawner : MonoBehaviour
     [SerializeField] private int _maxLumberjacks = 20;
 
     private HashSet<LumberjackController> _activeLumberjacks = new();
+    private UpgradeManager _upgradeManager;
 
     public int ActiveCount => _activeLumberjacks.Count;
 
     private void Awake()
     {
         ServiceLocator.Register(this);
+        ServiceLocator.TryGet(out _upgradeManager);
     }
 
     private void OnDestroy()
@@ -40,9 +42,9 @@ public class LumberjackSpawner : MonoBehaviour
         {
             _activeLumberjacks.Add(controller);
 
-            if (ServiceLocator.TryGet(out UpgradeManager upgradeManager))
+            if (_upgradeManager != null)
             {
-                controller.SetStats(upgradeManager.GetLumberjackProduction(), 1f);
+                controller.SetStats(_upgradeManager.GetLumberjackProduction(), 1f);
             }
         }
 
