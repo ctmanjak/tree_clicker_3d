@@ -13,7 +13,20 @@ public class CurrencyManager : MonoBehaviour
     private void Awake()
     {
         ServiceLocator.Register(this);
+    }
+
+    private void Start()
+    {
         ServiceLocator.TryGet(out _repository);
+        BroadcastInitialValues();
+    }
+
+    private void BroadcastInitialValues()
+    {
+        foreach (CurrencyType type in Enum.GetValues(typeof(CurrencyType)))
+        {
+            OnCurrencyChanged?.Invoke(type, GetAmount(type));
+        }
     }
 
     private void OnDestroy()

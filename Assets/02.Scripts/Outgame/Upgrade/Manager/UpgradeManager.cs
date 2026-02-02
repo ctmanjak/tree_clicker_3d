@@ -22,15 +22,31 @@ public class UpgradeManager : MonoBehaviour
     private void Awake()
     {
         ServiceLocator.Register(this);
-        ServiceLocator.TryGet(out _repository);
-        ServiceLocator.TryGet(out _currencyManager);
-        ServiceLocator.TryGet(out _lumberjackSpawner);
     }
 
     private void Start()
     {
+        ServiceLocator.TryGet(out _repository);
+        ServiceLocator.TryGet(out _currencyManager);
+        ServiceLocator.TryGet(out _lumberjackSpawner);
+
         RecalculateWoodPerClick();
         RecalculateLumberjackProduction();
+        SpawnSavedLumberjacks();
+    }
+
+    private void SpawnSavedLumberjacks()
+    {
+        int totalLevel = 0;
+        foreach (var upgrade in GetUpgradesByType(UpgradeType.SpawnLumberjack))
+        {
+            totalLevel += GetLevel(upgrade);
+        }
+
+        for (int i = 0; i < totalLevel; i++)
+        {
+            _lumberjackSpawner?.SpawnLumberjack(_cachedLumberjackProduction);
+        }
     }
 
     private void OnDestroy()
@@ -67,7 +83,7 @@ public class UpgradeManager : MonoBehaviour
                 OnPerClickChanged?.Invoke(CurrencyType.Wood, _cachedWoodPerClick);
                 break;
             case UpgradeType.SpawnLumberjack:
-                _lumberjackSpawner?.SpawnLumberjack();
+                _lumberjackSpawner?.SpawnLumberjack(_cachedLumberjackProduction);
                 break;
             case UpgradeType.LumberjackProduction:
                 RecalculateLumberjackProduction();

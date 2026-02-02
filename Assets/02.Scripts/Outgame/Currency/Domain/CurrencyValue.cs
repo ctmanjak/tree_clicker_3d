@@ -61,6 +61,8 @@ public struct CurrencyValue : IEquatable<CurrencyValue>, IComparable<CurrencyVal
 
     public CurrencyValue Pow(double exponent) => new(Math.Pow(Value, exponent));
     public static CurrencyValue Pow(CurrencyValue baseValue, double exponent) => baseValue.Pow(exponent);
+    public static CurrencyValue Max(CurrencyValue a, CurrencyValue b) => a.Value >= b.Value ? a : b;
+    public static CurrencyValue Min(CurrencyValue a, CurrencyValue b) => a.Value <= b.Value ? a : b;
 
     // 포맷팅 (UI용)
     public string ToFormattedString()

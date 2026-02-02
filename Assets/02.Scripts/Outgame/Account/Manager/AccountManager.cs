@@ -19,7 +19,10 @@ public class AccountManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+    }
 
+    private void Start()
+    {
         ServiceLocator.TryGet(out _repository);
     }
 
