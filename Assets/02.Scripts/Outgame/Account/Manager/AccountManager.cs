@@ -27,11 +27,12 @@ public class AccountManager : MonoBehaviour
     public AuthResult TryLogin(string email, string password)
     {
         // 1.유효성 검사
+        Account account;
         try
         {
-            Account account = new Account(email, password);
+            account = new Account(email, password);
         }
-        catch(Exception ex)
+        catch(ArgumentException ex)
         {
             return new AuthResult
             {
@@ -44,7 +45,7 @@ public class AccountManager : MonoBehaviour
         AuthResult result = _repository.Login(email, password);
         if (result.Success)
         {
-            _currentAccount = result.Account;
+            _currentAccount = account;
             return new AuthResult
             {
                 Success = true,
@@ -68,7 +69,7 @@ public class AccountManager : MonoBehaviour
         {
             Account account = new Account(email, password);
         }
-        catch(Exception ex)
+        catch(ArgumentException ex)
         {
             return new AuthResult
             {

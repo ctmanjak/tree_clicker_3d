@@ -51,66 +51,40 @@ public class LoginPanel : MonoBehaviour
 
     private void Login()
     {
-        string id = _idInputField.text;
-        if (string.IsNullOrEmpty(id))
-        {
-            _messageText.text = "Enter your ID!";
-            return;
-        }
-            
+        string email = _idInputField.text;
         string password = _passwordInputField.text;
-        if (string.IsNullOrEmpty(password))
+
+        AuthResult result = AccountManager.Instance.TryLogin(email, password);
+
+        if (!result.Success)
         {
-            _messageText.text = "Enter your Password!";
+            _messageText.text = result.ErrorMessage;
             return;
         }
 
-        if (!PlayerPrefs.HasKey(id))
-        {
-            _messageText.text = "ID Not Found!";
-            return;
-        }
-
-        string myPassword = PlayerPrefs.GetString(id);
-
-        if (myPassword != password)
-        {
-            _messageText.text = "Invalid Password!";
-        }
-            
         SceneManager.LoadScene("GameScene");
     }
 
     private void Register()
     {
-        string id = _idInputField.text;
-        if (string.IsNullOrEmpty(id))
-        {
-            _messageText.text = "Enter your ID";
-            return;
-        }
-            
+        string email = _idInputField.text;
         string password = _passwordInputField.text;
-        if (string.IsNullOrEmpty(password))
+        string repeatPassword = _repeatPasswordInputField.text;
+
+        if (password != repeatPassword)
         {
-            _messageText.text = "Enter your Password";
-            return;
-        }
-            
-        string password2 = _passwordInputField.text;
-        if (string.IsNullOrEmpty(password2) || password != password2)
-        {
-            _messageText.text = "Invalid Password";
-            return;
-        }
-            
-        if (PlayerPrefs.HasKey(id))
-        {
-            _messageText.text = "Duplicated ID";
+            _messageText.text = "Passwords do not match";
             return;
         }
 
-        PlayerPrefs.SetString(id, password);
+        AuthResult result = AccountManager.Instance.TryRegister(email, password);
+
+        if (!result.Success)
+        {
+            _messageText.text = result.ErrorMessage;
+            return;
+        }
+
         _messageText.text = "Registered";
         GotoLogin();
     }

@@ -36,4 +36,17 @@ public static class Crypto
         string inputHash = HashPassword(plainText, salt);
         return inputHash == hashedPassword;
     }
+
+    /// <summary>
+    /// 암호학적으로 안전한 무작위 솔트 생성
+    /// </summary>
+    public static string GenerateSalt(int length = 16)
+    {
+        byte[] saltBytes = new byte[length];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(saltBytes);
+        }
+        return Convert.ToBase64String(saltBytes);
+    }
 }

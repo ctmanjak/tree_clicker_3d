@@ -9,7 +9,7 @@ public class LocalUpgradeRepository : IUpgradeRepository
 
     private string SavePath => Path.Combine(Application.persistentDataPath, "upgrade_save.json");
 
-    public LocalUpgradeRepository()
+    public void Initialize()
     {
         LoadFromFile();
     }
@@ -30,8 +30,7 @@ public class LocalUpgradeRepository : IUpgradeRepository
         var saveData = new UpgradeSaveData();
         foreach (var kvp in _levels)
         {
-            saveData.Ids.Add(kvp.Key);
-            saveData.Levels.Add(kvp.Value);
+            saveData.Entries.Add(new UpgradeEntry { Id = kvp.Key, Level = kvp.Value });
         }
 
         string json = JsonUtility.ToJson(saveData, true);
@@ -47,11 +46,11 @@ public class LocalUpgradeRepository : IUpgradeRepository
             string json = File.ReadAllText(SavePath);
             var saveData = JsonUtility.FromJson<UpgradeSaveData>(json);
 
-            if (saveData?.Ids == null) return;
+            if (saveData?.Entries == null) return;
 
-            for (int i = 0; i < saveData.Ids.Count; i++)
+            foreach (var entry in saveData.Entries)
             {
-                _levels[saveData.Ids[i]] = saveData.Levels[i];
+                _levels[entry.Id] = entry.Level;
             }
         }
         catch (Exception e)
@@ -61,9 +60,15 @@ public class LocalUpgradeRepository : IUpgradeRepository
     }
 
     [Serializable]
+    private class UpgradeEntry
+    {
+        public string Id;
+        public int Level;
+    }
+
+    [Serializable]
     private class UpgradeSaveData
     {
-        public List<string> Ids = new();
-        public List<int> Levels = new();
+        public List<UpgradeEntry> Entries = new();
     }
 }

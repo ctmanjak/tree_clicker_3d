@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class LocalAccountRepository : IAccountRepository
 {
-    private const string SALT = "kk23";
-    
+    private const char SEPARATOR = ':';
+
     public bool IsEmailAvailable(string email)
     {
         // 이메일 검사
@@ -28,17 +28,15 @@ public class LocalAccountRepository : IAccountRepository
             };
         }
         
-        string hashedPassword = Crypto.HashPassword(password, SALT);
-        // 해싱문자열: 문자열을 특정 알고리즘을 이용해서 변경된 고정된 길이의 문자열 
-        // 성훈씨 아이디 : tjdgnd1004
-        //      비밀번호: 10041004!
-        
-        PlayerPrefs.SetString(email, hashedPassword);
-        
+        string salt = Crypto.GenerateSalt();
+        string hashedPassword = Crypto.HashPassword(password, salt);
+        string storedValue = $"{salt}{SEPARATOR}{hashedPassword}";
+
+        PlayerPrefs.SetString(email, storedValue);
+
         return new AuthResult()
         {
             Success = true,
-            Account = new Account(email, hashedPassword),
         };
     }
 
@@ -54,9 +52,24 @@ public class LocalAccountRepository : IAccountRepository
             };
         }
         
-        // 3. 비밀번호 틀렸다면 실패.
-        string myPassword = PlayerPrefs.GetString(email);
-        if (Crypto.VerifyPassword(password, myPassword, SALT))
+        // 3. 저장된 값에서 솔트와 해시 분리
+        string storedValue = PlayerPrefs.GetString(email);
+        string[] parts = storedValue.Split(SEPARATOR);
+
+        if (parts.Length != 2)
+        {
+            return new AuthResult
+            {
+                Success = false,
+                ErrorMessage = "계정 데이터가 손상되었습니다.",
+            };
+        }
+
+        string salt = parts[0];
+        string storedHash = parts[1];
+
+        // 4. 비밀번호 검증
+        if (!Crypto.VerifyPassword(password, storedHash, salt))
         {
             return new AuthResult
             {
@@ -68,7 +81,6 @@ public class LocalAccountRepository : IAccountRepository
         return new AuthResult()
         {
             Success = true,
-            Account = new Account(email, myPassword),
         };
     }
 

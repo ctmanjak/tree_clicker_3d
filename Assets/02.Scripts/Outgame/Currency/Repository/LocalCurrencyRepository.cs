@@ -8,7 +8,7 @@ public class LocalCurrencyRepository : ICurrencyRepository
 
     private readonly Dictionary<CurrencyType, Currency> _currencies = new();
 
-    public LocalCurrencyRepository()
+    public void Initialize()
     {
         LoadFromPlayerPrefs();
         InitializeDefaultCurrencies();

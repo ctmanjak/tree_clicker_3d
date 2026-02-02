@@ -5,9 +5,9 @@ public class GameBootstrap : MonoBehaviour
 {
     public static GameBootstrap Instance { get; private set; }
 
-    private LocalAccountRepository _accountRepository;
-    private LocalCurrencyRepository _currencyRepository;
-    private LocalUpgradeRepository _upgradeRepository;
+    private IAccountRepository _accountRepository;
+    private ICurrencyRepository _currencyRepository;
+    private IUpgradeRepository _upgradeRepository;
 
     private void Awake()
     {
@@ -46,9 +46,12 @@ public class GameBootstrap : MonoBehaviour
 
     private void InitializeRepositories()
     {
-        _accountRepository = new LocalAccountRepository();
-        _currencyRepository = new LocalCurrencyRepository();
-        _upgradeRepository = new LocalUpgradeRepository();
+        _accountRepository = RepositoryFactory.CreateAccountRepository();
+        _currencyRepository = RepositoryFactory.CreateCurrencyRepository();
+        _upgradeRepository = RepositoryFactory.CreateUpgradeRepository();
+
+        _currencyRepository.Initialize();
+        _upgradeRepository.Initialize();
 
         ServiceLocator.Register<IAccountRepository>(_accountRepository);
         ServiceLocator.Register<ICurrencyRepository>(_currencyRepository);

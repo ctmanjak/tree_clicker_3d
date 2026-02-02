@@ -22,12 +22,12 @@ public class UpgradeManager : MonoBehaviour
     {
         ServiceLocator.Register(this);
         ServiceLocator.TryGet(out _repository);
+        ServiceLocator.TryGet(out _currencyManager);
+        ServiceLocator.TryGet(out _lumberjackSpawner);
     }
 
     private void Start()
     {
-        ServiceLocator.TryGet(out _currencyManager);
-        ServiceLocator.TryGet(out _lumberjackSpawner);
         RecalculateWoodPerClick();
     }
 

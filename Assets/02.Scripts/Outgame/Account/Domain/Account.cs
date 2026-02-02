@@ -23,6 +23,8 @@ public class Account
         
         if(string.IsNullOrEmpty(password)) throw new ArgumentException($"비밀번호는 비어있을 수 없습니다.");
         if(password.Length < 6 || 15 < password.Length) throw new ArgumentException($"비밀번호는 6~15자 사이어야합니다.");
+        if(!Regex.IsMatch(password, "[A-Z]")) throw new ArgumentException($"비밀번호는 대문자를 1개 이상 포함해야합니다.");
+        if(!Regex.IsMatch(password, "[!@#$%^&*(),.?\":{}|<>]")) throw new ArgumentException($"비밀번호는 특수문자를 1개 이상 포함해야합니다.");
         
         Email = email;
         Password = password;
