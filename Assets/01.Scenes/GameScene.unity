@@ -1821,7 +1821,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1405122846}
   - component: {fileID: 1405122845}
-  - component: {fileID: 1405122844}
   m_Layer: 0
   m_Name: CurrencyManager
   m_TagString: Untagged
@@ -1829,18 +1828,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1405122844
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1405122843}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e5d59f5f89234728a1389fd3cb61b08, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CurrencyRepository
 --- !u!114 &1405122845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2218,7 +2205,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1959507690}
   - component: {fileID: 1959507692}
-  - component: {fileID: 1959507691}
   m_Layer: 0
   m_Name: UpgradeManager
   m_TagString: Untagged
@@ -2241,18 +2227,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1959507691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1959507688}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7570160f628fa4e899321fb3f44c8489, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UpgradeRepository
 --- !u!114 &1959507692
 MonoBehaviour:
   m_ObjectHideFlags: 0
