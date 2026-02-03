@@ -24,22 +24,16 @@ public class FirebaseStoreService : IFirebaseStoreService
 
     public async UniTask SetDocument<T>(string collection, T data) where T : IIdentifiable
     {
-        string uid = _authService.CurrentUserId;
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogWarning("Firestore 저장 실패: 로그인되지 않은 상태");
+        if (!TryGetUserId(out string uid))
             return;
-        }
 
-        var docRef = _firestore.Collection("users").Document(uid)
-            .Collection(collection).Document(data.Id);
+        var docRef = GetDocumentReference(uid, collection, data.Id);
         await docRef.SetAsync(data);
     }
 
     public async UniTask<List<T>> GetCollection<T>(string collection) where T : IIdentifiable
     {
-        string uid = _authService.CurrentUserId;
-        if (string.IsNullOrEmpty(uid))
+        if (!TryGetUserId(out string uid))
             return new List<T>();
 
         var collectionRef = _firestore.Collection("users").Document(uid)
@@ -56,15 +50,10 @@ public class FirebaseStoreService : IFirebaseStoreService
 
     public void SetDocumentAsync<T>(string collection, T data) where T : IIdentifiable
     {
-        string uid = _authService.CurrentUserId;
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogWarning("Firestore 저장 실패: 로그인되지 않은 상태");
+        if (!TryGetUserId(out string uid))
             return;
-        }
 
-        var docRef = _firestore.Collection("users").Document(uid)
-            .Collection(collection).Document(data.Id);
+        var docRef = GetDocumentReference(uid, collection, data.Id);
         docRef.SetAsync(data).ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
@@ -72,5 +61,22 @@ public class FirebaseStoreService : IFirebaseStoreService
                 Debug.LogWarning($"Firestore 백그라운드 저장 실패: {task.Exception?.Message}");
             }
         });
+    }
+
+    private bool TryGetUserId(out string uid)
+    {
+        uid = _authService.CurrentUserId;
+        if (string.IsNullOrEmpty(uid))
+        {
+            Debug.LogWarning("Firestore 저장 실패: 로그인되지 않은 상태");
+            return false;
+        }
+        return true;
+    }
+
+    private DocumentReference GetDocumentReference(string uid, string collection, string documentId)
+    {
+        return _firestore.Collection("users").Document(uid)
+            .Collection(collection).Document(documentId);
     }
 }

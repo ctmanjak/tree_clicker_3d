@@ -2,17 +2,24 @@ using Cysharp.Threading.Tasks;
 
 public class FirebaseRepositoryProvider : IRepositoryProvider
 {
+    private readonly IFirebaseAuthService _authService;
+    private readonly IFirebaseStoreService _storeService;
+
     public IAccountRepository AccountRepository { get; private set; }
     public ICurrencyRepository CurrencyRepository { get; private set; }
     public IUpgradeRepository UpgradeRepository { get; private set; }
 
-    public async UniTask Initialize()
+    public FirebaseRepositoryProvider(IFirebaseAuthService authService, IFirebaseStoreService storeService)
     {
-        var initializer = new FirebaseInitializer();
-        await initializer.Initialize();
+        _authService = authService;
+        _storeService = storeService;
+    }
 
-        AccountRepository = new FirebaseAccountRepository(initializer.AuthService);
-        CurrencyRepository = new FirebaseCurrencyRepository(initializer.StoreService);
-        UpgradeRepository = new FirebaseUpgradeRepository(initializer.StoreService);
+    public UniTask Initialize()
+    {
+        AccountRepository = new FirebaseAccountRepository(_authService);
+        CurrencyRepository = new FirebaseCurrencyRepository(_storeService);
+        UpgradeRepository = new FirebaseUpgradeRepository(_storeService);
+        return UniTask.CompletedTask;
     }
 }

@@ -3,11 +3,14 @@ using UnityEngine;
 
 public class LocalAccountRepository : IAccountRepository
 {
+    private const string KeyPrefix = "account:";
     private const char Separator = ':';
 
     public UniTask<AuthResult> Register(string email, string password)
     {
-        if (PlayerPrefs.HasKey(email))
+        string key = KeyPrefix + email;
+
+        if (PlayerPrefs.HasKey(key))
         {
             return UniTask.FromResult(new AuthResult
             {
@@ -20,7 +23,7 @@ public class LocalAccountRepository : IAccountRepository
         string hashedPassword = Crypto.HashPassword(password, salt);
         string storedValue = $"{salt}{Separator}{hashedPassword}";
 
-        PlayerPrefs.SetString(email, storedValue);
+        PlayerPrefs.SetString(key, storedValue);
 
         return UniTask.FromResult(new AuthResult
         {
@@ -30,7 +33,9 @@ public class LocalAccountRepository : IAccountRepository
 
     public UniTask<AuthResult> Login(string email, string password)
     {
-        if (!PlayerPrefs.HasKey(email))
+        string key = KeyPrefix + email;
+
+        if (!PlayerPrefs.HasKey(key))
         {
             return UniTask.FromResult(new AuthResult
             {
@@ -39,7 +44,7 @@ public class LocalAccountRepository : IAccountRepository
             });
         }
 
-        string storedValue = PlayerPrefs.GetString(email);
+        string storedValue = PlayerPrefs.GetString(key);
         string[] parts = storedValue.Split(Separator);
 
         if (parts.Length != 2)

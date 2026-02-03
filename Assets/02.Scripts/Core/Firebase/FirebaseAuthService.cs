@@ -18,49 +18,22 @@ public class FirebaseAuthService : IFirebaseAuthService
         return UniTask.CompletedTask;
     }
 
-    public async UniTask<FirebaseAuthResult> Register(string email, string password)
+    public UniTask<FirebaseAuthResult> Register(string email, string password)
     {
-        try
-        {
-            var result = await _auth.CreateUserWithEmailAndPasswordAsync(email, password);
-            return new FirebaseAuthResult
-            {
-                Success = true,
-                UserId = result.User.UserId,
-                Email = result.User.Email,
-            };
-        }
-        catch (AggregateException ex)
-        {
-            return new FirebaseAuthResult
-            {
-                Success = false,
-                ErrorMessage = ParseFirebaseError(ex),
-            };
-        }
-        catch (FirebaseException ex)
-        {
-            return new FirebaseAuthResult
-            {
-                Success = false,
-                ErrorMessage = ParseFirebaseError(ex),
-            };
-        }
-        catch (Exception ex)
-        {
-            return new FirebaseAuthResult
-            {
-                Success = false,
-                ErrorMessage = ex.Message,
-            };
-        }
+        return ExecuteAuthAsync(() => _auth.CreateUserWithEmailAndPasswordAsync(email, password));
     }
 
-    public async UniTask<FirebaseAuthResult> Login(string email, string password)
+    public UniTask<FirebaseAuthResult> Login(string email, string password)
+    {
+        return ExecuteAuthAsync(() => _auth.SignInWithEmailAndPasswordAsync(email, password));
+    }
+
+    private async UniTask<FirebaseAuthResult> ExecuteAuthAsync(
+        Func<System.Threading.Tasks.Task<Firebase.Auth.AuthResult>> authOperation)
     {
         try
         {
-            var result = await _auth.SignInWithEmailAndPasswordAsync(email, password);
+            var result = await authOperation();
             return new FirebaseAuthResult
             {
                 Success = true,
