@@ -184,12 +184,6 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private string GetEffectText()
     {
-        return _upgrade.Type switch
-        {
-            UpgradeType.WoodPerClick => $"+{_upgrade.EffectAmount}/클릭",
-            UpgradeType.SpawnLumberjack => "벌목꾼 +1",
-            UpgradeType.LumberjackProduction => $"+{_upgrade.EffectAmount}/벌목꾼",
-            _ => ""
-        };
+        return _upgrade.GetEffectText();
     }
 }

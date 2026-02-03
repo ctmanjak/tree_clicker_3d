@@ -8,6 +8,7 @@ public class Upgrade
     private UpgradeSpecData Spec { get; }
     public int Level { get; private set; }
 
+    private readonly IUpgradeEffectHandler _effectHandler;
     private CurrencyValue _cachedCost;
 
     public string Id => Spec.Id;
@@ -19,7 +20,7 @@ public class Upgrade
     public CurrencyValue CurrentCost => _cachedCost;
     public CurrencyValue EffectAmount => Spec.EffectAmount;
 
-    public Upgrade(UpgradeSpecData spec, int level)
+    public Upgrade(UpgradeSpecData spec, int level, IUpgradeEffectHandler effectHandler = null)
     {
         if (spec == null)
             throw new ArgumentNullException(nameof(spec));
@@ -29,6 +30,7 @@ public class Upgrade
 
         Spec = spec;
         Level = level;
+        _effectHandler = effectHandler;
         _cachedCost = Spec.GetCost(Level);
     }
 
@@ -74,6 +76,10 @@ public class Upgrade
         if (IsMaxLevel) return;
         SetLevel(Level + 1);
     }
+
+    public void ApplyEffect() => _effectHandler?.OnEffectApplied(this);
+
+    public string GetEffectText() => _effectHandler?.GetEffectText(this) ?? "";
 
     private bool IsValidLevel(int level)
     {
