@@ -1,9 +1,3 @@
-using Cysharp.Threading.Tasks;
-
-public interface IUpgradeRepository
+public interface IUpgradeRepository : IRepository<UpgradeSaveData>
 {
-    UniTask Initialize();
-    void Save();
-    int GetLevel(string upgradeId);
-    void SetLevel(string upgradeId, int level);
 }

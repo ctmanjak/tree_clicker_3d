@@ -17,9 +17,6 @@ public class RepositoryFactory
                 AccountRepository = provider.AccountRepository;
                 CurrencyRepository = provider.CurrencyRepository;
                 UpgradeRepository = provider.UpgradeRepository;
-
-                await CurrencyRepository.Initialize();
-                await UpgradeRepository.Initialize();
                 return;
             }
             catch (System.Exception ex)

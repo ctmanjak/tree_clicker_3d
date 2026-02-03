@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Firebase.Firestore;
@@ -23,7 +22,7 @@ public class FirebaseStoreService : IFirebaseStoreService
         return UniTask.CompletedTask;
     }
 
-    public async UniTask SetDocument(string collection, string documentId, Dictionary<string, object> data)
+    public async UniTask SetDocument<T>(string collection, T data) where T : IIdentifiable
     {
         string uid = _authService.CurrentUserId;
         if (string.IsNullOrEmpty(uid))
@@ -33,47 +32,29 @@ public class FirebaseStoreService : IFirebaseStoreService
         }
 
         var docRef = _firestore.Collection("users").Document(uid)
-            .Collection(collection).Document(documentId);
+            .Collection(collection).Document(data.Id);
         await docRef.SetAsync(data);
     }
 
-    public async UniTask<Dictionary<string, object>> GetDocument(string collection, string documentId)
+    public async UniTask<List<T>> GetCollection<T>(string collection) where T : IIdentifiable
     {
         string uid = _authService.CurrentUserId;
         if (string.IsNullOrEmpty(uid))
-            return null;
-
-        var docRef = _firestore.Collection("users").Document(uid)
-            .Collection(collection).Document(documentId);
-        var snapshot = await docRef.GetSnapshotAsync();
-
-        if (!snapshot.Exists)
-            return null;
-
-        return snapshot.ToDictionary();
-    }
-
-    public async UniTask<List<Dictionary<string, object>>> GetCollection(string collection)
-    {
-        string uid = _authService.CurrentUserId;
-        if (string.IsNullOrEmpty(uid))
-            return new List<Dictionary<string, object>>();
+            return new List<T>();
 
         var collectionRef = _firestore.Collection("users").Document(uid)
             .Collection(collection);
         var snapshot = await collectionRef.GetSnapshotAsync();
 
-        var results = new List<Dictionary<string, object>>();
+        var results = new List<T>();
         foreach (var doc in snapshot.Documents)
         {
-            var data = doc.ToDictionary();
-            data["_documentId"] = doc.Id;
-            results.Add(data);
+            results.Add(doc.ConvertTo<T>());
         }
         return results;
     }
 
-    public void SetDocumentAsync(string collection, string documentId, Dictionary<string, object> data)
+    public void SetDocumentAsync<T>(string collection, T data) where T : IIdentifiable
     {
         string uid = _authService.CurrentUserId;
         if (string.IsNullOrEmpty(uid))
@@ -83,7 +64,7 @@ public class FirebaseStoreService : IFirebaseStoreService
         }
 
         var docRef = _firestore.Collection("users").Document(uid)
-            .Collection(collection).Document(documentId);
+            .Collection(collection).Document(data.Id);
         docRef.SetAsync(data).ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)

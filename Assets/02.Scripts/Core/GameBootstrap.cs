@@ -32,16 +32,6 @@ public class GameBootstrap : MonoBehaviour
         }
     }
 
-    private void OnApplicationPause(bool pauseStatus)
-    {
-        if (pauseStatus) SaveAll();
-    }
-
-    private void OnApplicationQuit()
-    {
-        SaveAll();
-    }
-
     private async UniTaskVoid InitializeAsync()
     {
         _repositoryFactory = new RepositoryFactory();
@@ -65,11 +55,5 @@ public class GameBootstrap : MonoBehaviour
         ServiceLocator.Unregister(_repositoryFactory.AccountRepository);
         ServiceLocator.Unregister(_repositoryFactory.CurrencyRepository);
         ServiceLocator.Unregister(_repositoryFactory.UpgradeRepository);
-    }
-
-    private void SaveAll()
-    {
-        _repositoryFactory?.CurrencyRepository?.Save();
-        _repositoryFactory?.UpgradeRepository?.Save();
     }
 }

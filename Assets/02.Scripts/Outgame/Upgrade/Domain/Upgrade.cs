@@ -10,6 +10,7 @@ public class Upgrade
 
     private CurrencyValue _cachedCost;
 
+    public string Id => Spec.Id;
     public string Name => Spec.UpgradeName;
     public string Description => Spec.Description;
     public Sprite Icon => Spec.Icon;
@@ -33,8 +34,8 @@ public class Upgrade
 
     private static void ValidateSpec(UpgradeSpecData spec)
     {
-        if (string.IsNullOrWhiteSpace(spec.UpgradeName))
-            throw new ArgumentException("업그레이드 이름은 비어있을 수 없습니다.", nameof(spec));
+        if (string.IsNullOrWhiteSpace(spec.Id))
+            throw new ArgumentException("업그레이드 ID는 비어있을 수 없습니다.", nameof(spec));
 
         if (spec.BaseCost <= CurrencyValue.Zero)
             throw new ArgumentException("기본 비용은 0보다 커야 합니다.", nameof(spec));

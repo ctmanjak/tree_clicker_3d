@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -37,19 +38,22 @@ public class UpgradeManager : MonoBehaviour
 
         ServiceLocator.TryGet(out _lumberjackSpawner);
 
-        InitializeUpgrades();
+        await InitializeUpgrades();
         RecalculateWoodPerClick();
         RecalculateLumberjackProduction();
         SpawnSavedLumberjacks();
     }
 
-    private void InitializeUpgrades()
+    private async UniTask InitializeUpgrades()
     {
+        var savedData = await _repository.Initialize();
+        var savedLevels = savedData.ToDictionary(s => s.Id, s => s.Level);
+
         foreach (var spec in _upgradeSpecs)
         {
-            int level = _repository.GetLevel(spec.UpgradeName);
+            int level = savedLevels.GetValueOrDefault(spec.Id, 0);
             var upgrade = new Upgrade(spec, level);
-            _upgrades[spec.UpgradeName] = upgrade;
+            _upgrades[spec.Id] = upgrade;
 
             if (!_upgradesByType.TryGetValue(spec.Type, out var list))
             {
@@ -79,9 +83,9 @@ public class UpgradeManager : MonoBehaviour
         ServiceLocator.Unregister(this);
     }
 
-    public Upgrade GetUpgrade(string upgradeName)
+    public Upgrade GetUpgrade(string upgradeId)
     {
-        return _upgrades.TryGetValue(upgradeName, out var upgrade) ? upgrade : null;
+        return _upgrades.GetValueOrDefault(upgradeId);
     }
 
     public IEnumerable<Upgrade> GetUpgradesByType(UpgradeType type)
@@ -111,7 +115,7 @@ public class UpgradeManager : MonoBehaviour
             return false;
 
         upgrade.IncrementLevel();
-        _repository.SetLevel(upgrade.Name, upgrade.Level);
+        _repository.Save(new UpgradeSaveData { Id = upgrade.Id, Level = upgrade.Level });
 
         ApplyEffect(upgrade);
         OnUpgradePurchased?.Invoke(upgrade);

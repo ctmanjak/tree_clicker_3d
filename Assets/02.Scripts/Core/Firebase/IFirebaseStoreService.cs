@@ -5,8 +5,7 @@ public interface IFirebaseStoreService
 {
     bool IsInitialized { get; }
     UniTask Initialize();
-    UniTask SetDocument(string collection, string documentId, Dictionary<string, object> data);
-    UniTask<Dictionary<string, object>> GetDocument(string collection, string documentId);
-    UniTask<List<Dictionary<string, object>>> GetCollection(string collection);
-    void SetDocumentAsync(string collection, string documentId, Dictionary<string, object> data);
+    UniTask SetDocument<T>(string collection, T data) where T : IIdentifiable;
+    UniTask<List<T>> GetCollection<T>(string collection) where T : IIdentifiable;
+    void SetDocumentAsync<T>(string collection, T data) where T : IIdentifiable;
 }

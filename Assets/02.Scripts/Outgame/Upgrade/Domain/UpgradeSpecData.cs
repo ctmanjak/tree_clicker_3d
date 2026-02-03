@@ -14,6 +14,7 @@ public class UpgradeSpecData : ScriptableObject
     private const int UnlimitedLevel = 0;
 
     [Header("기본 정보")]
+    [SerializeField] private string _id;
     [SerializeField] private string _upgradeName;
     [TextArea] [SerializeField] private string _description;
     [SerializeField] private Sprite _icon;
@@ -37,6 +38,7 @@ public class UpgradeSpecData : ScriptableObject
     [Tooltip("0 = 무제한")]
     [SerializeField] private int _maxLevel = UnlimitedLevel;
 
+    public string Id => _id;
     public string UpgradeName => _upgradeName;
     public string Description => _description;
     public Sprite Icon => _icon;

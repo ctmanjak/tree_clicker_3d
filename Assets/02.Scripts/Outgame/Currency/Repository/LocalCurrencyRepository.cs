@@ -7,55 +7,36 @@ public class LocalCurrencyRepository : ICurrencyRepository
 {
     private const string SaveKey = "CurrencyData";
 
-    private readonly Dictionary<CurrencyType, Currency> _currencies = new();
+    private readonly Dictionary<string, CurrencySaveData> _data = new();
 
-    public UniTask Initialize()
+    public UniTask<List<CurrencySaveData>> Initialize()
     {
         LoadFromPlayerPrefs();
-        InitializeDefaultCurrencies();
-        return UniTask.CompletedTask;
+        InitializeDefaults();
+        return UniTask.FromResult(new List<CurrencySaveData>(_data.Values));
     }
 
-    private void InitializeDefaultCurrencies()
+    private void InitializeDefaults()
     {
         foreach (CurrencyType type in Enum.GetValues(typeof(CurrencyType)))
         {
-            if (!_currencies.ContainsKey(type))
-            {
-                _currencies[type] = new Currency(type);
-            }
+            string key = type.ToString();
+            if (!_data.ContainsKey(key))
+                _data[key] = new CurrencySaveData { Id = key, Type = key, Amount = 0 };
         }
     }
 
-    public Currency GetCurrency(CurrencyType type)
+    public void Save(CurrencySaveData item)
     {
-        if (!_currencies.TryGetValue(type, out var currency))
-        {
-            currency = new Currency(type);
-            _currencies[type] = currency;
-        }
-        return currency;
+        _data[item.Id] = item;
+        SaveToPlayerPrefs();
     }
 
-    public void SaveCurrency(Currency currency)
+    private void SaveToPlayerPrefs()
     {
-        _currencies[currency.Type] = currency;
-        Save();
-    }
-
-    public void Save()
-    {
-        var saveData = new CurrencySaveDataCollection();
-        foreach (var kvp in _currencies)
-        {
-            saveData.Items.Add(new CurrencySaveData
-            {
-                Type = kvp.Key.ToString(),
-                Amount = kvp.Value.Amount.ToDouble()
-            });
-        }
-
-        string json = JsonUtility.ToJson(saveData);
+        var collection = new SaveDataCollection();
+        collection.Items.AddRange(_data.Values);
+        string json = JsonUtility.ToJson(collection);
         PlayerPrefs.SetString(SaveKey, json);
         PlayerPrefs.Save();
     }
@@ -65,31 +46,19 @@ public class LocalCurrencyRepository : ICurrencyRepository
         if (!PlayerPrefs.HasKey(SaveKey)) return;
 
         string json = PlayerPrefs.GetString(SaveKey);
-        var saveData = JsonUtility.FromJson<CurrencySaveDataCollection>(json);
+        var saveData = JsonUtility.FromJson<SaveDataCollection>(json);
 
         if (saveData?.Items == null) return;
 
         foreach (var item in saveData.Items)
         {
-            if (Enum.TryParse<CurrencyType>(item.Type, out var type))
-            {
-                var currency = new Currency(type);
-                currency.SetAmount(item.Amount);
-                _currencies[type] = currency;
-            }
+            _data[item.Id] = item;
         }
     }
 
     [Serializable]
-    private class CurrencySaveDataCollection
+    private class SaveDataCollection
     {
         public List<CurrencySaveData> Items = new();
-    }
-
-    [Serializable]
-    private class CurrencySaveData
-    {
-        public string Type;
-        public double Amount;
     }
 }
