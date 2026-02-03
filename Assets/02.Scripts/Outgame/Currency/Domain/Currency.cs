@@ -1,3 +1,5 @@
+using System;
+
 public class Currency
 {
     public CurrencyType Type { get; }
@@ -5,6 +7,9 @@ public class Currency
 
     public Currency(CurrencyType type, CurrencyValue amount = default)
     {
+        if (amount.IsNegative)
+            throw new ArgumentException("재화량은 음수일 수 없습니다.", nameof(amount));
+
         Type = type;
         Amount = amount;
     }
@@ -31,6 +36,9 @@ public class Currency
 
     public void SetAmount(CurrencyValue value)
     {
+        if (value.IsNegative)
+            throw new ArgumentException("재화량은 음수일 수 없습니다.", nameof(value));
+
         Amount = value;
     }
 }

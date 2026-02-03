@@ -10,14 +10,12 @@ public class LumberjackSpawner : MonoBehaviour
     [SerializeField] private int _maxLumberjacks = 20;
 
     private HashSet<LumberjackController> _activeLumberjacks = new();
-    private UpgradeManager _upgradeManager;
 
     public int ActiveCount => _activeLumberjacks.Count;
 
     private void Awake()
     {
         ServiceLocator.Register(this);
-        ServiceLocator.TryGet(out _upgradeManager);
     }
 
     private void OnDestroy()
@@ -27,7 +25,7 @@ public class LumberjackSpawner : MonoBehaviour
 
     public bool CanSpawn => _activeLumberjacks.Count < _maxLumberjacks;
 
-    public LumberjackController SpawnLumberjack()
+    public LumberjackController SpawnLumberjack(CurrencyValue woodPerSecond)
     {
         if (!CanSpawn)
         {
@@ -41,11 +39,7 @@ public class LumberjackSpawner : MonoBehaviour
         if (obj.TryGetComponent(out LumberjackController controller))
         {
             _activeLumberjacks.Add(controller);
-
-            if (_upgradeManager != null)
-            {
-                controller.SetStats(_upgradeManager.GetLumberjackProduction(), 1f);
-            }
+            controller.SetStats(woodPerSecond, 1f);
         }
 
         if (obj.TryGetComponent(out SpawnEffect spawnEffect))
@@ -87,7 +81,10 @@ public class LumberjackSpawner : MonoBehaviour
     {
         foreach (var lumberjack in _activeLumberjacks)
         {
-            lumberjack.SetStats(woodPerSecond, 1f);
+            if (lumberjack != null)
+            {
+                lumberjack.SetStats(woodPerSecond, 1f);
+            }
         }
     }
 }

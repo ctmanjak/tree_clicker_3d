@@ -8,16 +8,15 @@ public class WoodCounterUI : MonoBehaviour
     private CurrencyManager _currencyManager;
     private bool _isSubscribed;
 
-    private void Start()
+    private void OnEnable()
     {
         ServiceLocator.TryGet(out _currencyManager);
         Subscribe();
-        UpdateDisplay(_currencyManager?.GetAmount(CurrencyType.Wood) ?? CurrencyValue.Zero);
-    }
 
-    private void OnEnable()
-    {
-        Subscribe();
+        if (_currencyManager != null)
+        {
+            UpdateDisplay(_currencyManager.GetAmount(CurrencyType.Wood));
+        }
     }
 
     private void OnDisable()
