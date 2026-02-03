@@ -4,6 +4,8 @@ using UnityEngine;
 [Serializable]
 public struct CurrencyValue : IEquatable<CurrencyValue>, IComparable<CurrencyValue>
 {
+    private const double RELATIVE_EPSILON = 1e-9;
+
     [SerializeField] private double _value;
 
     public double Value => _value;
@@ -29,8 +31,21 @@ public struct CurrencyValue : IEquatable<CurrencyValue>, IComparable<CurrencyVal
     public static CurrencyValue operator /(CurrencyValue a, CurrencyValue b) => new(a.Value / b.Value);
 
     // 비교 연산자
-    public static bool operator ==(CurrencyValue a, CurrencyValue b) => Math.Abs(a.Value - b.Value) < double.Epsilon;
+    public static bool operator ==(CurrencyValue a, CurrencyValue b) => ApproximatelyEqual(a.Value, b.Value);
     public static bool operator !=(CurrencyValue a, CurrencyValue b) => !(a == b);
+
+    private static bool ApproximatelyEqual(double a, double b)
+    {
+        if (a == b) return true;
+
+        double diff = Math.Abs(a - b);
+        double larger = Math.Max(Math.Abs(a), Math.Abs(b));
+
+        if (larger < 1.0)
+            return diff < RELATIVE_EPSILON;
+
+        return diff <= larger * RELATIVE_EPSILON;
+    }
     public static bool operator >(CurrencyValue a, CurrencyValue b) => a.Value > b.Value;
     public static bool operator <(CurrencyValue a, CurrencyValue b) => a.Value < b.Value;
     public static bool operator >=(CurrencyValue a, CurrencyValue b) => a.Value >= b.Value;

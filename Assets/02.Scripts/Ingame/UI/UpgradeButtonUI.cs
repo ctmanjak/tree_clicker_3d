@@ -11,12 +11,12 @@ public class UpgradeButtonUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _costText;
     [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private TextMeshProUGUI _effectText;
+    [SerializeField] private UpgradeButtonAnimator _animator;
 
     private Upgrade _upgrade;
     private UpgradeManager _upgradeManager;
     private CurrencyManager _currencyManager;
     private AudioManager _audioManager;
-    private UpgradeButtonAnimator _animator;
     private bool _isSubscribed;
     private bool _wasAffordable;
 
@@ -24,18 +24,12 @@ public class UpgradeButtonUI : MonoBehaviour
     {
         _upgrade = upgrade;
         _upgradeManager = manager;
-
-        if (_currencyManager != null)
-        {
-            UpdateDisplay();
-        }
     }
 
     private void Start()
     {
         ServiceLocator.TryGet(out _currencyManager);
         ServiceLocator.TryGet(out _audioManager);
-        _animator = GetComponent<UpgradeButtonAnimator>();
 
         if (_upgradeManager == null)
         {

@@ -81,7 +81,10 @@ public class LumberjackSpawner : MonoBehaviour
     {
         foreach (var lumberjack in _activeLumberjacks)
         {
-            lumberjack.SetStats(woodPerSecond, 1f);
+            if (lumberjack != null)
+            {
+                lumberjack.SetStats(woodPerSecond, 1f);
+            }
         }
     }
 }

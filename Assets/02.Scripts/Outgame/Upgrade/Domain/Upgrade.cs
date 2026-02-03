@@ -8,12 +8,14 @@ public class Upgrade
     private UpgradeSpecData Spec { get; }
     public int Level { get; private set; }
 
+    private CurrencyValue _cachedCost;
+
     public string Name => Spec.UpgradeName;
     public string Description => Spec.Description;
     public Sprite Icon => Spec.Icon;
     public UpgradeType Type => Spec.Type;
     public bool IsMaxLevel => Spec.IsMaxLevel(Level);
-    public CurrencyValue CurrentCost => Spec.GetCost(Level);
+    public CurrencyValue CurrentCost => _cachedCost;
     public CurrencyValue EffectAmount => Spec.EffectAmount;
 
     public Upgrade(UpgradeSpecData spec, int level)
@@ -26,6 +28,7 @@ public class Upgrade
 
         Spec = spec;
         Level = level;
+        _cachedCost = Spec.GetCost(Level);
     }
 
     private static void ValidateSpec(UpgradeSpecData spec)
@@ -58,13 +61,23 @@ public class Upgrade
     public void SetLevel(int level)
     {
         if (Level == level) return;
+        if (!IsValidLevel(level)) return;
 
         Level = level;
+        _cachedCost = Spec.GetCost(Level);
         OnLevelChanged?.Invoke(this);
     }
 
     public void IncrementLevel()
     {
+        if (IsMaxLevel) return;
         SetLevel(Level + 1);
+    }
+
+    private bool IsValidLevel(int level)
+    {
+        if (level < 0) return false;
+        if (Spec.MaxLevel > 0 && level > Spec.MaxLevel) return false;
+        return true;
     }
 }
