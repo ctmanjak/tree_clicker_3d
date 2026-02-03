@@ -4,7 +4,7 @@ public class UpgradePanelUI : MonoBehaviour
 {
     [SerializeField] private UpgradeButtonUI _buttonPrefab;
     [SerializeField] private Transform _contentParent;
-    [SerializeField] private UpgradeType _filterType;
+    [SerializeField] private UpgradeType[] _filterTypes;
 
     private UpgradeManager _upgradeManager;
 
@@ -23,10 +23,13 @@ public class UpgradePanelUI : MonoBehaviour
 
     private void CreateButtons()
     {
-        foreach (var upgrade in _upgradeManager.GetUpgradesByType(_filterType))
+        foreach (var filterType in _filterTypes)
         {
-            var button = Instantiate(_buttonPrefab, _contentParent);
-            button.Init(upgrade, _upgradeManager);
+            foreach (var upgrade in _upgradeManager.GetUpgradesByType(filterType))
+            {
+                var button = Instantiate(_buttonPrefab, _contentParent);
+                button.Init(upgrade, _upgradeManager);
+            }
         }
     }
 }

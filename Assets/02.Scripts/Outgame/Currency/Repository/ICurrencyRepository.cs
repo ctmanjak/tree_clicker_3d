@@ -1,7 +1,3 @@
-public interface ICurrencyRepository
+public interface ICurrencyRepository : IRepository<CurrencySaveData>
 {
-    void Initialize();
-    void Save();
-    Currency GetCurrency(CurrencyType type);
-    void SaveCurrency(Currency currency);
 }

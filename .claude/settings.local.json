@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(ls:*)",
-      "Skill(compound-engineering:plan_review)"
+      "Skill(compound-engineering:plan_review)",
+      "Skill(compound-engineering:workflows:compound)"
     ]
   }
 }

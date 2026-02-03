@@ -1,39 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class LocalUpgradeRepository : IUpgradeRepository
 {
-    private readonly Dictionary<string, int> _levels = new();
+    private readonly Dictionary<string, UpgradeSaveData> _data = new();
 
     private string SavePath => Path.Combine(Application.persistentDataPath, "upgrade_save.json");
 
-    public void Initialize()
+    public UniTask<List<UpgradeSaveData>> Initialize()
     {
         LoadFromFile();
+        return UniTask.FromResult(new List<UpgradeSaveData>(_data.Values));
     }
 
-    public int GetLevel(string upgradeId)
+    public void Save(UpgradeSaveData item)
     {
-        return _levels.TryGetValue(upgradeId, out int level) ? level : 0;
+        _data[item.Id] = item;
+        SaveToFile();
     }
 
-    public void SetLevel(string upgradeId, int level)
+    private void SaveToFile()
     {
-        _levels[upgradeId] = level;
-        Save();
-    }
-
-    public void Save()
-    {
-        var saveData = new UpgradeSaveData();
-        foreach (var kvp in _levels)
-        {
-            saveData.Entries.Add(new UpgradeEntry { Id = kvp.Key, Level = kvp.Value });
-        }
-
-        string json = JsonUtility.ToJson(saveData, true);
+        var collection = new SaveDataCollection();
+        collection.Entries.AddRange(_data.Values);
+        string json = JsonUtility.ToJson(collection, true);
         File.WriteAllText(SavePath, json);
     }
 
@@ -44,13 +37,13 @@ public class LocalUpgradeRepository : IUpgradeRepository
         try
         {
             string json = File.ReadAllText(SavePath);
-            var saveData = JsonUtility.FromJson<UpgradeSaveData>(json);
+            var saveData = JsonUtility.FromJson<SaveDataCollection>(json);
 
             if (saveData?.Entries == null) return;
 
             foreach (var entry in saveData.Entries)
             {
-                _levels[entry.Id] = entry.Level;
+                _data[entry.Id] = entry;
             }
         }
         catch (Exception e)
@@ -60,15 +53,8 @@ public class LocalUpgradeRepository : IUpgradeRepository
     }
 
     [Serializable]
-    private class UpgradeEntry
+    private class SaveDataCollection
     {
-        public string Id;
-        public int Level;
-    }
-
-    [Serializable]
-    private class UpgradeSaveData
-    {
-        public List<UpgradeEntry> Entries = new();
+        public List<UpgradeSaveData> Entries = new();
     }
 }

@@ -25,7 +25,7 @@ public class LumberjackSpawner : MonoBehaviour
 
     public bool CanSpawn => _activeLumberjacks.Count < _maxLumberjacks;
 
-    public LumberjackController SpawnLumberjack()
+    public LumberjackController SpawnLumberjack(CurrencyValue woodPerSecond)
     {
         if (!CanSpawn)
         {
@@ -39,6 +39,7 @@ public class LumberjackSpawner : MonoBehaviour
         if (obj.TryGetComponent(out LumberjackController controller))
         {
             _activeLumberjacks.Add(controller);
+            controller.SetStats(woodPerSecond, 1f);
         }
 
         if (obj.TryGetComponent(out SpawnEffect spawnEffect))
@@ -74,5 +75,16 @@ public class LumberjackSpawner : MonoBehaviour
             }
         }
         _activeLumberjacks.Clear();
+    }
+
+    public void UpdateAllLumberjackStats(CurrencyValue woodPerSecond)
+    {
+        foreach (var lumberjack in _activeLumberjacks)
+        {
+            if (lumberjack != null)
+            {
+                lumberjack.SetStats(woodPerSecond, 1f);
+            }
+        }
     }
 }

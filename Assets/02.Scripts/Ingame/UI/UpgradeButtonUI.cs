@@ -4,40 +4,32 @@ using TMPro;
 
 public class UpgradeButtonUI : MonoBehaviour
 {
-    [Header("Data")]
-    [SerializeField] private UpgradeData _upgradeData;
-
     [Header("References")]
-    [SerializeField] private UpgradeManager _upgradeManager;
     [SerializeField] private Button _button;
     [SerializeField] private Image _iconImage;
     [SerializeField] private TextMeshProUGUI _nameText;
     [SerializeField] private TextMeshProUGUI _costText;
     [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private TextMeshProUGUI _effectText;
+    [SerializeField] private UpgradeButtonAnimator _animator;
 
+    private Upgrade _upgrade;
+    private UpgradeManager _upgradeManager;
     private CurrencyManager _currencyManager;
     private AudioManager _audioManager;
-    private UpgradeButtonAnimator _animator;
     private bool _isSubscribed;
     private bool _wasAffordable;
 
-    public void Init(UpgradeData data, UpgradeManager manager)
+    public void Init(Upgrade upgrade, UpgradeManager manager)
     {
-        _upgradeData = data;
+        _upgrade = upgrade;
         _upgradeManager = manager;
-
-        if (_currencyManager != null)
-        {
-            UpdateDisplay();
-        }
     }
 
     private void Start()
     {
         ServiceLocator.TryGet(out _currencyManager);
         ServiceLocator.TryGet(out _audioManager);
-        _animator = GetComponent<UpgradeButtonAnimator>();
 
         if (_upgradeManager == null)
         {
@@ -73,23 +65,41 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void Subscribe()
     {
-        if (_isSubscribed || _currencyManager == null) return;
+        if (_isSubscribed) return;
 
-        _currencyManager.OnCurrencyChanged += OnCurrencyChanged;
+        if (_currencyManager != null)
+        {
+            _currencyManager.OnCurrencyChanged += OnCurrencyChanged;
+        }
+
+        if (_upgrade != null)
+        {
+            _upgrade.OnLevelChanged += OnLevelChanged;
+        }
+
         _isSubscribed = true;
     }
 
     private void Unsubscribe()
     {
-        if (!_isSubscribed || _currencyManager == null) return;
+        if (!_isSubscribed) return;
 
-        _currencyManager.OnCurrencyChanged -= OnCurrencyChanged;
+        if (_currencyManager != null)
+        {
+            _currencyManager.OnCurrencyChanged -= OnCurrencyChanged;
+        }
+
+        if (_upgrade != null)
+        {
+            _upgrade.OnLevelChanged -= OnLevelChanged;
+        }
+
         _isSubscribed = false;
     }
 
     private void OnClick()
     {
-        if (_upgradeManager.TryPurchase(_upgradeData))
+        if (_upgradeManager.TryPurchase(_upgrade))
         {
             _audioManager?.PlaySFX(SFXType.UpgradeBuy);
             _animator?.PlayPurchaseAnimation();
@@ -107,29 +117,33 @@ public class UpgradeButtonUI : MonoBehaviour
         UpdateButtonState();
     }
 
+    private void OnLevelChanged(Upgrade _)
+    {
+        UpdateDisplay();
+    }
+
     private void UpdateDisplay()
     {
-        int level = _upgradeManager.GetLevel(_upgradeData);
-        bool isMaxLevel = _upgradeData.IsMaxLevel(level);
+        if (_upgrade == null) return;
 
-        if (_iconImage != null && _upgradeData.Icon != null)
+        if (_iconImage != null && _upgrade.Icon != null)
         {
-            _iconImage.sprite = _upgradeData.Icon;
+            _iconImage.sprite = _upgrade.Icon;
         }
 
         if (_nameText != null)
         {
-            _nameText.text = _upgradeData.UpgradeName;
+            _nameText.text = _upgrade.Name;
         }
 
         if (_costText != null)
         {
-            _costText.text = isMaxLevel ? "MAX" : _upgradeData.GetCost(level).ToFormattedString();
+            _costText.text = _upgrade.IsMaxLevel ? "MAX" : _upgrade.CurrentCost.ToFormattedString();
         }
 
         if (_levelText != null)
         {
-            _levelText.text = isMaxLevel ? "MAX" : $"Lv.{level}";
+            _levelText.text = _upgrade.IsMaxLevel ? "MAX" : $"Lv.{_upgrade.Level}";
         }
 
         if (_effectText != null)
@@ -142,43 +156,40 @@ public class UpgradeButtonUI : MonoBehaviour
 
     private void UpdateButtonState()
     {
-        if (_upgradeManager == null || _currencyManager == null) return;
+        if (_upgrade == null || _upgradeManager == null) return;
 
-        int level = _upgradeManager.GetLevel(_upgradeData);
-
-        if (_upgradeData.IsMaxLevel(level))
+        if (_upgrade.IsMaxLevel)
         {
             _button.interactable = false;
             _animator?.StopPulseAnimation();
             return;
         }
 
-        CurrencyValue cost = _upgradeData.GetCost(level);
-        bool canAfford = _currencyManager.CanAfford(CurrencyType.Wood, cost);
+        bool canPurchase = _upgradeManager.CanPurchase(_upgrade);
 
         if (_animator != null)
         {
-            if (canAfford && !_wasAffordable)
+            if (canPurchase && !_wasAffordable)
             {
                 _animator.StartPulseAnimation();
             }
-            else if (!canAfford && _wasAffordable)
+            else if (!canPurchase && _wasAffordable)
             {
                 _animator.StopPulseAnimation();
             }
         }
 
-        _wasAffordable = canAfford;
+        _wasAffordable = canPurchase;
     }
 
     private string GetEffectText()
     {
-        return _upgradeData.Type switch
+        return _upgrade.Type switch
         {
-            UpgradeType.WoodPerClick => $"+{_upgradeData.EffectAmount}/클릭",
+            UpgradeType.WoodPerClick => $"+{_upgrade.EffectAmount}/클릭",
             UpgradeType.SpawnLumberjack => "벌목꾼 +1",
+            UpgradeType.LumberjackProduction => $"+{_upgrade.EffectAmount}/벌목꾼",
             _ => ""
         };
     }
-
 }

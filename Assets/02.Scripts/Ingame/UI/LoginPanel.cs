@@ -12,17 +12,19 @@ public class LoginPanel : MonoBehaviour
     }
 
     private SceneMode _mode = SceneMode.Login;
-        
+
     [SerializeField] private TextMeshProUGUI _messageText;
     [SerializeField] private GameObject _passwordConfirmObject;
     [SerializeField] private Button _gotoRegisterButton;
     [SerializeField] private Button _loginButton;
     [SerializeField] private Button _gotoLoginButton;
     [SerializeField] private Button _registerButton;
-    
+
     [SerializeField] private TMP_InputField _idInputField;
     [SerializeField] private TMP_InputField _passwordInputField;
     [SerializeField] private TMP_InputField _repeatPasswordInputField;
+
+    private bool _isProcessing;
 
     private void Start()
     {
@@ -44,17 +46,23 @@ public class LoginPanel : MonoBehaviour
         _passwordConfirmObject.SetActive(_mode == SceneMode.Register);
         _gotoLoginButton.gameObject.SetActive(_mode == SceneMode.Register);
         _registerButton.gameObject.SetActive(_mode == SceneMode.Register);
-            
+
         _gotoRegisterButton.gameObject.SetActive(_mode == SceneMode.Login);
         _loginButton.gameObject.SetActive(_mode == SceneMode.Login);
     }
 
-    private void Login()
+    private async void Login()
     {
+        if (_isProcessing) return;
+        _isProcessing = true;
+
         string email = _idInputField.text;
         string password = _passwordInputField.text;
 
-        AuthResult result = AccountManager.Instance.TryLogin(email, password);
+        _messageText.text = "로그인 중...";
+        AuthResult result = await AccountManager.Instance.TryLogin(email, password);
+
+        _isProcessing = false;
 
         if (!result.Success)
         {
@@ -65,19 +73,26 @@ public class LoginPanel : MonoBehaviour
         SceneManager.LoadScene("GameScene");
     }
 
-    private void Register()
+    private async void Register()
     {
+        if (_isProcessing) return;
+        _isProcessing = true;
+
         string email = _idInputField.text;
         string password = _passwordInputField.text;
         string repeatPassword = _repeatPasswordInputField.text;
 
         if (password != repeatPassword)
         {
-            _messageText.text = "Passwords do not match";
+            _messageText.text = "비밀번호가 일치하지 않습니다.";
+            _isProcessing = false;
             return;
         }
 
-        AuthResult result = AccountManager.Instance.TryRegister(email, password);
+        _messageText.text = "회원가입 중...";
+        AuthResult result = await AccountManager.Instance.TryRegister(email, password);
+
+        _isProcessing = false;
 
         if (!result.Success)
         {
@@ -85,7 +100,7 @@ public class LoginPanel : MonoBehaviour
             return;
         }
 
-        _messageText.text = "Registered";
+        _messageText.text = "회원가입 완료";
         GotoLogin();
     }
 
@@ -94,7 +109,7 @@ public class LoginPanel : MonoBehaviour
         _mode = SceneMode.Login;
         Refresh();
     }
-        
+
     private void GotoRegister()
     {
         _mode = SceneMode.Register;
