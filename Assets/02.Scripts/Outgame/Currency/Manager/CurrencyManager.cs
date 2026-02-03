@@ -74,13 +74,7 @@ public class CurrencyManager : MonoBehaviour
 
         var currency = GetCurrency(type);
         currency.Add(amount);
-        var key = type.ToString();
-        _repository.Save(new CurrencySaveData
-        {
-            Id = key,
-            Type = key,
-            Amount = currency.Amount.ToDouble()
-        });
+        SaveCurrency(type, currency);
 
         OnCurrencyAdded?.Invoke(type, amount);
         OnCurrencyChanged?.Invoke(type, currency.Amount);
@@ -91,18 +85,22 @@ public class CurrencyManager : MonoBehaviour
         if (!amount.IsPositive) return false;
 
         var currency = GetCurrency(type);
-        if (currency.TrySpend(amount))
+        if (!currency.TrySpend(amount))
+            return false;
+
+        SaveCurrency(type, currency);
+        OnCurrencyChanged?.Invoke(type, currency.Amount);
+        return true;
+    }
+
+    private void SaveCurrency(CurrencyType type, Currency currency)
+    {
+        var key = type.ToString();
+        _repository.Save(new CurrencySaveData
         {
-            var key = type.ToString();
-            _repository.Save(new CurrencySaveData
-            {
-                Id = key,
-                Type = key,
-                Amount = currency.Amount.ToDouble()
-            });
-            OnCurrencyChanged?.Invoke(type, currency.Amount);
-            return true;
-        }
-        return false;
+            Id = key,
+            Type = key,
+            Amount = currency.Amount.ToDouble()
+        });
     }
 }

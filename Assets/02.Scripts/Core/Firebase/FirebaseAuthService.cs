@@ -43,28 +43,25 @@ public class FirebaseAuthService : IFirebaseAuthService
         }
         catch (AggregateException ex)
         {
-            return new FirebaseAuthResult
-            {
-                Success = false,
-                ErrorMessage = ParseFirebaseError(ex),
-            };
+            return FailureResult(ParseFirebaseError(ex));
         }
         catch (FirebaseException ex)
         {
-            return new FirebaseAuthResult
-            {
-                Success = false,
-                ErrorMessage = ParseFirebaseError(ex),
-            };
+            return FailureResult(ParseFirebaseError(ex));
         }
         catch (Exception ex)
         {
-            return new FirebaseAuthResult
-            {
-                Success = false,
-                ErrorMessage = ex.Message,
-            };
+            return FailureResult(ex.Message);
         }
+    }
+
+    private static FirebaseAuthResult FailureResult(string errorMessage)
+    {
+        return new FirebaseAuthResult
+        {
+            Success = false,
+            ErrorMessage = errorMessage,
+        };
     }
 
     public void Logout()

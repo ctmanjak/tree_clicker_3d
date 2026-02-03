@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using Firebase;
 using UnityEngine;
@@ -15,8 +16,7 @@ public class FirebaseInitializer
         var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
         if (dependencyStatus != DependencyStatus.Available)
         {
-            Debug.LogError($"Firebase 초기화 실패: {dependencyStatus}");
-            return;
+            throw new InvalidOperationException($"Firebase 초기화 실패: {dependencyStatus}");
         }
 
         _authService = new FirebaseAuthService();
