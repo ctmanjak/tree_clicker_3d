@@ -1,7 +1,8 @@
+using Cysharp.Threading.Tasks;
+
 public interface IAccountRepository
 {
-    bool IsEmailAvailable(string email);
-    AuthResult Register(string email, string password);
-    AuthResult Login(string email, string password);
+    UniTask<AuthResult> Register(string email, string password);
+    UniTask<AuthResult> Login(string email, string password);
     void Logout();
 }

@@ -1,5 +1,7 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+
 
 [DefaultExecutionOrder(-50)]
 public class CurrencyManager : MonoBehaviour
@@ -16,8 +18,9 @@ public class CurrencyManager : MonoBehaviour
         ServiceLocator.Register(this);
     }
 
-    private void Start()
+    private async UniTaskVoid Start()
     {
+        await GameBootstrap.Instance.Initialization;
         ServiceLocator.TryGet(out _repository);
         BroadcastInitialValues();
     }

@@ -1,17 +1,19 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class LocalCurrencyRepository : ICurrencyRepository
 {
-    private const string SAVE_KEY = "CurrencyData";
+    private const string SaveKey = "CurrencyData";
 
     private readonly Dictionary<CurrencyType, Currency> _currencies = new();
 
-    public void Initialize()
+    public UniTask Initialize()
     {
         LoadFromPlayerPrefs();
         InitializeDefaultCurrencies();
+        return UniTask.CompletedTask;
     }
 
     private void InitializeDefaultCurrencies()
@@ -54,15 +56,15 @@ public class LocalCurrencyRepository : ICurrencyRepository
         }
 
         string json = JsonUtility.ToJson(saveData);
-        PlayerPrefs.SetString(SAVE_KEY, json);
+        PlayerPrefs.SetString(SaveKey, json);
         PlayerPrefs.Save();
     }
 
     private void LoadFromPlayerPrefs()
     {
-        if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
+        if (!PlayerPrefs.HasKey(SaveKey)) return;
 
-        string json = PlayerPrefs.GetString(SAVE_KEY);
+        string json = PlayerPrefs.GetString(SaveKey);
         var saveData = JsonUtility.FromJson<CurrencySaveDataCollection>(json);
 
         if (saveData?.Items == null) return;

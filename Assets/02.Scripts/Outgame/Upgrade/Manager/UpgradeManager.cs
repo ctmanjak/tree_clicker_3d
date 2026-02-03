@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 [DefaultExecutionOrder(-50)]
@@ -24,8 +25,10 @@ public class UpgradeManager : MonoBehaviour
         ServiceLocator.Register(this);
     }
 
-    private void Start()
+    private async UniTaskVoid Start()
     {
+        await GameBootstrap.Instance.Initialization;
+
         if (!ServiceLocator.TryGet(out _repository))
             throw new InvalidOperationException($"{nameof(IUpgradeRepository)} is not registered in ServiceLocator");
 

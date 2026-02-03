@@ -3,25 +3,25 @@ using System.Collections.Generic;
 
 public static class ServiceLocator
 {
-    private static readonly Dictionary<Type, object> services = new();
+    private static readonly Dictionary<Type, object> _services = new();
 
     public static void Register<T>(T service) where T : class
     {
-        services[typeof(T)] = service;
+        _services[typeof(T)] = service;
     }
 
     public static void Unregister<T>(T service) where T : class
     {
         var type = typeof(T);
-        if (services.TryGetValue(type, out var registered) && ReferenceEquals(registered, service))
+        if (_services.TryGetValue(type, out var registered) && ReferenceEquals(registered, service))
         {
-            services.Remove(type);
+            _services.Remove(type);
         }
     }
 
     public static T Get<T>() where T : class
     {
-        if (services.TryGetValue(typeof(T), out var service))
+        if (_services.TryGetValue(typeof(T), out var service))
         {
             return service as T;
         }
@@ -30,7 +30,7 @@ public static class ServiceLocator
 
     public static bool TryGet<T>(out T service) where T : class
     {
-        if (services.TryGetValue(typeof(T), out var obj))
+        if (_services.TryGetValue(typeof(T), out var obj))
         {
             service = obj as T;
             return true;
@@ -41,6 +41,6 @@ public static class ServiceLocator
 
     public static void Clear()
     {
-        services.Clear();
+        _services.Clear();
     }
 }

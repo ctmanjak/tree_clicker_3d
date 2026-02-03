@@ -16,16 +16,27 @@
 
 ```
 Assets/02.Scripts/
-├── Core/           # 핵심 시스템 (ServiceLocator, GameEvents)
-├── Interfaces/     # 인터페이스 (IClickable, ISaveable)
-├── Utils/          # 유틸리티 (ObjectPool)
-├── Tree/           # 나무 관련 로직
-├── Lumberjack/     # 벌목꾼 시스템
-├── Player/         # 플레이어 입력/상호작용
-├── Economy/        # 재화 및 경제 시스템
-├── Effects/        # 파티클, 피드백 효과
-├── UI/             # UI 컴포넌트
-└── Services/       # 서비스 클래스
+├── Core/                        # 앱 부팅 + 인프라 (DI, 초기화, 외부 서비스 래핑, 유틸)
+│   ├── ServiceLocator.cs
+│   ├── Crypto.cs
+│   ├── GameBootstrap.cs
+│   ├── RepositoryFactory.cs
+│   └── Firebase/                # Firebase 인프라 서비스
+│
+├── Outgame/                     # 비즈니스 도메인
+│   ├── Account/
+│   ├── Currency/
+│   └── Upgrade/
+│
+└── Ingame/                      # 게임플레이
+    ├── Common/Interface/
+    ├── Player/
+    ├── Tree/
+    ├── Lumberjack/
+    ├── UI/
+    ├── Audio/
+    ├── Effect/
+    └── Util/
 ```
 
 ## 코딩 컨벤션

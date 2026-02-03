@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class LocalUpgradeRepository : IUpgradeRepository
@@ -9,9 +10,10 @@ public class LocalUpgradeRepository : IUpgradeRepository
 
     private string SavePath => Path.Combine(Application.persistentDataPath, "upgrade_save.json");
 
-    public void Initialize()
+    public UniTask Initialize()
     {
         LoadFromFile();
+        return UniTask.CompletedTask;
     }
 
     public int GetLevel(string upgradeId)
