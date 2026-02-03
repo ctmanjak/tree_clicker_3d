@@ -14,6 +14,7 @@ public class UpgradeManager : MonoBehaviour
     private readonly Dictionary<string, Upgrade> _upgrades = new();
     private readonly Dictionary<UpgradeType, List<Upgrade>> _upgradesByType = new();
     private readonly Dictionary<UpgradeType, IUpgradeEffectHandler> _effectHandlers = new();
+    private readonly Dictionary<Type, IUpgradeEffectHandler> _handlersByConcreteType = new();
     private IUpgradeRepository _repository;
     private CurrencyManager _currencyManager;
 
@@ -55,6 +56,7 @@ public class UpgradeManager : MonoBehaviour
     private void RegisterHandler(UpgradeType type, IUpgradeEffectHandler handler)
     {
         _effectHandlers[type] = handler;
+        _handlersByConcreteType[handler.GetType()] = handler;
     }
 
     private async UniTask InitializeUpgrades()
@@ -67,10 +69,8 @@ public class UpgradeManager : MonoBehaviour
         foreach (var spec in _upgradeSpecs)
         {
             int level = savedLevels.GetValueOrDefault(spec.Id, 0);
-            var upgrade = new Upgrade(spec, level);
-
-            if (_effectHandlers.TryGetValue(spec.Type, out var handler))
-                upgrade.SetEffectHandler(handler);
+            _effectHandlers.TryGetValue(spec.Type, out var handler);
+            var upgrade = new Upgrade(spec, level, handler);
 
             _upgrades[spec.Id] = upgrade;
 
@@ -129,12 +129,7 @@ public class UpgradeManager : MonoBehaviour
 
     public T GetEffectHandler<T>() where T : class, IUpgradeEffectHandler
     {
-        foreach (var handler in _effectHandlers.Values)
-        {
-            if (handler is T typed)
-                return typed;
-        }
-        return null;
+        return _handlersByConcreteType.TryGetValue(typeof(T), out var handler) ? handler as T : null;
     }
 
     public CurrencyValue GetWoodPerClick()
