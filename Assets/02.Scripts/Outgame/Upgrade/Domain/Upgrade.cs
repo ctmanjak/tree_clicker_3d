@@ -8,6 +8,7 @@ public class Upgrade
     private UpgradeSpecData Spec { get; }
     public int Level { get; private set; }
 
+    private IUpgradeEffectHandler _effectHandler;
     private CurrencyValue _cachedCost;
 
     public string Id => Spec.Id;
@@ -74,6 +75,15 @@ public class Upgrade
         if (IsMaxLevel) return;
         SetLevel(Level + 1);
     }
+
+    public void SetEffectHandler(IUpgradeEffectHandler handler)
+    {
+        _effectHandler = handler;
+    }
+
+    public void ApplyEffect() => _effectHandler?.OnEffectApplied(this);
+
+    public string GetEffectText() => _effectHandler?.GetEffectText(this) ?? "";
 
     private bool IsValidLevel(int level)
     {

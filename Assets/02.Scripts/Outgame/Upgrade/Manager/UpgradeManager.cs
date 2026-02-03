@@ -8,18 +8,14 @@ using UnityEngine;
 public class UpgradeManager : MonoBehaviour
 {
     public event Action<Upgrade> OnUpgradePurchased;
-    public event Action<CurrencyType, CurrencyValue> OnPerClickChanged;
 
     [SerializeField] private List<UpgradeSpecData> _upgradeSpecs = new();
 
     private readonly Dictionary<string, Upgrade> _upgrades = new();
     private readonly Dictionary<UpgradeType, List<Upgrade>> _upgradesByType = new();
+    private readonly Dictionary<UpgradeType, IUpgradeEffectHandler> _effectHandlers = new();
     private IUpgradeRepository _repository;
     private CurrencyManager _currencyManager;
-    private LumberjackSpawner _lumberjackSpawner;
-
-    private CurrencyValue _cachedWoodPerClick = CurrencyValue.One;
-    private CurrencyValue _cachedLumberjackProduction = CurrencyValue.One;
 
     private void Awake()
     {
@@ -36,23 +32,46 @@ public class UpgradeManager : MonoBehaviour
         if (!ServiceLocator.TryGet(out _currencyManager))
             throw new InvalidOperationException($"{nameof(CurrencyManager)} is not registered in ServiceLocator");
 
-        ServiceLocator.TryGet(out _lumberjackSpawner);
-
+        RegisterEffectHandlers();
         await InitializeUpgrades();
-        RecalculateWoodPerClick();
-        RecalculateLumberjackProduction();
-        SpawnSavedLumberjacks();
+
+        foreach (var pair in _effectHandlers)
+        {
+            pair.Value.OnInitialLoad(GetUpgradesByType(pair.Key));
+        }
+    }
+
+    private void RegisterEffectHandlers()
+    {
+        ServiceLocator.TryGet(out LumberjackSpawner spawner);
+
+        var productionHandler = new LumberjackProductionEffectHandler(spawner);
+
+        RegisterHandler(UpgradeType.WoodPerClick, new WoodPerClickEffectHandler());
+        RegisterHandler(UpgradeType.LumberjackProduction, productionHandler);
+        RegisterHandler(UpgradeType.SpawnLumberjack, new SpawnLumberjackEffectHandler(spawner, productionHandler));
+    }
+
+    private void RegisterHandler(UpgradeType type, IUpgradeEffectHandler handler)
+    {
+        _effectHandlers[type] = handler;
     }
 
     private async UniTask InitializeUpgrades()
     {
         var savedData = await _repository.Initialize();
-        var savedLevels = savedData.ToDictionary(s => s.Id, s => s.Level);
+        var savedLevels = savedData
+            .GroupBy(s => s.Id)
+            .ToDictionary(g => g.Key, g => g.Max(s => s.Level));
 
         foreach (var spec in _upgradeSpecs)
         {
             int level = savedLevels.GetValueOrDefault(spec.Id, 0);
             var upgrade = new Upgrade(spec, level);
+
+            if (_effectHandlers.TryGetValue(spec.Type, out var handler))
+                upgrade.SetEffectHandler(handler);
+
             _upgrades[spec.Id] = upgrade;
 
             if (!_upgradesByType.TryGetValue(spec.Type, out var list))
@@ -61,20 +80,6 @@ public class UpgradeManager : MonoBehaviour
                 _upgradesByType[spec.Type] = list;
             }
             list.Add(upgrade);
-        }
-    }
-
-    private void SpawnSavedLumberjacks()
-    {
-        int totalLevel = 0;
-        foreach (var upgrade in GetUpgradesByType(UpgradeType.SpawnLumberjack))
-        {
-            totalLevel += upgrade.Level;
-        }
-
-        for (int i = 0; i < totalLevel; i++)
-        {
-            _lumberjackSpawner?.SpawnLumberjack(_cachedLumberjackProduction);
         }
     }
 
@@ -117,51 +122,24 @@ public class UpgradeManager : MonoBehaviour
         upgrade.IncrementLevel();
         _repository.Save(new UpgradeSaveData { Id = upgrade.Id, Level = upgrade.Level });
 
-        ApplyEffect(upgrade);
+        upgrade.ApplyEffect();
         OnUpgradePurchased?.Invoke(upgrade);
         return true;
     }
 
-    private void ApplyEffect(Upgrade upgrade)
+    public T GetEffectHandler<T>() where T : class, IUpgradeEffectHandler
     {
-        switch (upgrade.Type)
+        foreach (var handler in _effectHandlers.Values)
         {
-            case UpgradeType.WoodPerClick:
-                RecalculateWoodPerClick();
-                OnPerClickChanged?.Invoke(CurrencyType.Wood, _cachedWoodPerClick);
-                break;
-            case UpgradeType.SpawnLumberjack:
-                _lumberjackSpawner?.SpawnLumberjack(_cachedLumberjackProduction);
-                break;
-            case UpgradeType.LumberjackProduction:
-                RecalculateLumberjackProduction();
-                _lumberjackSpawner?.UpdateAllLumberjackStats(_cachedLumberjackProduction);
-                break;
+            if (handler is T typed)
+                return typed;
         }
+        return null;
     }
 
-    public CurrencyValue GetWoodPerClick() => _cachedWoodPerClick;
-    public CurrencyValue GetLumberjackProduction() => _cachedLumberjackProduction;
+    public CurrencyValue GetWoodPerClick()
+        => GetEffectHandler<WoodPerClickEffectHandler>()?.WoodPerClick ?? CurrencyValue.One;
 
-    private void RecalculateWoodPerClick()
-    {
-        _cachedWoodPerClick = CalculateTotalEffect(UpgradeType.WoodPerClick);
-    }
-
-    private void RecalculateLumberjackProduction()
-    {
-        _cachedLumberjackProduction = CalculateTotalEffect(UpgradeType.LumberjackProduction);
-    }
-
-    private CurrencyValue CalculateTotalEffect(UpgradeType type)
-    {
-        CurrencyValue total = CurrencyValue.One;
-
-        foreach (var upgrade in GetUpgradesByType(type))
-        {
-            total += upgrade.EffectAmount * upgrade.Level;
-        }
-
-        return total;
-    }
+    public CurrencyValue GetLumberjackProduction()
+        => GetEffectHandler<LumberjackProductionEffectHandler>()?.LumberjackProduction ?? CurrencyValue.One;
 }
