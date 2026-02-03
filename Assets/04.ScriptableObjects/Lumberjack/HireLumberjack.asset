@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280eea38c14804b5aaa2bbcff3a393d3, type: 3}
   m_Name: HireLumberjack
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
+  _id: HireLumberjack
   _upgradeName: "\uBC8C\uBAA9\uAFBC \uACE0\uC6A9"
   _description: "\uBC8C\uBAA9\uAFBC\uC744 1\uBA85 \uACE0\uC6A9\uD569\uB2C8\uB2E4"
   _icon: {fileID: 0}

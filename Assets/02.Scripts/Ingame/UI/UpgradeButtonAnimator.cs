@@ -25,6 +25,7 @@ public class UpgradeButtonAnimator : MonoBehaviour
     private Tween _pulseTween;
     private Sequence _currentSequence;
     private Color[] _originalColors;
+    private Vector2 _originalPosition;
     private AudioManager _audioManager;
     private bool _isPulsing;
 
@@ -33,6 +34,11 @@ public class UpgradeButtonAnimator : MonoBehaviour
         if (_targetTransform == null)
         {
             _targetTransform = GetComponent<RectTransform>();
+        }
+
+        if (_targetTransform != null)
+        {
+            _originalPosition = _targetTransform.anchoredPosition;
         }
 
         if (_backgroundImages == null || _backgroundImages.Length == 0)
@@ -64,8 +70,7 @@ public class UpgradeButtonAnimator : MonoBehaviour
 
     private void OnDestroy()
     {
-        _pulseTween?.Kill();
-        _currentSequence?.Kill();
+        KillAllTweens();
     }
 
     public void StartPulseAnimation()
@@ -88,7 +93,8 @@ public class UpgradeButtonAnimator : MonoBehaviour
 
         _isPulsing = false;
         _pulseTween?.Kill();
-        _targetTransform.DOScale(1f, 0.1f);
+        _pulseTween = null;
+        _targetTransform.localScale = Vector3.one;
     }
 
     public void PlayPurchaseAnimation()
@@ -96,9 +102,7 @@ public class UpgradeButtonAnimator : MonoBehaviour
         if (_targetTransform == null) return;
 
         bool wasPulsing = _isPulsing;
-        StopPulseAnimation();
-        _currentSequence?.Kill();
-        _targetTransform.localScale = Vector3.one;
+        ResetToOriginalState();
 
         _currentSequence = DOTween.Sequence();
         _currentSequence.Append(_targetTransform.DOPunchScale(Vector3.one * (_purchaseScale - 1f), _purchaseDuration, 1, 0.5f));
@@ -117,9 +121,7 @@ public class UpgradeButtonAnimator : MonoBehaviour
         _audioManager?.PlaySFX(SFXType.UpgradeDenied);
 
         bool wasPulsing = _isPulsing;
-        StopPulseAnimation();
-        _currentSequence?.Kill();
-        _targetTransform.localScale = Vector3.one;
+        ResetToOriginalState();
 
         _currentSequence = DOTween.Sequence();
         _currentSequence.Append(_targetTransform.DOShakeAnchorPos(_shakeDuration, new Vector2(_shakeStrength, 0), 10, 90, false, true));
@@ -128,6 +130,57 @@ public class UpgradeButtonAnimator : MonoBehaviour
         if (wasPulsing)
         {
             _currentSequence.OnComplete(StartPulseAnimation);
+        }
+    }
+
+    private void ResetToOriginalState()
+    {
+        _isPulsing = false;
+        KillAllTweens();
+
+        if (_targetTransform != null)
+        {
+            _targetTransform.localScale = Vector3.one;
+            _targetTransform.anchoredPosition = _originalPosition;
+        }
+
+        ResetColors();
+    }
+
+    private void KillAllTweens()
+    {
+        _pulseTween?.Kill();
+        _pulseTween = null;
+        _currentSequence?.Kill();
+        _currentSequence = null;
+
+        if (_targetTransform != null)
+        {
+            _targetTransform.DOKill();
+        }
+
+        if (_backgroundImages != null)
+        {
+            for (int i = 0; i < _backgroundImages.Length; i++)
+            {
+                if (_backgroundImages[i] != null)
+                {
+                    _backgroundImages[i].DOKill();
+                }
+            }
+        }
+    }
+
+    private void ResetColors()
+    {
+        if (_backgroundImages == null || _originalColors == null) return;
+
+        for (int i = 0; i < _backgroundImages.Length; i++)
+        {
+            if (_backgroundImages[i] != null)
+            {
+                _backgroundImages[i].color = _originalColors[i];
+            }
         }
     }
 
@@ -143,15 +196,21 @@ public class UpgradeButtonAnimator : MonoBehaviour
             }
         }
 
-        sequence.AppendCallback(() =>
+        for (int i = 0; i < _backgroundImages.Length; i++)
         {
-            for (int i = 0; i < _backgroundImages.Length; i++)
+            if (_backgroundImages[i] != null)
             {
-                if (_backgroundImages[i] != null)
+                int index = i;
+                Tween colorRestore = _backgroundImages[index].DOColor(_originalColors[index], duration * 0.7f);
+                if (i == 0)
                 {
-                    _backgroundImages[i].DOColor(_originalColors[i], duration * 0.7f);
+                    sequence.Append(colorRestore);
+                }
+                else
+                {
+                    sequence.Join(colorRestore);
                 }
             }
-        });
+        }
     }
 }

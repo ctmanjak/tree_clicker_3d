@@ -1,7 +1,3 @@
-public interface IUpgradeRepository
+public interface IUpgradeRepository : IRepository<UpgradeSaveData>
 {
-    void Initialize();
-    void Save();
-    int GetLevel(string upgradeId);
-    void SetLevel(string upgradeId, int level);
 }
