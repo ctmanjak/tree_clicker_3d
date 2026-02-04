@@ -3,36 +3,39 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public class FirebaseCurrencyRepository : ICurrencyRepository
+namespace Outgame
 {
-    private const string CollectionName = "currencies";
-
-    private readonly IFirebaseStoreService _storeService;
-
-    public FirebaseCurrencyRepository(IFirebaseStoreService storeService)
+    public class FirebaseCurrencyRepository : ICurrencyRepository
     {
-        _storeService = storeService;
-    }
+        private const string CollectionName = "currencies";
 
-    public async UniTask<List<CurrencySaveData>> Initialize()
-    {
-        var result = new List<CurrencySaveData>();
-        var documents = await _storeService.GetCollection<CurrencySaveData>(CollectionName);
+        private readonly IFirebaseStoreService _storeService;
 
-        foreach (var data in documents)
+        public FirebaseCurrencyRepository(IFirebaseStoreService storeService)
         {
-            if (!Enum.TryParse<CurrencyType>(data.Id, out _))
-                continue;
-
-            result.Add(data);
+            _storeService = storeService;
         }
 
-        Debug.Log($"Firestore에서 재화 데이터 로드 완료 ({result.Count}건)");
-        return result;
-    }
+        public async UniTask<List<CurrencySaveData>> Initialize()
+        {
+            var result = new List<CurrencySaveData>();
+            var documents = await _storeService.GetCollection<CurrencySaveData>(CollectionName);
 
-    public void Save(CurrencySaveData item)
-    {
-        _storeService.SetDocumentAsync(CollectionName, item);
+            foreach (var data in documents)
+            {
+                if (!Enum.TryParse<CurrencyType>(data.Id, out _))
+                    continue;
+
+                result.Add(data);
+            }
+
+            Debug.Log($"Firestore에서 재화 데이터 로드 완료 ({result.Count}건)");
+            return result;
+        }
+
+        public void Save(CurrencySaveData item)
+        {
+            _storeService.SetDocumentAsync(CollectionName, item);
+        }
     }
 }

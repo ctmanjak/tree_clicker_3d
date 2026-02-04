@@ -1,39 +1,43 @@
 using System.Collections.Generic;
+using Ingame;
 
-public class SpawnLumberjackEffectHandler : IUpgradeEffectHandler
+namespace Outgame
 {
-    private readonly LumberjackSpawner _spawner;
-    private readonly LumberjackProductionEffectHandler _productionHandler;
-
-    public SpawnLumberjackEffectHandler(LumberjackSpawner spawner, LumberjackProductionEffectHandler productionHandler)
+    public class SpawnLumberjackEffectHandler : IUpgradeEffectHandler
     {
-        _spawner = spawner;
-        _productionHandler = productionHandler;
-    }
+        private readonly LumberjackSpawner _spawner;
+        private readonly LumberjackProductionEffectHandler _productionHandler;
 
-    public void OnInitialLoad(IEnumerable<Upgrade> upgrades)
-    {
-        CurrencyValue production = _productionHandler.LumberjackProduction;
-
-        int totalLevel = 0;
-        foreach (var upgrade in upgrades)
+        public SpawnLumberjackEffectHandler(LumberjackSpawner spawner, LumberjackProductionEffectHandler productionHandler)
         {
-            totalLevel += upgrade.Level;
+            _spawner = spawner;
+            _productionHandler = productionHandler;
         }
 
-        for (int i = 0; i < totalLevel; i++)
+        public void OnInitialLoad(IEnumerable<Upgrade> upgrades)
         {
-            _spawner?.SpawnLumberjack(production);
+            CurrencyValue production = _productionHandler.LumberjackProduction;
+
+            int totalLevel = 0;
+            foreach (var upgrade in upgrades)
+            {
+                totalLevel += upgrade.Level;
+            }
+
+            for (int i = 0; i < totalLevel; i++)
+            {
+                _spawner?.SpawnLumberjack(production);
+            }
         }
-    }
 
-    public void OnEffectApplied(Upgrade upgrade)
-    {
-        _spawner?.SpawnLumberjack(_productionHandler.LumberjackProduction);
-    }
+        public void OnEffectApplied(Upgrade upgrade)
+        {
+            _spawner?.SpawnLumberjack(_productionHandler.LumberjackProduction);
+        }
 
-    public string GetEffectText(Upgrade upgrade)
-    {
-        return "벌목꾼 +1";
+        public string GetEffectText(Upgrade upgrade)
+        {
+            return "벌목꾼 +1";
+        }
     }
 }

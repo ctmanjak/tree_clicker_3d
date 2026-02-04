@@ -1,46 +1,49 @@
 using System;
 using System.Collections.Generic;
 
-public static class ServiceLocator
+namespace Core
 {
-    private static readonly Dictionary<Type, object> _services = new();
-
-    public static void Register<T>(T service) where T : class
+    public static class ServiceLocator
     {
-        _services[typeof(T)] = service;
-    }
+        private static readonly Dictionary<Type, object> _services = new();
 
-    public static void Unregister<T>(T service) where T : class
-    {
-        var type = typeof(T);
-        if (_services.TryGetValue(type, out var registered) && ReferenceEquals(registered, service))
+        public static void Register<T>(T service) where T : class
         {
-            _services.Remove(type);
+            _services[typeof(T)] = service;
         }
-    }
 
-    public static T Get<T>() where T : class
-    {
-        if (_services.TryGetValue(typeof(T), out var service))
+        public static void Unregister<T>(T service) where T : class
         {
-            return service as T;
+            var type = typeof(T);
+            if (_services.TryGetValue(type, out var registered) && ReferenceEquals(registered, service))
+            {
+                _services.Remove(type);
+            }
         }
-        throw new InvalidOperationException($"Service {typeof(T).Name} not registered");
-    }
 
-    public static bool TryGet<T>(out T service) where T : class
-    {
-        if (_services.TryGetValue(typeof(T), out var obj))
+        public static T Get<T>() where T : class
         {
-            service = obj as T;
-            return true;
+            if (_services.TryGetValue(typeof(T), out var service))
+            {
+                return service as T;
+            }
+            throw new InvalidOperationException($"Service {typeof(T).Name} not registered");
         }
-        service = null;
-        return false;
-    }
 
-    public static void Clear()
-    {
-        _services.Clear();
+        public static bool TryGet<T>(out T service) where T : class
+        {
+            if (_services.TryGetValue(typeof(T), out var obj))
+            {
+                service = obj as T;
+                return true;
+            }
+            service = null;
+            return false;
+        }
+
+        public static void Clear()
+        {
+            _services.Clear();
+        }
     }
 }

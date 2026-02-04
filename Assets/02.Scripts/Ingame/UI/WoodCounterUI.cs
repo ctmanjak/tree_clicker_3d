@@ -1,51 +1,56 @@
-using UnityEngine;
+using Core;
+using Outgame;
 using TMPro;
+using UnityEngine;
 
-public class WoodCounterUI : MonoBehaviour
+namespace Ingame
 {
-    [SerializeField] private TextMeshProUGUI _woodText;
-
-    private CurrencyManager _currencyManager;
-    private bool _isSubscribed;
-
-    private void OnEnable()
+    public class WoodCounterUI : MonoBehaviour
     {
-        ServiceLocator.TryGet(out _currencyManager);
-        Subscribe();
-    }
+        [SerializeField] private TextMeshProUGUI _woodText;
 
-    private void OnDisable()
-    {
-        Unsubscribe();
-    }
+        private CurrencyManager _currencyManager;
+        private bool _isSubscribed;
 
-    private void Subscribe()
-    {
-        if (_isSubscribed || _currencyManager == null) return;
-
-        _currencyManager.OnCurrencyChanged += OnCurrencyChanged;
-        _isSubscribed = true;
-    }
-
-    private void Unsubscribe()
-    {
-        if (!_isSubscribed || _currencyManager == null) return;
-
-        _currencyManager.OnCurrencyChanged -= OnCurrencyChanged;
-        _isSubscribed = false;
-    }
-
-    private void OnCurrencyChanged(CurrencyType type, CurrencyValue amount)
-    {
-        if (type != CurrencyType.Wood) return;
-        UpdateDisplay(amount);
-    }
-
-    private void UpdateDisplay(CurrencyValue amount)
-    {
-        if (_woodText != null)
+        private void OnEnable()
         {
-            _woodText.text = amount.ToFormattedString();
+            ServiceLocator.TryGet(out _currencyManager);
+            Subscribe();
+        }
+
+        private void OnDisable()
+        {
+            Unsubscribe();
+        }
+
+        private void Subscribe()
+        {
+            if (_isSubscribed || _currencyManager == null) return;
+
+            _currencyManager.OnCurrencyChanged += OnCurrencyChanged;
+            _isSubscribed = true;
+        }
+
+        private void Unsubscribe()
+        {
+            if (!_isSubscribed || _currencyManager == null) return;
+
+            _currencyManager.OnCurrencyChanged -= OnCurrencyChanged;
+            _isSubscribed = false;
+        }
+
+        private void OnCurrencyChanged(CurrencyType type, CurrencyValue amount)
+        {
+            if (type != CurrencyType.Wood) return;
+            UpdateDisplay(amount);
+        }
+
+        private void UpdateDisplay(CurrencyValue amount)
+        {
+            if (_woodText != null)
+            {
+                _woodText.text = amount.ToFormattedString();
+            }
         }
     }
 }

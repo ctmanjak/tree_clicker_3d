@@ -1,97 +1,101 @@
 using System;
+using Core;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-[DefaultExecutionOrder(-50)]
-public class AccountManager : MonoBehaviour
+namespace Outgame
 {
-    public static AccountManager Instance { get; private set; }
-
-    private Account _currentAccount = null;
-    public bool IsLogin => _currentAccount != null;
-    public string Email => _currentAccount?.Email ?? string.Empty;
-
-    private IAccountRepository _repository;
-
-    private void Awake()
+    [DefaultExecutionOrder(-50)]
+    public class AccountManager : MonoBehaviour
     {
-        Instance = this;
-    }
+        public static AccountManager Instance { get; private set; }
 
-    private async UniTaskVoid Start()
-    {
-        await GameBootstrap.Instance.Initialization;
-        ServiceLocator.TryGet(out _repository);
-    }
+        private Account _currentAccount = null;
+        public bool IsLogin => _currentAccount != null;
+        public string Email => _currentAccount?.Email ?? string.Empty;
 
-    public async UniTask<AuthResult> TryLogin(string email, string password)
-    {
-        Account account;
-        try
+        private IAccountRepository _repository;
+
+        private void Awake()
         {
-            account = new Account(email, password);
+            Instance = this;
         }
-        catch (ArgumentException ex)
+
+        private async UniTaskVoid Start()
         {
+            await GameBootstrap.Instance.Initialization;
+            ServiceLocator.TryGet(out _repository);
+        }
+
+        public async UniTask<AuthResult> TryLogin(string email, string password)
+        {
+            Account account;
+            try
+            {
+                account = new Account(email, password);
+            }
+            catch (ArgumentException ex)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message,
+                };
+            }
+
+            AuthResult result = await _repository.Login(email, password);
+            if (result.Success)
+            {
+                _currentAccount = account;
+                return new AuthResult
+                {
+                    Success = true,
+                    Account = _currentAccount,
+                };
+            }
+
             return new AuthResult
             {
                 Success = false,
-                ErrorMessage = ex.Message,
+                ErrorMessage = result.ErrorMessage,
             };
         }
 
-        AuthResult result = await _repository.Login(email, password);
-        if (result.Success)
+        public async UniTask<AuthResult> TryRegister(string email, string password)
         {
-            _currentAccount = account;
-            return new AuthResult
+            try
             {
-                Success = true,
-                Account = _currentAccount,
-            };
-        }
+                Account account = new Account(email, password);
+            }
+            catch (ArgumentException ex)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message,
+                };
+            }
 
-        return new AuthResult
-        {
-            Success = false,
-            ErrorMessage = result.ErrorMessage,
-        };
-    }
+            AuthResult result = await _repository.Register(email, password);
+            if (result.Success)
+            {
+                return new AuthResult
+                {
+                    Success = true,
+                };
+            }
 
-    public async UniTask<AuthResult> TryRegister(string email, string password)
-    {
-        try
-        {
-            Account account = new Account(email, password);
-        }
-        catch (ArgumentException ex)
-        {
             return new AuthResult
             {
                 Success = false,
-                ErrorMessage = ex.Message,
+                ErrorMessage = result.ErrorMessage,
             };
         }
 
-        AuthResult result = await _repository.Register(email, password);
-        if (result.Success)
+        public void Logout()
         {
-            return new AuthResult
-            {
-                Success = true,
-            };
+            _currentAccount = null;
+            _repository.Logout();
         }
-
-        return new AuthResult
-        {
-            Success = false,
-            ErrorMessage = result.ErrorMessage,
-        };
-    }
-
-    public void Logout()
-    {
-        _currentAccount = null;
-        _repository.Logout();
     }
 }

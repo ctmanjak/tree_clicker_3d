@@ -1,6 +1,9 @@
-public enum FloatingTextStyle
+namespace Ingame
 {
-    Normal,
-    Critical,
-    Bonus
+    public enum FloatingTextStyle
+    {
+        Normal,
+        Critical,
+        Bonus
+    }
 }

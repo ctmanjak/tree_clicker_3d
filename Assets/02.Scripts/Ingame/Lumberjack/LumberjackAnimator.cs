@@ -1,45 +1,48 @@
 using System;
 using UnityEngine;
 
-public class LumberjackAnimator : MonoBehaviour
+namespace Ingame
 {
-    private static readonly int BlendParam = Animator.StringToHash("Blend");
-    private static readonly int AttackTrigger = Animator.StringToHash("Attack");
-    private static readonly int SpeedParam = Animator.StringToHash("Speed");
-
-    [SerializeField] private Animator _animator;
-
-    public event Action OnAttackHit;
-
-    private void Awake()
+    public class LumberjackAnimator : MonoBehaviour
     {
-        if (_animator == null)
+        private static readonly int BlendParam = Animator.StringToHash("Blend");
+        private static readonly int AttackTrigger = Animator.StringToHash("Attack");
+        private static readonly int SpeedParam = Animator.StringToHash("Speed");
+
+        [SerializeField] private Animator _animator;
+
+        public event Action OnAttackHit;
+
+        private void Awake()
         {
-            _animator = GetComponent<Animator>();
+            if (_animator == null)
+            {
+                _animator = GetComponent<Animator>();
+            }
         }
-    }
 
-    public void PlayAttack()
-    {
-        if (_animator == null) return;
-        _animator.SetTrigger(AttackTrigger);
-    }
+        public void PlayAttack()
+        {
+            if (_animator == null) return;
+            _animator.SetTrigger(AttackTrigger);
+        }
 
-    public void SetAnimationSpeed(float speed)
-    {
-        if (_animator == null) return;
-        _animator.SetFloat(SpeedParam, speed);
-    }
+        public void SetAnimationSpeed(float speed)
+        {
+            if (_animator == null) return;
+            _animator.SetFloat(SpeedParam, speed);
+        }
 
-    public void SetBlendValue(float value)
-    {
-        if (_animator == null) return;
-        _animator.SetFloat(BlendParam, Mathf.Clamp01(value));
-    }
+        public void SetBlendValue(float value)
+        {
+            if (_animator == null) return;
+            _animator.SetFloat(BlendParam, Mathf.Clamp01(value));
+        }
 
-    // Animation Event에서 호출
-    public void OnAttackHitEvent()
-    {
-        OnAttackHit?.Invoke();
+        // Animation Event에서 호출
+        public void OnAttackHitEvent()
+        {
+            OnAttackHit?.Invoke();
+        }
     }
 }

@@ -1,22 +1,25 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CloseAllPanelsButton : MonoBehaviour
+namespace Ingame
 {
-    [SerializeField] private Button _button;
-
-    private void OnEnable()
+    public class CloseAllPanelsButton : MonoBehaviour
     {
-        _button.onClick.AddListener(OnClick);
-    }
+        [SerializeField] private Button _button;
 
-    private void OnDisable()
-    {
-        _button.onClick.RemoveListener(OnClick);
-    }
+        private void OnEnable()
+        {
+            _button.onClick.AddListener(OnClick);
+        }
 
-    private void OnClick()
-    {
-        UpgradePanelToggle.CloseAllPanels();
+        private void OnDisable()
+        {
+            _button.onClick.RemoveListener(OnClick);
+        }
+
+        private void OnClick()
+        {
+            UpgradePanelToggle.CloseAllPanels();
+        }
     }
 }

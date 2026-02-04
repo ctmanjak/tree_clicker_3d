@@ -1,4 +1,6 @@
+using Core;
 using Cysharp.Threading.Tasks;
+using Outgame;
 using UnityEngine;
 
 [DefaultExecutionOrder(-100)]

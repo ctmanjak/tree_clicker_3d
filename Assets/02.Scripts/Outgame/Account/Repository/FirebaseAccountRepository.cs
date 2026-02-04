@@ -1,37 +1,40 @@
 using Cysharp.Threading.Tasks;
 
-public class FirebaseAccountRepository : IAccountRepository
+namespace Outgame
 {
-    private readonly IFirebaseAuthService _authService;
-
-    public FirebaseAccountRepository(IFirebaseAuthService authService)
+    public class FirebaseAccountRepository : IAccountRepository
     {
-        _authService = authService;
-    }
+        private readonly IFirebaseAuthService _authService;
 
-    public async UniTask<AuthResult> Register(string email, string password)
-    {
-        FirebaseAuthResult firebaseResult = await _authService.Register(email, password);
-        return ToAuthResult(firebaseResult);
-    }
-
-    public async UniTask<AuthResult> Login(string email, string password)
-    {
-        FirebaseAuthResult firebaseResult = await _authService.Login(email, password);
-        return ToAuthResult(firebaseResult);
-    }
-
-    public void Logout()
-    {
-        _authService.Logout();
-    }
-
-    private AuthResult ToAuthResult(FirebaseAuthResult firebaseResult)
-    {
-        return new AuthResult
+        public FirebaseAccountRepository(IFirebaseAuthService authService)
         {
-            Success = firebaseResult.Success,
-            ErrorMessage = firebaseResult.ErrorMessage,
-        };
+            _authService = authService;
+        }
+
+        public async UniTask<AuthResult> Register(string email, string password)
+        {
+            FirebaseAuthResult firebaseResult = await _authService.Register(email, password);
+            return ToAuthResult(firebaseResult);
+        }
+
+        public async UniTask<AuthResult> Login(string email, string password)
+        {
+            FirebaseAuthResult firebaseResult = await _authService.Login(email, password);
+            return ToAuthResult(firebaseResult);
+        }
+
+        public void Logout()
+        {
+            _authService.Logout();
+        }
+
+        private AuthResult ToAuthResult(FirebaseAuthResult firebaseResult)
+        {
+            return new AuthResult
+            {
+                Success = firebaseResult.Success,
+                ErrorMessage = firebaseResult.ErrorMessage,
+            };
+        }
     }
 }

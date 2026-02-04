@@ -1,6 +1,9 @@
 using UnityEngine;
 
-public interface IClickable
+namespace Ingame
 {
-    void OnClick(Vector3 hitPoint, Vector3 hitNormal);
+    public interface IClickable
+    {
+        void OnClick(Vector3 hitPoint, Vector3 hitNormal);
+    }
 }

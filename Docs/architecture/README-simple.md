@@ -1,0 +1,217 @@
+# 벌목왕 - 아키텍처 다이어그램 (요약본)
+
+> `README.md`의 다이어그램을 핵심 위주로 정리한 버전입니다.
+> 클래스명 옆 괄호는 해당 클래스의 역할 설명입니다.
+
+---
+
+## 1. 시스템 레이어 구조
+
+게임 코드는 3개 레이어로 나뉘고, 각 레이어는 명확한 역할을 갖습니다.
+
+```
+┌──────────────────────┐     ┌──────────────────────────┐
+│       Ingame         │ ←─→ │        Outgame           │
+│                      │     │                          │
+│  플레이어가 직접 보고  │     │  화면 뒤에서 돌아가는     │
+│  상호작용하는 영역     │     │  비즈니스 로직 영역       │
+│  (나무, 벌목꾼, UI,   │     │  (계정, 재화, 업그레이드)  │
+│   사운드, 이펙트)     │     │                          │
+└──────────┬───────────┘     └────────────┬─────────────┘
+           │                              │
+           └──────────┬───────────────────┘
+                      ▼
+         ┌─────────────────────────┐
+         │          Core           │
+         │                        │
+         │  모두가 공유하는 인프라   │
+         │  (ServiceLocator, 암호화)│
+         └─────────────────────────┘
+```
+
+**의존성 규칙**:
+- Ingame ↔ Outgame: 양방향 가능 (서로 협력)
+- Ingame/Outgame → Core: **단방향만 허용** (Core를 가져다 쓸 수만 있음)
+
+---
+
+## 2. 주요 컴포넌트 의존성
+
+```mermaid
+graph TB
+    subgraph "Ingame (화면/상호작용)"
+        TreeController["TreeController\n(나무 클릭 처리)"]
+        LumberjackController["LumberjackController\n(벌목꾼 AI)"]
+        UpgradeButtonUI["UpgradeButtonUI\n(업그레이드 버튼)"]
+        WoodCounterUI["WoodCounterUI\n(재화 표시)"]
+        LoginPanel["LoginPanel\n(로그인 화면)"]
+        LumberjackSpawner["LumberjackSpawner\n(벌목꾼 생성)"]
+    end
+
+    subgraph "Outgame (비즈니스 로직)"
+        CurrencyManager["CurrencyManager\n(재화 관리)"]
+        UpgradeManager["UpgradeManager\n(업그레이드 관리)"]
+        AccountManager["AccountManager\n(계정 관리)"]
+        EffectHandlers["IUpgradeEffectHandler\n(업그레이드 효과 처리)"]
+    end
+
+    subgraph "Core (인프라)"
+        ServiceLocator["ServiceLocator\n(서비스 레지스트리)"]
+    end
+
+    TreeController -->|"재화 추가 요청"| CurrencyManager
+    LumberjackController -->|"재화 추가 요청"| CurrencyManager
+    UpgradeButtonUI -->|"구매 요청"| UpgradeManager
+    UpgradeButtonUI -->|"잔액 확인"| CurrencyManager
+    WoodCounterUI -->|"현재 재화 조회"| CurrencyManager
+    LoginPanel -->|"로그인 요청"| AccountManager
+
+    UpgradeManager -->|"효과 위임"| EffectHandlers
+    EffectHandlers -->|"벌목꾼 스폰"| LumberjackSpawner
+
+    CurrencyManager --> ServiceLocator
+    UpgradeManager --> ServiceLocator
+    AccountManager --> ServiceLocator
+```
+
+**화살표 = 의존 방향**: A → B는 "A가 B를 사용한다"는 의미.
+실선(─) = 직접 참조, 점선(- -) = 인터페이스를 통한 간접 참조.
+
+---
+
+## 3. Repository 패턴 — 저장소 추상화
+
+데이터 저장 방식(Local / Firebase)을 인터페이스로 추상화해서, 어떤 저장소든 같은 방식으로 사용할 수 있게 합니다.
+
+```mermaid
+graph TB
+    subgraph "인터페이스 (계약)"
+        IAccountRepo["IAccountRepository"]
+        ICurrencyRepo["ICurrencyRepository"]
+        IUpgradeRepo["IUpgradeRepository"]
+    end
+
+    subgraph "Local 구현 (오프라인)"
+        LocalAccount["LocalAccountRepository\n(PlayerPrefs)"]
+        LocalCurrency["LocalCurrencyRepository\n(File I/O)"]
+        LocalUpgrade["LocalUpgradeRepository\n(File I/O)"]
+    end
+
+    subgraph "Firebase 구현 (온라인)"
+        FBAccount["FirebaseAccountRepository\n(Auth API)"]
+        FBCurrency["FirebaseCurrencyRepository\n(Firestore)"]
+        FBUpgrade["FirebaseUpgradeRepository\n(Firestore)"]
+    end
+
+    LocalAccount -.->|"구현"| IAccountRepo
+    LocalCurrency -.->|"구현"| ICurrencyRepo
+    LocalUpgrade -.->|"구현"| IUpgradeRepo
+
+    FBAccount -.->|"구현"| IAccountRepo
+    FBCurrency -.->|"구현"| ICurrencyRepo
+    FBUpgrade -.->|"구현"| IUpgradeRepo
+```
+
+Manager들은 인터페이스(I~Repository)만 알고, 실제 구현이 Local인지 Firebase인지 모릅니다.
+덕분에 저장소 교체 시 Manager 코드를 건드릴 필요가 없습니다.
+
+---
+
+## 4. 나무 클릭 → 재화 획득 흐름
+
+```mermaid
+graph TD
+    A["플레이어 터치/클릭"] --> B["InputHandler: Raycast로 나무 감지"]
+    B --> C["TreeController.OnClick()"]
+    C --> D["UpgradeManager에서 클릭당 획득량 조회"]
+    D --> E["CurrencyManager.Add(Wood, amount)"]
+    E --> F["Repository에 저장"]
+
+    E -->|"OnCurrencyChanged 이벤트"| G["WoodCounterUI 텍스트 갱신"]
+    E -->|"OnCurrencyAdded 이벤트"| H["FloatingTextSpawner: +N 텍스트"]
+    C -->|"OnTreeHit 이벤트"| I["TreeShake + ParticleEffect"]
+```
+
+핵심 포인트:
+- **이벤트 기반 통신**: CurrencyManager가 직접 UI를 호출하지 않고, 이벤트를 발행하면 구독자들이 각자 반응
+- **관심사 분리**: 재화 로직(Outgame)과 화면 표시(Ingame)가 이벤트로만 연결됨
+
+---
+
+## 5. 업그레이드 구매 흐름
+
+```mermaid
+graph TD
+    A["UpgradeButtonUI: 버튼 클릭"] --> B["UpgradeManager.TryPurchase()"]
+    B --> C{"CurrencyManager.CanAfford()?"}
+
+    C -->|"true"| D["CurrencyManager.Spend(Wood, cost)"]
+    D --> E["Upgrade.IncrementLevel()"]
+    E --> F["Upgrade.ApplyEffect()"]
+    F --> G["IUpgradeEffectHandler.OnEffectApplied()"]
+    G --> H["Repository에 저장"]
+    H --> I["OnUpgradePurchased 이벤트 → UI 갱신"]
+
+    C -->|"false"| J["구매 실패 → 거부 애니메이션"]
+```
+
+**Strategy 패턴**: 업그레이드 종류마다 다른 효과를 IUpgradeEffectHandler 구현체로 분리
+
+| 핸들러 | 하는 일 |
+|---|---|
+| WoodPerClickEffectHandler | 클릭당 목재 보너스 증가 |
+| LumberjackProductionEffectHandler | 벌목꾼 1명당 생산량 증가 |
+| SpawnLumberjackEffectHandler | 새 벌목꾼 스폰 |
+
+---
+
+## 6. 벌목꾼 AI 상태 머신
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle: 스폰 완료
+
+    Idle --> Moving: FindAndAttackTree()
+    Moving --> Attacking: 나무 도달
+    Attacking --> Idle: 공격 세트 완료
+
+    state Attacking {
+        [*] --> SwingAxe
+        SwingAxe --> HitTree: 애니메이션 이벤트
+        HitTree --> AddCurrency: CurrencyManager.Add()
+        AddCurrency --> Cooldown
+        Cooldown --> SwingAxe: 쿨다운 종료
+        Cooldown --> [*]: 공격 횟수 소진
+    }
+```
+
+벌목꾼은 **Idle → Moving → Attacking** 3개 상태를 순환합니다.
+Attacking 내부에서는 "휘두르기 → 적중 → 재화 추가 → 쿨다운"을 반복합니다.
+
+---
+
+## 7. 앱 부팅 시퀀스
+
+```mermaid
+graph TD
+    A["GameBootstrap.Awake()\nSingleton 초기화"] --> B["RepositoryFactory.CreateProvider()"]
+    B --> C{"Firebase SDK\n사용 가능?"}
+
+    C -->|"가능"| D["FirebaseInitializer.Initialize()"]
+    D --> E{"초기화 성공?"}
+    E -->|"성공"| F["FirebaseRepositoryProvider 생성"]
+    E -->|"실패"| G["LocalRepositoryProvider 생성"]
+    C -->|"불가"| G
+
+    F --> H["ServiceLocator에 Repository 등록\n(IAccountRepo, ICurrencyRepo, IUpgradeRepo)"]
+    G --> H
+
+    H --> I["각 Manager의 Start()에서\nServiceLocator.Get()으로 Repository 획득"]
+    I --> J["초기 데이터 로드 및 게임 시작"]
+```
+
+부팅 순서 요약:
+1. `GameBootstrap.Awake()` — 앱 진입점, Singleton 보장
+2. `RepositoryFactory` — Firebase 가능 여부에 따라 저장소 구현체 결정
+3. `ServiceLocator` — 결정된 Repository를 전역 레지스트리에 등록
+4. 각 Manager — `Start()`에서 ServiceLocator를 통해 Repository를 가져와 초기화

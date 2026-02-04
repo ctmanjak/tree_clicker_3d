@@ -1,3 +1,6 @@
-public interface IUpgradeRepository : IRepository<UpgradeSaveData>
+namespace Outgame
 {
+    public interface IUpgradeRepository : IRepository<UpgradeSaveData>
+    {
+    }
 }
