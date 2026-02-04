@@ -1,79 +1,82 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// 범용 오브젝트 풀링 시스템
-/// M2+에서 파티클, 벌목꾼 등에도 활용
-/// </summary>
-public class ObjectPool<T> where T : Component
+namespace Ingame
 {
-    private readonly T prefab;
-    private readonly Transform parent;
-    private readonly Queue<T> pool = new();
-    private readonly List<T> activeObjects = new();
-
-    public ObjectPool(T prefab, Transform parent, int initialSize = 10)
+    /// <summary>
+    /// 범용 오브젝트 풀링 시스템
+    /// M2+에서 파티클, 벌목꾼 등에도 활용
+    /// </summary>
+    public class ObjectPool<T> where T : Component
     {
-        this.prefab = prefab;
-        this.parent = parent;
+        private readonly T prefab;
+        private readonly Transform parent;
+        private readonly Queue<T> pool = new();
+        private readonly List<T> activeObjects = new();
 
-        for (int i = 0; i < initialSize; i++)
+        public ObjectPool(T prefab, Transform parent, int initialSize = 10)
         {
-            CreateNew();
-        }
-    }
+            this.prefab = prefab;
+            this.parent = parent;
 
-    private T CreateNew()
-    {
-        T obj = Object.Instantiate(prefab, parent);
-        obj.gameObject.SetActive(false);
-        pool.Enqueue(obj);
-        return obj;
-    }
-
-    public T Get()
-    {
-        T obj = pool.Count > 0 ? pool.Dequeue() : CreateNew();
-        obj.gameObject.SetActive(true);
-        activeObjects.Add(obj);
-        return obj;
-    }
-
-    public void Return(T obj)
-    {
-        obj.gameObject.SetActive(false);
-        activeObjects.Remove(obj);
-        pool.Enqueue(obj);
-    }
-
-    public void ReturnAll()
-    {
-        for (int i = activeObjects.Count - 1; i >= 0; i--)
-        {
-            var obj = activeObjects[i];
-            obj.gameObject.SetActive(false);
-            pool.Enqueue(obj);
-        }
-        activeObjects.Clear();
-    }
-
-    public void Clear()
-    {
-        foreach (var obj in activeObjects)
-        {
-            if (obj != null)
+            for (int i = 0; i < initialSize; i++)
             {
-                Object.Destroy(obj.gameObject);
+                CreateNew();
             }
         }
-        activeObjects.Clear();
 
-        while (pool.Count > 0)
+        private T CreateNew()
         {
-            var obj = pool.Dequeue();
-            if (obj != null)
+            T obj = Object.Instantiate(prefab, parent);
+            obj.gameObject.SetActive(false);
+            pool.Enqueue(obj);
+            return obj;
+        }
+
+        public T Get()
+        {
+            T obj = pool.Count > 0 ? pool.Dequeue() : CreateNew();
+            obj.gameObject.SetActive(true);
+            activeObjects.Add(obj);
+            return obj;
+        }
+
+        public void Return(T obj)
+        {
+            obj.gameObject.SetActive(false);
+            activeObjects.Remove(obj);
+            pool.Enqueue(obj);
+        }
+
+        public void ReturnAll()
+        {
+            for (int i = activeObjects.Count - 1; i >= 0; i--)
             {
-                Object.Destroy(obj.gameObject);
+                var obj = activeObjects[i];
+                obj.gameObject.SetActive(false);
+                pool.Enqueue(obj);
+            }
+            activeObjects.Clear();
+        }
+
+        public void Clear()
+        {
+            foreach (var obj in activeObjects)
+            {
+                if (obj != null)
+                {
+                    Object.Destroy(obj.gameObject);
+                }
+            }
+            activeObjects.Clear();
+
+            while (pool.Count > 0)
+            {
+                var obj = pool.Dequeue();
+                if (obj != null)
+                {
+                    Object.Destroy(obj.gameObject);
+                }
             }
         }
     }

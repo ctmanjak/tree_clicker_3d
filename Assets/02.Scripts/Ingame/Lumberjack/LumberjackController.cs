@@ -1,188 +1,193 @@
+using Core;
+using Outgame;
 using UnityEngine;
 
-public class LumberjackController : MonoBehaviour
+namespace Ingame
 {
-    private const float StopDistance = 0.1f;
-    private const float TreeSearchInterval = 1f;
-
-    [Header("Stats")]
-    [SerializeField] private CurrencyValue _woodPerSecond = CurrencyValue.One;
-    [SerializeField] private float _attackCooldown = 0.5f;
-    [SerializeField] private float _attackRange = 2f;
-
-    [Header("Animation")]
-    [SerializeField] private float _blendDampTime = 0.1f;
-    [SerializeField] private float _rotationSpeed = 10f;
-
-    private enum State { Idle, Moving, Attacking }
-    private State _currentState = State.Idle;
-
-    public bool IsMoving => _currentState == State.Moving;
-
-    private bool _isAttackAnimPlaying;
-    private float _attackCooldownTimer;
-    private CurrencyValue _woodAccumulator;
-    private float _treeSearchTimer = TreeSearchInterval;
-    private float _currentBlendValue;
-    private Vector3 _targetPosition;
-    private TreeController _treeController;
-    private AudioManager _audioManager;
-    private LumberjackAnimator _animator;
-
-    private void Awake()
+    public class LumberjackController : MonoBehaviour
     {
-        _animator = GetComponent<LumberjackAnimator>();
-    }
+        private const float StopDistance = 0.1f;
+        private const float TreeSearchInterval = 1f;
 
-    private void Start()
-    {
-        ServiceLocator.TryGet(out _audioManager);
+        [Header("Stats")]
+        [SerializeField] private CurrencyValue _woodPerSecond = CurrencyValue.One;
+        [SerializeField] private float _attackCooldown = 0.5f;
+        [SerializeField] private float _attackRange = 2f;
 
-        if (_animator != null)
+        [Header("Animation")]
+        [SerializeField] private float _blendDampTime = 0.1f;
+        [SerializeField] private float _rotationSpeed = 10f;
+
+        private enum State { Idle, Moving, Attacking }
+        private State _currentState = State.Idle;
+
+        public bool IsMoving => _currentState == State.Moving;
+
+        private bool _isAttackAnimPlaying;
+        private float _attackCooldownTimer;
+        private CurrencyValue _woodAccumulator;
+        private float _treeSearchTimer = TreeSearchInterval;
+        private float _currentBlendValue;
+        private Vector3 _targetPosition;
+        private TreeController _treeController;
+        private AudioManager _audioManager;
+        private LumberjackAnimator _animator;
+
+        private void Awake()
         {
-            _animator.OnAttackHit += OnSwingHit;
+            _animator = GetComponent<LumberjackAnimator>();
         }
 
-        FindTree();
-    }
-
-    private void OnDestroy()
-    {
-        if (_animator != null)
+        private void Start()
         {
-            _animator.OnAttackHit -= OnSwingHit;
-        }
-    }
+            ServiceLocator.TryGet(out _audioManager);
 
-    private void Update()
-    {
-        float targetBlend = 0f;
+            if (_animator != null)
+            {
+                _animator.OnAttackHit += OnSwingHit;
+            }
 
-        switch (_currentState)
-        {
-            case State.Idle:
-                FindTree();
-                break;
-            case State.Moving:
-                targetBlend = 1f;
-                MoveToTree();
-                break;
-            case State.Attacking:
-                Attack();
-                break;
+            FindTree();
         }
 
-        _currentBlendValue = Mathf.MoveTowards(_currentBlendValue, targetBlend, Time.deltaTime / _blendDampTime);
-        _animator?.SetBlendValue(_currentBlendValue);
-    }
-
-    private void FindTree()
-    {
-        if (_treeController == null)
+        private void OnDestroy()
         {
-            _treeSearchTimer += Time.deltaTime;
-            if (_treeSearchTimer < TreeSearchInterval) return;
-            _treeSearchTimer = 0f;
-
-            ServiceLocator.TryGet(out _treeController);
+            if (_animator != null)
+            {
+                _animator.OnAttackHit -= OnSwingHit;
+            }
         }
 
-        if (_treeController == null) return;
-
-        _targetPosition = _treeController.Position + GetRandomOffset();
-        _currentState = State.Moving;
-    }
-
-    private void MoveToTree()
-    {
-        if (_treeController == null)
+        private void Update()
         {
-            _currentState = State.Idle;
-            return;
+            float targetBlend = 0f;
+
+            switch (_currentState)
+            {
+                case State.Idle:
+                    FindTree();
+                    break;
+                case State.Moving:
+                    targetBlend = 1f;
+                    MoveToTree();
+                    break;
+                case State.Attacking:
+                    Attack();
+                    break;
+            }
+
+            _currentBlendValue = Mathf.MoveTowards(_currentBlendValue, targetBlend, Time.deltaTime / _blendDampTime);
+            _animator?.SetBlendValue(_currentBlendValue);
         }
 
-        Vector3 direction = _targetPosition - transform.position;
-        direction.y = 0;
-
-        if (direction.magnitude < StopDistance)
+        private void FindTree()
         {
-            _currentState = State.Attacking;
+            if (_treeController == null)
+            {
+                _treeSearchTimer += Time.deltaTime;
+                if (_treeSearchTimer < TreeSearchInterval) return;
+                _treeSearchTimer = 0f;
+
+                ServiceLocator.TryGet(out _treeController);
+            }
+
+            if (_treeController == null) return;
+
+            _targetPosition = _treeController.Position + GetRandomOffset();
+            _currentState = State.Moving;
+        }
+
+        private void MoveToTree()
+        {
+            if (_treeController == null)
+            {
+                _currentState = State.Idle;
+                return;
+            }
+
+            Vector3 direction = _targetPosition - transform.position;
+            direction.y = 0;
+
+            if (direction.magnitude < StopDistance)
+            {
+                _currentState = State.Attacking;
+                _attackCooldownTimer = 0f;
+                LookAtTree();
+                return;
+            }
+
+            Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
+        }
+
+        private void Attack()
+        {
+            if (_treeController == null)
+            {
+                _currentState = State.Idle;
+                return;
+            }
+
+            if (_isAttackAnimPlaying) return;
+
+            _attackCooldownTimer += Time.deltaTime;
+            if (_attackCooldownTimer < _attackCooldown) return;
+
             _attackCooldownTimer = 0f;
-            LookAtTree();
-            return;
+            _isAttackAnimPlaying = true;
+            _animator?.PlayAttack();
         }
 
-        Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
-    }
-
-    private void Attack()
-    {
-        if (_treeController == null)
+        public void OnSwingStart()
         {
-            _currentState = State.Idle;
-            return;
+            _audioManager?.PlaySFX(SFXType.Swing);
         }
 
-        if (_isAttackAnimPlaying) return;
-
-        _attackCooldownTimer += Time.deltaTime;
-        if (_attackCooldownTimer < _attackCooldown) return;
-
-        _attackCooldownTimer = 0f;
-        _isAttackAnimPlaying = true;
-        _animator?.PlayAttack();
-    }
-
-    public void OnSwingStart()
-    {
-        _audioManager?.PlaySFX(SFXType.Swing);
-    }
-
-    public void OnSwingHit()
-    {
-        if (_treeController == null) return;
-
-        _audioManager?.PlaySFX(SFXType.Hit);
-        _woodAccumulator += _woodPerSecond;
-
-        if (_woodAccumulator >= CurrencyValue.One)
+        public void OnSwingHit()
         {
-            CurrencyValue woodToAdd = _woodAccumulator.Floor();
-            _treeController.Hit(woodToAdd, transform.position);
-            _woodAccumulator -= woodToAdd;
+            if (_treeController == null) return;
+
+            _audioManager?.PlaySFX(SFXType.Hit);
+            _woodAccumulator += _woodPerSecond;
+
+            if (_woodAccumulator >= CurrencyValue.One)
+            {
+                CurrencyValue woodToAdd = _woodAccumulator.Floor();
+                _treeController.Hit(woodToAdd, transform.position);
+                _woodAccumulator -= woodToAdd;
+            }
         }
-    }
 
-    // Animation Event 또는 LumberjackAnimationReceiver에서 호출
-    public void OnAttackAnimationEnd()
-    {
-        _isAttackAnimPlaying = false;
-    }
-
-    private void LookAtTree()
-    {
-        if (_treeController == null) return;
-
-        Vector3 lookDir = _treeController.Position - transform.position;
-        lookDir.y = 0;
-
-        if (lookDir.magnitude > StopDistance)
+        // Animation Event 또는 LumberjackAnimationReceiver에서 호출
+        public void OnAttackAnimationEnd()
         {
-            transform.rotation = Quaternion.LookRotation(lookDir);
+            _isAttackAnimPlaying = false;
         }
-    }
 
-    private Vector3 GetRandomOffset()
-    {
-        float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-        float distance = Random.Range(_attackRange * 0.8f, _attackRange);
-        return new Vector3(Mathf.Cos(angle) * distance, 0, Mathf.Sin(angle) * distance);
-    }
+        private void LookAtTree()
+        {
+            if (_treeController == null) return;
 
-    public void SetStats(CurrencyValue woodPerSecond, float animationSpeed)
-    {
-        _woodPerSecond = woodPerSecond;
-        _animator?.SetAnimationSpeed(animationSpeed);
+            Vector3 lookDir = _treeController.Position - transform.position;
+            lookDir.y = 0;
+
+            if (lookDir.magnitude > StopDistance)
+            {
+                transform.rotation = Quaternion.LookRotation(lookDir);
+            }
+        }
+
+        private Vector3 GetRandomOffset()
+        {
+            float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            float distance = Random.Range(_attackRange * 0.8f, _attackRange);
+            return new Vector3(Mathf.Cos(angle) * distance, 0, Mathf.Sin(angle) * distance);
+        }
+
+        public void SetStats(CurrencyValue woodPerSecond, float animationSpeed)
+        {
+            _woodPerSecond = woodPerSecond;
+            _animator?.SetAnimationSpeed(animationSpeed);
+        }
     }
 }

@@ -2,41 +2,44 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
-public class Firewood : MonoBehaviour
+namespace Ingame
 {
-    [SerializeField] private float _lifetime = 1.5f;
-
-    private Rigidbody _rigidbody;
-    private Action<Firewood> _onComplete;
-
-    private void Awake()
+    [RequireComponent(typeof(Rigidbody))]
+    public class Firewood : MonoBehaviour
     {
-        _rigidbody = GetComponent<Rigidbody>();
-    }
+        [SerializeField] private float _lifetime = 1.5f;
 
-    public void Initialize(Action<Firewood> returnToPool)
-    {
-        _onComplete = returnToPool;
-    }
+        private Rigidbody _rigidbody;
+        private Action<Firewood> _onComplete;
 
-    public void Launch(Vector3 position, Vector3 force)
-    {
-        transform.position = position;
-        transform.rotation = UnityEngine.Random.rotation;
+        private void Awake()
+        {
+            _rigidbody = GetComponent<Rigidbody>();
+        }
 
-        _rigidbody.linearVelocity = Vector3.zero;
-        _rigidbody.angularVelocity = Vector3.zero;
-        _rigidbody.AddForce(force, ForceMode.Impulse);
-        _rigidbody.AddTorque(UnityEngine.Random.insideUnitSphere * 5f, ForceMode.Impulse);
+        public void Initialize(Action<Firewood> returnToPool)
+        {
+            _onComplete = returnToPool;
+        }
 
-        StopAllCoroutines();
-        StartCoroutine(ReturnAfterDelay());
-    }
+        public void Launch(Vector3 position, Vector3 force)
+        {
+            transform.position = position;
+            transform.rotation = UnityEngine.Random.rotation;
 
-    private IEnumerator ReturnAfterDelay()
-    {
-        yield return new WaitForSeconds(_lifetime);
-        _onComplete?.Invoke(this);
+            _rigidbody.linearVelocity = Vector3.zero;
+            _rigidbody.angularVelocity = Vector3.zero;
+            _rigidbody.AddForce(force, ForceMode.Impulse);
+            _rigidbody.AddTorque(UnityEngine.Random.insideUnitSphere * 5f, ForceMode.Impulse);
+
+            StopAllCoroutines();
+            StartCoroutine(ReturnAfterDelay());
+        }
+
+        private IEnumerator ReturnAfterDelay()
+        {
+            yield return new WaitForSeconds(_lifetime);
+            _onComplete?.Invoke(this);
+        }
     }
 }

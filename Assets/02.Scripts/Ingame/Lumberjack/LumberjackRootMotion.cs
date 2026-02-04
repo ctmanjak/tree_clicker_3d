@@ -1,50 +1,53 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Animator))]
-public class LumberjackRootMotion : MonoBehaviour
+namespace Ingame
 {
-    private const float Gravity = -9.81f;
-
-    private Animator _animator;
-    private LumberjackController _controller;
-    private CharacterController _characterController;
-    private float _verticalVelocity;
-
-    private void Awake()
+    [RequireComponent(typeof(Animator))]
+    public class LumberjackRootMotion : MonoBehaviour
     {
-        _animator = GetComponent<Animator>();
-        _controller = GetComponentInParent<LumberjackController>();
-        _characterController = GetComponentInParent<CharacterController>();
-    }
+        private const float Gravity = -9.81f;
 
-    private void OnAnimatorMove()
-    {
-        if (_controller == null) return;
+        private Animator _animator;
+        private LumberjackController _controller;
+        private CharacterController _characterController;
+        private float _verticalVelocity;
 
-        Vector3 movement = Vector3.zero;
-
-        if (_controller.IsMoving)
+        private void Awake()
         {
-            movement = _animator.deltaPosition;
+            _animator = GetComponent<Animator>();
+            _controller = GetComponentInParent<LumberjackController>();
+            _characterController = GetComponentInParent<CharacterController>();
         }
 
-        if (_characterController != null)
+        private void OnAnimatorMove()
         {
-            if (_characterController.isGrounded)
+            if (_controller == null) return;
+
+            Vector3 movement = Vector3.zero;
+
+            if (_controller.IsMoving)
             {
-                _verticalVelocity = -0.5f;
+                movement = _animator.deltaPosition;
+            }
+
+            if (_characterController != null)
+            {
+                if (_characterController.isGrounded)
+                {
+                    _verticalVelocity = -0.5f;
+                }
+                else
+                {
+                    _verticalVelocity += Gravity * Time.deltaTime;
+                }
+
+                movement.y = _verticalVelocity * Time.deltaTime;
+                _characterController.Move(movement);
             }
             else
             {
-                _verticalVelocity += Gravity * Time.deltaTime;
+                _controller.transform.position += movement;
             }
-
-            movement.y = _verticalVelocity * Time.deltaTime;
-            _characterController.Move(movement);
-        }
-        else
-        {
-            _controller.transform.position += movement;
         }
     }
 }

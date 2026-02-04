@@ -1,89 +1,94 @@
-using UnityEngine;
 using System.Collections.Generic;
+using Core;
+using Outgame;
+using UnityEngine;
 
-public class LumberjackSpawner : MonoBehaviour
+namespace Ingame
 {
-    private const float RandomSpawnDistance = 10f;
-
-    [SerializeField] private GameObject _lumberjackPrefab;
-    [SerializeField] private Transform _spawnPoint;
-    [SerializeField] private int _maxLumberjacks = 20;
-
-    private HashSet<LumberjackController> _activeLumberjacks = new();
-
-    public int ActiveCount => _activeLumberjacks.Count;
-
-    private void Awake()
+    public class LumberjackSpawner : MonoBehaviour
     {
-        ServiceLocator.Register(this);
-    }
+        private const float RandomSpawnDistance = 10f;
 
-    private void OnDestroy()
-    {
-        ServiceLocator.Unregister(this);
-    }
+        [SerializeField] private GameObject _lumberjackPrefab;
+        [SerializeField] private Transform _spawnPoint;
+        [SerializeField] private int _maxLumberjacks = 20;
 
-    public bool CanSpawn => _activeLumberjacks.Count < _maxLumberjacks;
+        private HashSet<LumberjackController> _activeLumberjacks = new();
 
-    public LumberjackController SpawnLumberjack(CurrencyValue woodPerSecond)
-    {
-        if (!CanSpawn)
+        public int ActiveCount => _activeLumberjacks.Count;
+
+        private void Awake()
         {
-            Debug.LogWarning("Maximum lumberjacks reached!");
-            return null;
+            ServiceLocator.Register(this);
         }
 
-        Vector3 spawnPos = _spawnPoint != null ? _spawnPoint.position : GetRandomSpawnPosition();
-        GameObject obj = Instantiate(_lumberjackPrefab, spawnPos, Quaternion.identity);
-
-        if (obj.TryGetComponent(out LumberjackController controller))
+        private void OnDestroy()
         {
-            _activeLumberjacks.Add(controller);
-            controller.SetStats(woodPerSecond, 1f);
+            ServiceLocator.Unregister(this);
         }
 
-        if (obj.TryGetComponent(out SpawnEffect spawnEffect))
+        public bool CanSpawn => _activeLumberjacks.Count < _maxLumberjacks;
+
+        public LumberjackController SpawnLumberjack(CurrencyValue woodPerSecond)
         {
-            spawnEffect.PlaySpawnAnimation();
+            if (!CanSpawn)
+            {
+                Debug.LogWarning("Maximum lumberjacks reached!");
+                return null;
+            }
+
+            Vector3 spawnPos = _spawnPoint != null ? _spawnPoint.position : GetRandomSpawnPosition();
+            GameObject obj = Instantiate(_lumberjackPrefab, spawnPos, Quaternion.identity);
+
+            if (obj.TryGetComponent(out LumberjackController controller))
+            {
+                _activeLumberjacks.Add(controller);
+                controller.SetStats(woodPerSecond, 1f);
+            }
+
+            if (obj.TryGetComponent(out SpawnEffect spawnEffect))
+            {
+                spawnEffect.PlaySpawnAnimation();
+            }
+
+            return controller;
         }
 
-        return controller;
-    }
-
-    private Vector3 GetRandomSpawnPosition()
-    {
-        float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-        float distance = RandomSpawnDistance;
-        return new Vector3(Mathf.Cos(angle) * distance, 0, Mathf.Sin(angle) * distance);
-    }
-
-    public void RemoveLumberjack(LumberjackController lumberjack)
-    {
-        if (_activeLumberjacks.Remove(lumberjack))
+        private Vector3 GetRandomSpawnPosition()
         {
-            Destroy(lumberjack.gameObject);
+            float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            float distance = RandomSpawnDistance;
+            return new Vector3(Mathf.Cos(angle) * distance, 0, Mathf.Sin(angle) * distance);
         }
-    }
 
-    public void ClearAll()
-    {
-        foreach (var lumberjack in _activeLumberjacks)
+        public void RemoveLumberjack(LumberjackController lumberjack)
         {
-            if (lumberjack != null)
+            if (_activeLumberjacks.Remove(lumberjack))
             {
                 Destroy(lumberjack.gameObject);
             }
         }
-        _activeLumberjacks.Clear();
-    }
 
-    public void UpdateAllLumberjackStats(CurrencyValue woodPerSecond)
-    {
-        foreach (var lumberjack in _activeLumberjacks)
+        public void ClearAll()
         {
-            if (lumberjack != null)
+            foreach (var lumberjack in _activeLumberjacks)
             {
-                lumberjack.SetStats(woodPerSecond, 1f);
+                if (lumberjack != null)
+                {
+                    Destroy(lumberjack.gameObject);
+                }
+            }
+            _activeLumberjacks.Clear();
+        }
+
+        public void UpdateAllLumberjackStats(CurrencyValue woodPerSecond)
+        {
+            foreach (var lumberjack in _activeLumberjacks)
+            {
+                if (lumberjack != null)
+                {
+                    lumberjack.SetStats(woodPerSecond, 1f);
+                }
             }
         }
     }

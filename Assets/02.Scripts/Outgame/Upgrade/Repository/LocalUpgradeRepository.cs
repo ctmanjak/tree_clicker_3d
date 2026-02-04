@@ -4,57 +4,60 @@ using System.IO;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public class LocalUpgradeRepository : IUpgradeRepository
+namespace Outgame
 {
-    private readonly Dictionary<string, UpgradeSaveData> _data = new();
-
-    private string SavePath => Path.Combine(Application.persistentDataPath, "upgrade_save.json");
-
-    public UniTask<List<UpgradeSaveData>> Initialize()
+    public class LocalUpgradeRepository : IUpgradeRepository
     {
-        LoadFromFile();
-        return UniTask.FromResult(new List<UpgradeSaveData>(_data.Values));
-    }
+        private readonly Dictionary<string, UpgradeSaveData> _data = new();
 
-    public void Save(UpgradeSaveData item)
-    {
-        _data[item.Id] = item;
-        SaveToFile();
-    }
+        private string SavePath => Path.Combine(Application.persistentDataPath, "upgrade_save.json");
 
-    private void SaveToFile()
-    {
-        var collection = new SaveDataCollection();
-        collection.Entries.AddRange(_data.Values);
-        string json = JsonUtility.ToJson(collection, true);
-        File.WriteAllText(SavePath, json);
-    }
-
-    private void LoadFromFile()
-    {
-        if (!File.Exists(SavePath)) return;
-
-        try
+        public UniTask<List<UpgradeSaveData>> Initialize()
         {
-            string json = File.ReadAllText(SavePath);
-            var saveData = JsonUtility.FromJson<SaveDataCollection>(json);
+            LoadFromFile();
+            return UniTask.FromResult(new List<UpgradeSaveData>(_data.Values));
+        }
 
-            if (saveData?.Entries == null) return;
+        public void Save(UpgradeSaveData item)
+        {
+            _data[item.Id] = item;
+            SaveToFile();
+        }
 
-            foreach (var entry in saveData.Entries)
+        private void SaveToFile()
+        {
+            var collection = new SaveDataCollection();
+            collection.Entries.AddRange(_data.Values);
+            string json = JsonUtility.ToJson(collection, true);
+            File.WriteAllText(SavePath, json);
+        }
+
+        private void LoadFromFile()
+        {
+            if (!File.Exists(SavePath)) return;
+
+            try
             {
-                _data[entry.Id] = entry;
+                string json = File.ReadAllText(SavePath);
+                var saveData = JsonUtility.FromJson<SaveDataCollection>(json);
+
+                if (saveData?.Entries == null) return;
+
+                foreach (var entry in saveData.Entries)
+                {
+                    _data[entry.Id] = entry;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Failed to load upgrade data: {e.Message}");
             }
         }
-        catch (Exception e)
-        {
-            Debug.LogWarning($"Failed to load upgrade data: {e.Message}");
-        }
-    }
 
-    [Serializable]
-    private class SaveDataCollection
-    {
-        public List<UpgradeSaveData> Entries = new();
+        [Serializable]
+        private class SaveDataCollection
+        {
+            public List<UpgradeSaveData> Entries = new();
+        }
     }
 }

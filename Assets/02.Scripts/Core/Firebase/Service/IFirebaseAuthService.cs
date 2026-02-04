@@ -1,12 +1,15 @@
 using Cysharp.Threading.Tasks;
 
-public interface IFirebaseAuthService
+namespace Core
 {
-    bool IsInitialized { get; }
-    string CurrentUserId { get; }
-    bool IsLoggedIn { get; }
-    UniTask Initialize();
-    UniTask<FirebaseAuthResult> Register(string email, string password);
-    UniTask<FirebaseAuthResult> Login(string email, string password);
-    void Logout();
+    public interface IFirebaseAuthService
+    {
+        bool IsInitialized { get; }
+        string CurrentUserId { get; }
+        bool IsLoggedIn { get; }
+        UniTask Initialize();
+        UniTask<FirebaseAuthResult> Register(string email, string password);
+        UniTask<FirebaseAuthResult> Login(string email, string password);
+        void Logout();
+    }
 }

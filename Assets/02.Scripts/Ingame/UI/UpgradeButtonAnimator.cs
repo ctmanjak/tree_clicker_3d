@@ -1,214 +1,218 @@
+using Core;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
 
-public class UpgradeButtonAnimator : MonoBehaviour
+namespace Ingame
 {
-    [Header("Pulse Animation")]
-    [SerializeField] private float _pulseScale = 1.05f;
-    [SerializeField] private float _pulseDuration = 0.5f;
-
-    [Header("Purchase Animation")]
-    [SerializeField] private float _purchaseScale = 1.2f;
-    [SerializeField] private float _purchaseDuration = 0.2f;
-    [SerializeField] private Color _purchaseFlashColor = new Color(0.3f, 1f, 0.3f);
-
-    [Header("Denied Animation")]
-    [SerializeField] private float _shakeStrength = 10f;
-    [SerializeField] private float _shakeDuration = 0.15f;
-    [SerializeField] private Color _deniedFlashColor = new Color(1f, 0.3f, 0.3f);
-
-    [Header("References")]
-    [SerializeField] private RectTransform _targetTransform;
-    [SerializeField] private Image[] _backgroundImages;
-
-    private Tween _pulseTween;
-    private Sequence _currentSequence;
-    private Color[] _originalColors;
-    private Vector2 _originalPosition;
-    private AudioManager _audioManager;
-    private bool _isPulsing;
-
-    private void Awake()
+    public class UpgradeButtonAnimator : MonoBehaviour
     {
-        if (_targetTransform == null)
-        {
-            _targetTransform = GetComponent<RectTransform>();
-        }
+        [Header("Pulse Animation")]
+        [SerializeField] private float _pulseScale = 1.05f;
+        [SerializeField] private float _pulseDuration = 0.5f;
 
-        if (_targetTransform != null)
-        {
-            _originalPosition = _targetTransform.anchoredPosition;
-        }
+        [Header("Purchase Animation")]
+        [SerializeField] private float _purchaseScale = 1.2f;
+        [SerializeField] private float _purchaseDuration = 0.2f;
+        [SerializeField] private Color _purchaseFlashColor = new Color(0.3f, 1f, 0.3f);
 
-        if (_backgroundImages == null || _backgroundImages.Length == 0)
+        [Header("Denied Animation")]
+        [SerializeField] private float _shakeStrength = 10f;
+        [SerializeField] private float _shakeDuration = 0.15f;
+        [SerializeField] private Color _deniedFlashColor = new Color(1f, 0.3f, 0.3f);
+
+        [Header("References")]
+        [SerializeField] private RectTransform _targetTransform;
+        [SerializeField] private Image[] _backgroundImages;
+
+        private Tween _pulseTween;
+        private Sequence _currentSequence;
+        private Color[] _originalColors;
+        private Vector2 _originalPosition;
+        private AudioManager _audioManager;
+        private bool _isPulsing;
+
+        private void Awake()
         {
-            var image = GetComponent<Image>();
-            if (image != null)
+            if (_targetTransform == null)
             {
-                _backgroundImages = new[] { image };
+                _targetTransform = GetComponent<RectTransform>();
             }
-        }
 
-        if (_backgroundImages != null && _backgroundImages.Length > 0)
-        {
-            _originalColors = new Color[_backgroundImages.Length];
-            for (int i = 0; i < _backgroundImages.Length; i++)
+            if (_targetTransform != null)
             {
-                if (_backgroundImages[i] != null)
+                _originalPosition = _targetTransform.anchoredPosition;
+            }
+
+            if (_backgroundImages == null || _backgroundImages.Length == 0)
+            {
+                var image = GetComponent<Image>();
+                if (image != null)
                 {
-                    _originalColors[i] = _backgroundImages[i].color;
+                    _backgroundImages = new[] { image };
+                }
+            }
+
+            if (_backgroundImages != null && _backgroundImages.Length > 0)
+            {
+                _originalColors = new Color[_backgroundImages.Length];
+                for (int i = 0; i < _backgroundImages.Length; i++)
+                {
+                    if (_backgroundImages[i] != null)
+                    {
+                        _originalColors[i] = _backgroundImages[i].color;
+                    }
                 }
             }
         }
-    }
 
-    private void Start()
-    {
-        ServiceLocator.TryGet(out _audioManager);
-    }
-
-    private void OnDestroy()
-    {
-        KillAllTweens();
-    }
-
-    public void StartPulseAnimation()
-    {
-        if (_isPulsing || _targetTransform == null) return;
-
-        _isPulsing = true;
-        _pulseTween?.Kill();
-        _targetTransform.localScale = Vector3.one;
-
-        _pulseTween = _targetTransform
-            .DOScale(_pulseScale, _pulseDuration)
-            .SetEase(Ease.InOutSine)
-            .SetLoops(-1, LoopType.Yoyo);
-    }
-
-    public void StopPulseAnimation()
-    {
-        if (!_isPulsing) return;
-
-        _isPulsing = false;
-        _pulseTween?.Kill();
-        _pulseTween = null;
-        _targetTransform.localScale = Vector3.one;
-    }
-
-    public void PlayPurchaseAnimation()
-    {
-        if (_targetTransform == null) return;
-
-        bool wasPulsing = _isPulsing;
-        ResetToOriginalState();
-
-        _currentSequence = DOTween.Sequence();
-        _currentSequence.Append(_targetTransform.DOPunchScale(Vector3.one * (_purchaseScale - 1f), _purchaseDuration, 1, 0.5f));
-        AddColorFlashToSequence(_currentSequence, _purchaseFlashColor, _purchaseDuration);
-
-        if (wasPulsing)
+        private void Start()
         {
-            _currentSequence.OnComplete(StartPulseAnimation);
+            ServiceLocator.TryGet(out _audioManager);
         }
-    }
 
-    public void PlayDeniedAnimation()
-    {
-        if (_targetTransform == null) return;
-
-        _audioManager?.PlaySFX(SFXType.UpgradeDenied);
-
-        bool wasPulsing = _isPulsing;
-        ResetToOriginalState();
-
-        _currentSequence = DOTween.Sequence();
-        _currentSequence.Append(_targetTransform.DOShakeAnchorPos(_shakeDuration, new Vector2(_shakeStrength, 0), 10, 90, false, true));
-        AddColorFlashToSequence(_currentSequence, _deniedFlashColor, _shakeDuration);
-
-        if (wasPulsing)
+        private void OnDestroy()
         {
-            _currentSequence.OnComplete(StartPulseAnimation);
+            KillAllTweens();
         }
-    }
 
-    private void ResetToOriginalState()
-    {
-        _isPulsing = false;
-        KillAllTweens();
-
-        if (_targetTransform != null)
+        public void StartPulseAnimation()
         {
+            if (_isPulsing || _targetTransform == null) return;
+
+            _isPulsing = true;
+            _pulseTween?.Kill();
             _targetTransform.localScale = Vector3.one;
-            _targetTransform.anchoredPosition = _originalPosition;
+
+            _pulseTween = _targetTransform
+                .DOScale(_pulseScale, _pulseDuration)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo);
         }
 
-        ResetColors();
-    }
-
-    private void KillAllTweens()
-    {
-        _pulseTween?.Kill();
-        _pulseTween = null;
-        _currentSequence?.Kill();
-        _currentSequence = null;
-
-        if (_targetTransform != null)
+        public void StopPulseAnimation()
         {
-            _targetTransform.DOKill();
+            if (!_isPulsing) return;
+
+            _isPulsing = false;
+            _pulseTween?.Kill();
+            _pulseTween = null;
+            _targetTransform.localScale = Vector3.one;
         }
 
-        if (_backgroundImages != null)
+        public void PlayPurchaseAnimation()
         {
+            if (_targetTransform == null) return;
+
+            bool wasPulsing = _isPulsing;
+            ResetToOriginalState();
+
+            _currentSequence = DOTween.Sequence();
+            _currentSequence.Append(_targetTransform.DOPunchScale(Vector3.one * (_purchaseScale - 1f), _purchaseDuration, 1, 0.5f));
+            AddColorFlashToSequence(_currentSequence, _purchaseFlashColor, _purchaseDuration);
+
+            if (wasPulsing)
+            {
+                _currentSequence.OnComplete(StartPulseAnimation);
+            }
+        }
+
+        public void PlayDeniedAnimation()
+        {
+            if (_targetTransform == null) return;
+
+            _audioManager?.PlaySFX(SFXType.UpgradeDenied);
+
+            bool wasPulsing = _isPulsing;
+            ResetToOriginalState();
+
+            _currentSequence = DOTween.Sequence();
+            _currentSequence.Append(_targetTransform.DOShakeAnchorPos(_shakeDuration, new Vector2(_shakeStrength, 0), 10, 90, false, true));
+            AddColorFlashToSequence(_currentSequence, _deniedFlashColor, _shakeDuration);
+
+            if (wasPulsing)
+            {
+                _currentSequence.OnComplete(StartPulseAnimation);
+            }
+        }
+
+        private void ResetToOriginalState()
+        {
+            _isPulsing = false;
+            KillAllTweens();
+
+            if (_targetTransform != null)
+            {
+                _targetTransform.localScale = Vector3.one;
+                _targetTransform.anchoredPosition = _originalPosition;
+            }
+
+            ResetColors();
+        }
+
+        private void KillAllTweens()
+        {
+            _pulseTween?.Kill();
+            _pulseTween = null;
+            _currentSequence?.Kill();
+            _currentSequence = null;
+
+            if (_targetTransform != null)
+            {
+                _targetTransform.DOKill();
+            }
+
+            if (_backgroundImages != null)
+            {
+                for (int i = 0; i < _backgroundImages.Length; i++)
+                {
+                    if (_backgroundImages[i] != null)
+                    {
+                        _backgroundImages[i].DOKill();
+                    }
+                }
+            }
+        }
+
+        private void ResetColors()
+        {
+            if (_backgroundImages == null || _originalColors == null) return;
+
             for (int i = 0; i < _backgroundImages.Length; i++)
             {
                 if (_backgroundImages[i] != null)
                 {
-                    _backgroundImages[i].DOKill();
+                    _backgroundImages[i].color = _originalColors[i];
                 }
             }
         }
-    }
 
-    private void ResetColors()
-    {
-        if (_backgroundImages == null || _originalColors == null) return;
-
-        for (int i = 0; i < _backgroundImages.Length; i++)
+        private void AddColorFlashToSequence(Sequence sequence, Color flashColor, float duration)
         {
-            if (_backgroundImages[i] != null)
-            {
-                _backgroundImages[i].color = _originalColors[i];
-            }
-        }
-    }
+            if (_backgroundImages == null || _originalColors == null) return;
 
-    private void AddColorFlashToSequence(Sequence sequence, Color flashColor, float duration)
-    {
-        if (_backgroundImages == null || _originalColors == null) return;
-
-        for (int i = 0; i < _backgroundImages.Length; i++)
-        {
-            if (_backgroundImages[i] != null)
+            for (int i = 0; i < _backgroundImages.Length; i++)
             {
-                sequence.Join(_backgroundImages[i].DOColor(flashColor, duration * 0.3f));
-            }
-        }
-
-        for (int i = 0; i < _backgroundImages.Length; i++)
-        {
-            if (_backgroundImages[i] != null)
-            {
-                int index = i;
-                Tween colorRestore = _backgroundImages[index].DOColor(_originalColors[index], duration * 0.7f);
-                if (i == 0)
+                if (_backgroundImages[i] != null)
                 {
-                    sequence.Append(colorRestore);
+                    sequence.Join(_backgroundImages[i].DOColor(flashColor, duration * 0.3f));
                 }
-                else
+            }
+
+            for (int i = 0; i < _backgroundImages.Length; i++)
+            {
+                if (_backgroundImages[i] != null)
                 {
-                    sequence.Join(colorRestore);
+                    int index = i;
+                    Tween colorRestore = _backgroundImages[index].DOColor(_originalColors[index], duration * 0.7f);
+                    if (i == 0)
+                    {
+                        sequence.Append(colorRestore);
+                    }
+                    else
+                    {
+                        sequence.Join(colorRestore);
+                    }
                 }
             }
         }

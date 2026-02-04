@@ -1,34 +1,39 @@
+using Core;
+using Outgame;
 using UnityEngine;
 
-public class UpgradePanelUI : MonoBehaviour
+namespace Ingame
 {
-    [SerializeField] private UpgradeButtonUI _buttonPrefab;
-    [SerializeField] private Transform _contentParent;
-    [SerializeField] private UpgradeType[] _filterTypes;
-
-    private UpgradeManager _upgradeManager;
-
-    private void Start()
+    public class UpgradePanelUI : MonoBehaviour
     {
-        ServiceLocator.TryGet(out _upgradeManager);
+        [SerializeField] private UpgradeButtonUI _buttonPrefab;
+        [SerializeField] private Transform _contentParent;
+        [SerializeField] private UpgradeType[] _filterTypes;
 
-        if (_upgradeManager == null)
+        private UpgradeManager _upgradeManager;
+
+        private void Start()
         {
-            Debug.LogError("UpgradeManager not found");
-            return;
+            ServiceLocator.TryGet(out _upgradeManager);
+
+            if (_upgradeManager == null)
+            {
+                Debug.LogError("UpgradeManager not found");
+                return;
+            }
+
+            CreateButtons();
         }
 
-        CreateButtons();
-    }
-
-    private void CreateButtons()
-    {
-        foreach (var filterType in _filterTypes)
+        private void CreateButtons()
         {
-            foreach (var upgrade in _upgradeManager.GetUpgradesByType(filterType))
+            foreach (var filterType in _filterTypes)
             {
-                var button = Instantiate(_buttonPrefab, _contentParent);
-                button.Init(upgrade, _upgradeManager);
+                foreach (var upgrade in _upgradeManager.GetUpgradesByType(filterType))
+                {
+                    var button = Instantiate(_buttonPrefab, _contentParent);
+                    button.Init(upgrade, _upgradeManager);
+                }
             }
         }
     }

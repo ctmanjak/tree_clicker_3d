@@ -2,97 +2,100 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UpgradePanelToggle : MonoBehaviour
+namespace Ingame
 {
-    [SerializeField] private GameObject _upgradePanel;
-    [SerializeField] private Button _toggleButton;
-
-    private static event Action<UpgradePanelToggle> OnPanelOpened;
-    private static event Action OnAllPanelsClosed;
-
-    private PanelTransition _panelTransition;
-    private bool _isOpen;
-
-    public static void CloseAllPanels()
+    public class UpgradePanelToggle : MonoBehaviour
     {
-        OnAllPanelsClosed?.Invoke();
-    }
+        [SerializeField] private GameObject _upgradePanel;
+        [SerializeField] private Button _toggleButton;
 
-    private void Awake()
-    {
-        _panelTransition = _upgradePanel.GetComponent<PanelTransition>();
-    }
+        private static event Action<UpgradePanelToggle> OnPanelOpened;
+        private static event Action OnAllPanelsClosed;
 
-    private void Start()
-    {
-        _toggleButton.onClick.AddListener(Toggle);
-        _upgradePanel.SetActive(false);
-    }
+        private PanelTransition _panelTransition;
+        private bool _isOpen;
 
-    private void OnEnable()
-    {
-        OnPanelOpened += HandleOtherPanelOpened;
-        OnAllPanelsClosed += ClosePanel;
-    }
-
-    private void OnDisable()
-    {
-        OnPanelOpened -= HandleOtherPanelOpened;
-        OnAllPanelsClosed -= ClosePanel;
-    }
-
-    private void OnDestroy()
-    {
-        _toggleButton.onClick.RemoveListener(Toggle);
-    }
-
-    private void Toggle()
-    {
-        if (_isOpen)
+        public static void CloseAllPanels()
         {
-            ClosePanel();
-        }
-        else
-        {
-            OpenPanel();
-        }
-    }
-
-    private void OpenPanel()
-    {
-        _isOpen = true;
-
-        if (_panelTransition != null)
-        {
-            _panelTransition.Open();
-        }
-        else
-        {
-            _upgradePanel.SetActive(true);
+            OnAllPanelsClosed?.Invoke();
         }
 
-        OnPanelOpened?.Invoke(this);
-    }
-
-    private void ClosePanel()
-    {
-        if (!_isOpen) return;
-
-        _isOpen = false;
-
-        if (_panelTransition != null)
+        private void Awake()
         {
-            _panelTransition.Close();
+            _panelTransition = _upgradePanel.GetComponent<PanelTransition>();
         }
-        else
+
+        private void Start()
         {
+            _toggleButton.onClick.AddListener(Toggle);
             _upgradePanel.SetActive(false);
         }
-    }
 
-    private void HandleOtherPanelOpened(UpgradePanelToggle sender)
-    {
-        if (sender == this) return;
-        ClosePanel();
+        private void OnEnable()
+        {
+            OnPanelOpened += HandleOtherPanelOpened;
+            OnAllPanelsClosed += ClosePanel;
+        }
+
+        private void OnDisable()
+        {
+            OnPanelOpened -= HandleOtherPanelOpened;
+            OnAllPanelsClosed -= ClosePanel;
+        }
+
+        private void OnDestroy()
+        {
+            _toggleButton.onClick.RemoveListener(Toggle);
+        }
+
+        private void Toggle()
+        {
+            if (_isOpen)
+            {
+                ClosePanel();
+            }
+            else
+            {
+                OpenPanel();
+            }
+        }
+
+        private void OpenPanel()
+        {
+            _isOpen = true;
+
+            if (_panelTransition != null)
+            {
+                _panelTransition.Open();
+            }
+            else
+            {
+                _upgradePanel.SetActive(true);
+            }
+
+            OnPanelOpened?.Invoke(this);
+        }
+
+        private void ClosePanel()
+        {
+            if (!_isOpen) return;
+
+            _isOpen = false;
+
+            if (_panelTransition != null)
+            {
+                _panelTransition.Close();
+            }
+            else
+            {
+                _upgradePanel.SetActive(false);
+            }
+        }
+
+        private void HandleOtherPanelOpened(UpgradePanelToggle sender)
+        {
+            if (sender == this) return;
+            ClosePanel();
+        }
     }
 }

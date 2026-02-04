@@ -1,44 +1,47 @@
 using System;
 
-public class Currency
+namespace Outgame
 {
-    public CurrencyType Type { get; }
-    public CurrencyValue Amount { get; private set; }
-
-    public Currency(CurrencyType type, CurrencyValue amount = default)
+    public class Currency
     {
-        if (amount.IsNegative)
-            throw new ArgumentException("재화량은 음수일 수 없습니다.", nameof(amount));
+        public CurrencyType Type { get; }
+        public CurrencyValue Amount { get; private set; }
 
-        Type = type;
-        Amount = amount;
-    }
+        public Currency(CurrencyType type, CurrencyValue amount = default)
+        {
+            if (amount.IsNegative)
+                throw new ArgumentException("재화량은 음수일 수 없습니다.", nameof(amount));
 
-    public bool CanAfford(CurrencyValue cost)
-    {
-        return Amount >= cost;
-    }
+            Type = type;
+            Amount = amount;
+        }
 
-    public bool TrySpend(CurrencyValue cost)
-    {
-        if (!cost.IsPositive || !CanAfford(cost))
-            return false;
+        public bool CanAfford(CurrencyValue cost)
+        {
+            return Amount >= cost;
+        }
 
-        Amount -= cost;
-        return true;
-    }
+        public bool TrySpend(CurrencyValue cost)
+        {
+            if (!cost.IsPositive || !CanAfford(cost))
+                return false;
 
-    public void Add(CurrencyValue value)
-    {
-        if (!value.IsPositive) return;
-        Amount += value;
-    }
+            Amount -= cost;
+            return true;
+        }
 
-    public void SetAmount(CurrencyValue value)
-    {
-        if (value.IsNegative)
-            throw new ArgumentException("재화량은 음수일 수 없습니다.", nameof(value));
+        public void Add(CurrencyValue value)
+        {
+            if (!value.IsPositive) return;
+            Amount += value;
+        }
 
-        Amount = value;
+        public void SetAmount(CurrencyValue value)
+        {
+            if (value.IsNegative)
+                throw new ArgumentException("재화량은 음수일 수 없습니다.", nameof(value));
+
+            Amount = value;
+        }
     }
 }

@@ -1,16 +1,20 @@
 using System;
+using Core;
 using Firebase.Firestore;
 using UnityEngine;
 
-[Serializable, FirestoreData]
-public class UpgradeSaveData : IIdentifiable
+namespace Outgame
 {
-    [SerializeField] private string _id;
-    [SerializeField] private int _level;
+    [Serializable, FirestoreData]
+    public class UpgradeSaveData : IIdentifiable
+    {
+        [SerializeField] private string _id;
+        [SerializeField] private int _level;
 
-    [FirestoreProperty("id")]
-    public string Id { get => _id; set => _id = value; }
+        [FirestoreProperty("id")]
+        public string Id { get => _id; set => _id = value; }
 
-    [FirestoreProperty("level")]
-    public int Level { get => _level; set => _level = value; }
+        [FirestoreProperty("level")]
+        public int Level { get => _level; set => _level = value; }
+    }
 }

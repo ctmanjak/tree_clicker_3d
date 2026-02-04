@@ -1,4 +1,7 @@
-public enum CurrencyType
+namespace Outgame
 {
-    Wood
+    public enum CurrencyType
+    {
+        Wood
+    }
 }

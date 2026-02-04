@@ -1,37 +1,40 @@
 using System.Collections.Generic;
 
-public class WoodPerClickEffectHandler : IUpgradeEffectHandler
+namespace Outgame
 {
-    private IEnumerable<Upgrade> _upgrades;
-    private CurrencyValue _cachedWoodPerClick = CurrencyValue.One;
-
-    public CurrencyValue WoodPerClick => _cachedWoodPerClick;
-
-    public void OnInitialLoad(IEnumerable<Upgrade> upgrades)
+    public class WoodPerClickEffectHandler : IUpgradeEffectHandler
     {
-        _upgrades = upgrades;
-        Recalculate();
-    }
+        private IEnumerable<Upgrade> _upgrades;
+        private CurrencyValue _cachedWoodPerClick = CurrencyValue.One;
 
-    public void OnEffectApplied(Upgrade upgrade)
-    {
-        Recalculate();
-    }
+        public CurrencyValue WoodPerClick => _cachedWoodPerClick;
 
-    public string GetEffectText(Upgrade upgrade)
-    {
-        return $"+{upgrade.EffectAmount}/클릭";
-    }
-
-    private void Recalculate()
-    {
-        CurrencyValue total = CurrencyValue.One;
-
-        foreach (var upgrade in _upgrades)
+        public void OnInitialLoad(IEnumerable<Upgrade> upgrades)
         {
-            total += upgrade.EffectAmount * upgrade.Level;
+            _upgrades = upgrades;
+            Recalculate();
         }
 
-        _cachedWoodPerClick = total;
+        public void OnEffectApplied(Upgrade upgrade)
+        {
+            Recalculate();
+        }
+
+        public string GetEffectText(Upgrade upgrade)
+        {
+            return $"+{upgrade.EffectAmount}/클릭";
+        }
+
+        private void Recalculate()
+        {
+            CurrencyValue total = CurrencyValue.One;
+
+            foreach (var upgrade in _upgrades)
+            {
+                total += upgrade.EffectAmount * upgrade.Level;
+            }
+
+            _cachedWoodPerClick = total;
+        }
     }
 }

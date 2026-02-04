@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 
-public interface IUpgradeEffectHandler
+namespace Outgame
 {
-    void OnInitialLoad(IEnumerable<Upgrade> upgrades);
-    void OnEffectApplied(Upgrade upgrade);
-    string GetEffectText(Upgrade upgrade);
+    public interface IUpgradeEffectHandler
+    {
+        void OnInitialLoad(IEnumerable<Upgrade> upgrades);
+        void OnEffectApplied(Upgrade upgrade);
+        string GetEffectText(Upgrade upgrade);
+    }
 }
