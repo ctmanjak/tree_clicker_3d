@@ -156,39 +156,71 @@ Manager들은 인터페이스(I~Repository)만 알고, 실제 구현이 Local인
 ## 4. 나무 클릭 → 재화 획득 흐름
 
 ```mermaid
-graph TD
-    A["플레이어 터치/클릭"] --> B["InputHandler: Raycast로 나무 감지"]
-    B --> C["TreeController.OnClick()"]
-    C --> D["UpgradeManager에서 클릭당 획득량 조회"]
-    D --> E["CurrencyManager.Add(Wood, amount)"]
-    E --> F["Repository에 저장"]
+sequenceDiagram
+    participant Player as 플레이어
+    participant Input as InputHandler
+    participant Tree as TreeController
+    participant UM as UpgradeManager
+    participant CM as CurrencyManager
+    participant Repo as Repository
+    participant UI as WoodCounterUI
+    participant FT as FloatingTextSpawner
+    participant FX as Effects
 
-    E -->|"OnCurrencyChanged 이벤트"| G["WoodCounterUI 텍스트 갱신"]
-    E -->|"OnCurrencyAdded 이벤트"| H["FloatingTextSpawner: +N 텍스트"]
-    C -->|"OnTreeHit 이벤트"| I["TreeShake + ParticleEffect"]
+    Player->>Input: 화면 터치
+    Input->>Input: 터치 지점에 나무가 있는지 확인
+    Input->>Tree: 나무 클릭 전달
+    Tree->>UM: 클릭당 획득량 조회
+    UM-->>Tree: 획득량 반환
+
+    Tree->>CM: 목재 추가 요청
+    CM->>Repo: 변경된 재화 저장
+
+    par 이벤트 병렬 처리
+        CM-->>UI: 재화 변경 알림 → 숫자 갱신
+    and
+        CM-->>FT: 재화 추가 알림 → +N 텍스트 표시
+    and
+        Tree-->>FX: 나무 피격 알림 → 흔들림/파티클
+    end
 ```
 
 핵심 포인트:
-- **이벤트 기반 통신**: CurrencyManager가 직접 UI를 호출하지 않고, 이벤트를 발행하면 구독자들이 각자 반응
-- **관심사 분리**: 재화 로직(Outgame)과 화면 표시(Ingame)가 이벤트로만 연결됨
+- **이벤트 기반 통신**: CurrencyManager가 직접 UI를 호출하지 않고, 이벤트를 발행(점선 화살표)하면 구독자들이 각자 반응
+- **par 블록**: 이벤트 구독자들이 동시에 독립적으로 반응하는 구간
 
 ---
 
 ## 5. 업그레이드 구매 흐름
 
 ```mermaid
-graph TD
-    A["UpgradeButtonUI: 버튼 클릭"] --> B["UpgradeManager.TryPurchase()"]
-    B --> C{"CurrencyManager.CanAfford()?"}
+sequenceDiagram
+    participant Player as 플레이어
+    participant BtnUI as UpgradeButtonUI
+    participant UM as UpgradeManager
+    participant CM as CurrencyManager
+    participant Upgrade as Upgrade
+    participant Handler as IUpgradeEffectHandler
+    participant Repo as Repository
 
-    C -->|"true"| D["CurrencyManager.Spend(Wood, cost)"]
-    D --> E["Upgrade.IncrementLevel()"]
-    E --> F["Upgrade.ApplyEffect()"]
-    F --> G["IUpgradeEffectHandler.OnEffectApplied()"]
-    G --> H["Repository에 저장"]
-    H --> I["OnUpgradePurchased 이벤트 → UI 갱신"]
+    Player->>BtnUI: 업그레이드 버튼 클릭
+    BtnUI->>UM: 구매 시도 요청
+    UM->>CM: 비용을 지불할 수 있는지 확인
+    CM-->>UM: 가능 / 불가능
 
-    C -->|"false"| J["구매 실패 → 거부 애니메이션"]
+    alt 구매 가능
+        UM->>CM: 비용 차감
+        UM->>Upgrade: 레벨 1 증가
+        Upgrade-->>BtnUI: 레벨 변경 알림
+        UM->>Upgrade: 효과 적용
+        Upgrade->>Handler: 업그레이드 종류에 맞는 효과 실행
+        UM->>Repo: 변경된 업그레이드 저장
+        UM-->>BtnUI: 구매 성공 알림
+        BtnUI->>BtnUI: 성공 애니메이션
+    else 구매 불가
+        UM-->>BtnUI: 실패 반환
+        BtnUI->>BtnUI: 거부 애니메이션
+    end
 ```
 
 **Strategy 패턴**: 업그레이드 종류마다 다른 효과를 IUpgradeEffectHandler 구현체로 분리
