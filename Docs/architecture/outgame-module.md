@@ -1,12 +1,11 @@
 # Outgame 모듈 API 레퍼런스
 
-> 비즈니스 도메인: 계정 관리, 재화 시스템, 업그레이드 시스템, 데이터 영속성, Firebase 서비스
+> 비즈니스 도메인: 계정 관리, 재화 시스템, 업그레이드 시스템, 데이터 영속성
 
 ## 목차
 
 - [Common 인터페이스](#common-인터페이스)
 - [Repository 시스템](#repository-시스템)
-- [Firebase 서비스](#firebase-서비스)
 - [Account 도메인](#account-도메인)
 - [Currency 도메인](#currency-도메인)
 - [Upgrade 도메인](#upgrade-도메인)
@@ -15,34 +14,11 @@
 
 ## Common 인터페이스
 
-### IIdentifiable
-
-**파일**: `Outgame/Common/IIdentifiable.cs`
-**역할**: 고유 식별자를 가진 엔티티의 마커 인터페이스
-
-```csharp
-public interface IIdentifiable
-{
-    string Id { get; }
-}
-```
-
-### IRepository\<T\>
-
-**파일**: `Outgame/Common/IRepository.cs`
-**역할**: 데이터 영속성 추상화를 위한 제네릭 인터페이스
-
-```csharp
-public interface IRepository<T>
-{
-    UniTask<List<T>> Initialize();
-    void Save(T item);
-}
-```
+> `IIdentifiable`, `IRepository<T>`는 Core 모듈로 이동되었습니다. [Core 모듈 API 레퍼런스](./core-module.md#common-인터페이스) 참조.
 
 ### IRepositoryProvider
 
-**파일**: `Outgame/Common/IRepositoryProvider.cs`
+**파일**: `Outgame/Common/Repository/IRepositoryProvider.cs`
 **역할**: 모든 Repository 구현체에 대한 팩토리 인터페이스
 
 ```csharp
@@ -61,7 +37,7 @@ public interface IRepositoryProvider
 
 ### RepositoryFactory
 
-**파일**: `Outgame/Common/RepositoryFactory.cs`
+**파일**: `Outgame/Common/Repository/RepositoryFactory.cs`
 **역할**: Firebase → Local 순서로 Repository Provider 초기화 시도
 **패턴**: Factory + Chain of Responsibility
 
@@ -73,7 +49,7 @@ public interface IRepositoryProvider
 
 ### LocalRepositoryProvider
 
-**파일**: `Outgame/Common/LocalRepositoryProvider.cs`
+**파일**: `Outgame/Common/Repository/LocalRepositoryProvider.cs`
 **역할**: PlayerPrefs/File I/O 기반 로컬 저장소 제공
 
 | 프로퍼티 | 반환 타입 | 구현체 |
@@ -84,7 +60,7 @@ public interface IRepositoryProvider
 
 ### FirebaseRepositoryProvider
 
-**파일**: `Outgame/Common/FirebaseRepositoryProvider.cs`
+**파일**: `Outgame/Common/Repository/FirebaseRepositoryProvider.cs`
 **역할**: Firebase Firestore 기반 원격 저장소 제공
 
 | 프로퍼티 | 반환 타입 | 구현체 |
@@ -95,70 +71,7 @@ public interface IRepositoryProvider
 
 ---
 
-## Firebase 서비스
-
-### FirebaseInitializer
-
-**파일**: `Outgame/Firebase/FirebaseInitializer.cs`
-**역할**: Firebase SDK 종속성 확인 및 Auth/Store 서비스 초기화
-
-| 프로퍼티 | 타입 | 설명 |
-|---|---|---|
-| `AuthService` | `IFirebaseAuthService` | 인증 서비스 인스턴스 |
-| `StoreService` | `IFirebaseStoreService` | 저장소 서비스 인스턴스 |
-
-| 메서드 | 시그니처 | 설명 |
-|---|---|---|
-| `Initialize` | `UniTask Initialize()` | Firebase 초기화 |
-
-### IFirebaseAuthService
-
-**파일**: `Outgame/Firebase/Service/IFirebaseAuthService.cs`
-**역할**: Firebase Authentication 서비스 계약
-
-| 멤버 | 타입 | 설명 |
-|---|---|---|
-| `IsInitialized` | `bool` (property) | 초기화 완료 여부 |
-| `CurrentUserId` | `string` (property) | 현재 로그인 사용자 ID |
-| `IsLoggedIn` | `bool` (property) | 로그인 상태 |
-| `Register` | `UniTask<FirebaseAuthResult>` | 이메일/비밀번호 회원가입 |
-| `Login` | `UniTask<FirebaseAuthResult>` | 이메일/비밀번호 로그인 |
-| `Logout` | `void` | 로그아웃 |
-
-### IFirebaseStoreService
-
-**파일**: `Outgame/Firebase/Service/IFirebaseStoreService.cs`
-**역할**: Firebase Firestore 데이터베이스 서비스 계약
-
-| 메서드 | 시그니처 | 설명 |
-|---|---|---|
-| `SetDocument<T>` | `UniTask SetDocument<T>(string collection, T data) where T : IIdentifiable` | 문서 저장/업데이트 |
-| `GetCollection<T>` | `UniTask<List<T>> GetCollection<T>(string collection) where T : IIdentifiable` | 컬렉션 전체 조회 |
-| `SetDocumentAsync<T>` | `void SetDocumentAsync<T>(string collection, T data) where T : IIdentifiable` | 비동기 저장 (fire-and-forget) |
-
-### FirebaseAuthResult
-
-**파일**: `Outgame/Firebase/Domain/FirebaseAuthResult.cs`
-**역할**: Firebase 인증 결과 컨테이너 (값 객체)
-
-| 프로퍼티 | 타입 | 설명 |
-|---|---|---|
-| `Success` | `bool` | 성공 여부 |
-| `UserId` | `string` | 사용자 고유 ID |
-| `Email` | `string` | 이메일 주소 |
-| `ErrorMessage` | `string` | 실패 시 오류 메시지 |
-
-### FirebaseAuthService
-
-**파일**: `Outgame/Firebase/Service/FirebaseAuthService.cs`
-**역할**: `IFirebaseAuthService`의 Firebase SDK 구현체
-**구현**: `Firebase.Auth.FirebaseAuth` API 래핑
-
-### FirebaseStoreService
-
-**파일**: `Outgame/Firebase/Service/FirebaseStoreService.cs`
-**역할**: `IFirebaseStoreService`의 Firestore SDK 구현체
-**구현**: `Firebase.Firestore.FirebaseFirestore` API 래핑
+> Firebase 서비스(FirebaseInitializer, IFirebaseAuthService, IFirebaseStoreService 등)는 Core 모듈로 이동되었습니다. [Core 모듈 API 레퍼런스](./core-module.md#firebase-서비스) 참조.
 
 ---
 
@@ -166,7 +79,7 @@ public interface IRepositoryProvider
 
 ### Account
 
-**파일**: `Outgame/Account/Account.cs`
+**파일**: `Outgame/Account/Domain/Account.cs`
 **역할**: 사용자 계정 도메인 모델. 이메일/비밀번호 유효성 검증 포함.
 
 | 프로퍼티 | 타입 | 설명 |
@@ -180,7 +93,7 @@ public interface IRepositoryProvider
 
 ### AuthResult
 
-**파일**: `Outgame/Account/AuthResult.cs`
+**파일**: `Outgame/Account/Domain/AuthResult.cs`
 **역할**: 인증 작업 결과 컨테이너
 
 | 프로퍼티 | 타입 | 설명 |
@@ -191,7 +104,7 @@ public interface IRepositoryProvider
 
 ### EmailAccountSpecification
 
-**파일**: `Outgame/Account/EmailAccountSpecification.cs`
+**파일**: `Outgame/Account/Domain/Specification/EmailAccountSpecification.cs`
 **역할**: 이메일 형식 검증 (Specification 패턴)
 
 | 메서드 | 시그니처 | 설명 |
@@ -200,9 +113,8 @@ public interface IRepositoryProvider
 
 ### IAccountRepository
 
-**파일**: `Outgame/Account/IAccountRepository.cs`
+**파일**: `Outgame/Account/Repository/IAccountRepository.cs`
 **역할**: 계정 저장소 인터페이스
-**상속**: `IRepository<Account>`
 
 | 메서드 | 시그니처 | 설명 |
 |---|---|---|
@@ -214,19 +126,19 @@ public interface IRepositoryProvider
 
 ### LocalAccountRepository
 
-**파일**: `Outgame/Account/LocalAccountRepository.cs`
+**파일**: `Outgame/Account/Repository/LocalAccountRepository.cs`
 **역할**: PlayerPrefs 기반 로컬 계정 저장소
 **보안**: Salt + SHA256 해시로 비밀번호 저장 (`Crypto` 클래스 사용)
 
 ### FirebaseAccountRepository
 
-**파일**: `Outgame/Account/FirebaseAccountRepository.cs`
+**파일**: `Outgame/Account/Repository/FirebaseAccountRepository.cs`
 **역할**: Firebase Authentication 기반 원격 계정 저장소
-**위임**: `IFirebaseAuthService`에 인증 로직 위임
+**위임**: `Core.IFirebaseAuthService`에 인증 로직 위임
 
 ### AccountManager
 
-**파일**: `Outgame/Account/AccountManager.cs`
+**파일**: `Outgame/Account/Manager/AccountManager.cs`
 **역할**: 현재 로그인 계정 관리 및 인증 흐름 조율
 **패턴**: Singleton MonoBehaviour
 
@@ -252,7 +164,7 @@ public interface IRepositoryProvider
 
 ### CurrencyType
 
-**파일**: `Outgame/Currency/CurrencyType.cs`
+**파일**: `Outgame/Currency/Domain/CurrencyType.cs`
 **역할**: 게임 재화 타입 열거형
 
 | 값 | 정수값 | 설명 |
@@ -261,7 +173,7 @@ public interface IRepositoryProvider
 
 ### CurrencyValue
 
-**파일**: `Outgame/Currency/CurrencyValue.cs`
+**파일**: `Outgame/Currency/Domain/CurrencyValue.cs`
 **역할**: 불변 재화 값 객체. 연산자 오버로딩, 비교, 형식화 출력 지원.
 **패턴**: Value Object, IEquatable, IComparable
 
@@ -289,7 +201,7 @@ public interface IRepositoryProvider
 
 ### Currency
 
-**파일**: `Outgame/Currency/Currency.cs`
+**파일**: `Outgame/Currency/Domain/Currency.cs`
 **역할**: 개별 재화 인스턴스 도메인 모델
 
 | 프로퍼티 | 타입 | 설명 |
@@ -306,9 +218,9 @@ public interface IRepositoryProvider
 
 ### CurrencySaveData
 
-**파일**: `Outgame/Currency/CurrencySaveData.cs`
+**파일**: `Outgame/Currency/Domain/CurrencySaveData.cs`
 **역할**: 재화 영속성용 직렬화 데이터 모델
-**상속**: `IIdentifiable`
+**상속**: `Core.IIdentifiable`
 
 | 프로퍼티 | 타입 | 설명 |
 |---|---|---|
@@ -318,12 +230,12 @@ public interface IRepositoryProvider
 
 ### ICurrencyRepository
 
-**파일**: `Outgame/Currency/ICurrencyRepository.cs`
-**상속**: `IRepository<CurrencySaveData>`
+**파일**: `Outgame/Currency/Repository/ICurrencyRepository.cs`
+**상속**: `Core.IRepository<CurrencySaveData>`
 
 ### CurrencyManager
 
-**파일**: `Outgame/Currency/CurrencyManager.cs`
+**파일**: `Outgame/Currency/Manager/CurrencyManager.cs`
 **역할**: 모든 게임 재화를 관리하고 영속성을 처리하는 중앙 매니저
 **패턴**: Singleton MonoBehaviour
 
@@ -465,8 +377,9 @@ public interface IUpgradeEffectHandler
 
 ### UpgradeSaveData
 
-**파일**: `Outgame/Upgrade/Repository/UpgradeSaveData.cs`
+**파일**: `Outgame/Upgrade/Domain/UpgradeSaveData.cs`
 **역할**: 업그레이드 영속성용 직렬화 데이터
+**상속**: `Core.IIdentifiable`
 
 | 프로퍼티 | 타입 | 설명 |
 |---|---|---|

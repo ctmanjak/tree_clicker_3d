@@ -1,4 +1,4 @@
-namespace Outgame
+namespace Core
 {
     public interface IIdentifiable
     {

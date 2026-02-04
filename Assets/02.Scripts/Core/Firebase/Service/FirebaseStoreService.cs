@@ -4,7 +4,7 @@ using Firebase.Extensions;
 using Firebase.Firestore;
 using UnityEngine;
 
-namespace Outgame
+namespace Core
 {
     public class FirebaseStoreService : IFirebaseStoreService
     {

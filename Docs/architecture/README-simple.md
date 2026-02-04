@@ -23,9 +23,10 @@
                       ▼
          ┌─────────────────────────┐
          │          Core           │
-         │                        │
-         │  모두가 공유하는 인프라   │
-         │  (ServiceLocator, 암호화)│
+         │                         │
+         │  모두가 공유하는 인프라    │
+         │  (ServiceLocator, 암호화, │
+         │   Firebase, 공통 인터페이스)│
          └─────────────────────────┘
 ```
 
@@ -39,13 +40,26 @@
 
 ```mermaid
 graph TB
-    subgraph "Ingame (화면/상호작용)"
-        TreeController["TreeController\n(나무 클릭 처리)"]
-        LumberjackController["LumberjackController\n(벌목꾼 AI)"]
-        UpgradeButtonUI["UpgradeButtonUI\n(업그레이드 버튼)"]
-        WoodCounterUI["WoodCounterUI\n(재화 표시)"]
-        LoginPanel["LoginPanel\n(로그인 화면)"]
-        LumberjackSpawner["LumberjackSpawner\n(벌목꾼 생성)"]
+    subgraph Ingame
+        subgraph "UI (화면 표시/입력)"
+            UpgradeButtonUI["UpgradeButtonUI\n(업그레이드 버튼)"]
+            UpgradePanelUI["UpgradePanelUI\n(업그레이드 패널)"]
+            WoodCounterUI["WoodCounterUI\n(재화 표시)"]
+            LoginPanel["LoginPanel\n(로그인 화면)"]
+            FloatingTextSpawner["FloatingTextSpawner\n(+N 텍스트)"]
+        end
+
+        subgraph "게임 오브젝트 (월드)"
+            TreeController["TreeController\n(나무)"]
+            LumberjackController["LumberjackController\n(벌목꾼 AI)"]
+            LumberjackSpawner["LumberjackSpawner\n(벌목꾼 생성)"]
+            InputHandler["InputHandler\n(터치/클릭 입력)"]
+        end
+
+        subgraph "연출 (이펙트/사운드)"
+            AudioManager["AudioManager\n(사운드)"]
+            Effects["TreeShake, ScreenShake\nParticle 등"]
+        end
     end
 
     subgraph "Outgame (비즈니스 로직)"
@@ -57,21 +71,35 @@ graph TB
 
     subgraph "Core (인프라)"
         ServiceLocator["ServiceLocator\n(서비스 레지스트리)"]
+        FirebaseServices["Firebase 서비스\n(Auth, Store, Initializer)"]
     end
 
-    TreeController -->|"재화 추가 요청"| CurrencyManager
-    LumberjackController -->|"재화 추가 요청"| CurrencyManager
+    %% 입력 흐름
+    InputHandler -->|"클릭 감지"| TreeController
+
+    %% 게임 오브젝트 → Outgame
+    TreeController -->|"재화 추가"| CurrencyManager
+    LumberjackController -->|"재화 추가"| CurrencyManager
+
+    %% UI → Outgame
     UpgradeButtonUI -->|"구매 요청"| UpgradeManager
     UpgradeButtonUI -->|"잔액 확인"| CurrencyManager
-    WoodCounterUI -->|"현재 재화 조회"| CurrencyManager
+    WoodCounterUI -->|"이벤트 구독"| CurrencyManager
+    FloatingTextSpawner -->|"이벤트 구독"| CurrencyManager
     LoginPanel -->|"로그인 요청"| AccountManager
 
+    %% 게임 오브젝트 → 연출
+    TreeController -->|"OnTreeHit"| Effects
+
+    %% Outgame → Ingame (역방향)
     UpgradeManager -->|"효과 위임"| EffectHandlers
     EffectHandlers -->|"벌목꾼 스폰"| LumberjackSpawner
 
+    %% Outgame → Core
     CurrencyManager --> ServiceLocator
     UpgradeManager --> ServiceLocator
     AccountManager --> ServiceLocator
+    AccountManager -->|"Firebase 인증"| FirebaseServices
 ```
 
 **화살표 = 의존 방향**: A → B는 "A가 B를 사용한다"는 의미.
@@ -110,6 +138,14 @@ graph TB
     FBAccount -.->|"구현"| IAccountRepo
     FBCurrency -.->|"구현"| ICurrencyRepo
     FBUpgrade -.->|"구현"| IUpgradeRepo
+
+    subgraph "Core (인프라)"
+        CoreFirebase["Firebase 서비스\n(IFirebaseAuthService,\nIFirebaseStoreService)"]
+    end
+
+    FBAccount -->|"사용"| CoreFirebase
+    FBCurrency -->|"사용"| CoreFirebase
+    FBUpgrade -->|"사용"| CoreFirebase
 ```
 
 Manager들은 인터페이스(I~Repository)만 알고, 실제 구현이 Local인지 Firebase인지 모릅니다.
@@ -197,7 +233,7 @@ graph TD
     A["GameBootstrap.Awake()\nSingleton 초기화"] --> B["RepositoryFactory.CreateProvider()"]
     B --> C{"Firebase SDK\n사용 가능?"}
 
-    C -->|"가능"| D["FirebaseInitializer.Initialize()"]
+    C -->|"가능"| D["Core::FirebaseInitializer.Initialize()"]
     D --> E{"초기화 성공?"}
     E -->|"성공"| F["FirebaseRepositoryProvider 생성"]
     E -->|"실패"| G["LocalRepositoryProvider 생성"]

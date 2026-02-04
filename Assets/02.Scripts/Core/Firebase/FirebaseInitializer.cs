@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using Firebase;
 using UnityEngine;
 
-namespace Outgame
+namespace Core
 {
     public class FirebaseInitializer
     {

@@ -44,13 +44,15 @@ Assets/02.Scripts/
 ├── GameBootstrap.cs          # Composition Root (글로벌 namespace)
 │
 ├── Core/                     # 인프라 레이어 (namespace: Core)
-│   ├── ServiceLocator        # 서비스 레지스트리 (DI)
-│   └── Crypto                # 암호화 유틸리티
+│   ├── Common/               # 공통 인프라 (ServiceLocator, Crypto,
+│   │                         #   IIdentifiable, IRepository<T>)
+│   └── Firebase/             # Firebase 인프라 서비스
+│       ├── Domain/           # FirebaseAuthResult
+│       └── Service/          # IFirebaseAuthService, IFirebaseStoreService, 구현체
 │
 ├── Outgame/                  # 비즈니스 도메인 레이어 (namespace: Outgame)
-│   ├── Common/               # 공통 인프라 (IIdentifiable, IRepository<T>,
-│   │                         #   IRepositoryProvider, RepositoryFactory, Provider 구현체)
-│   ├── Firebase/             # Firebase 서비스 (Initializer, Auth, Store)
+│   ├── Common/
+│   │   └── Repository/       # IRepositoryProvider, RepositoryFactory, Provider 구현체
 │   ├── Account/              # 계정 관리 (인증, 회원가입)
 │   ├── Currency/             # 재화 시스템 (Wood)
 │   └── Upgrade/              # 업그레이드 시스템
@@ -103,7 +105,6 @@ graph TB
         IRepositoryProvider[IRepositoryProvider]
         LocalRepoProvider[LocalRepositoryProvider]
         FirebaseRepoProvider[FirebaseRepositoryProvider]
-        FirebaseInitializer[FirebaseInitializer]
         IUpgradeEffectHandler[IUpgradeEffectHandler]
         WoodPerClickHandler[WoodPerClickEffectHandler]
         LumberjackProductionHandler[LumberjackProductionEffectHandler]
@@ -112,6 +113,9 @@ graph TB
 
     subgraph "Core Layer"
         ServiceLocator[ServiceLocator]
+        FirebaseInitializer[FirebaseInitializer]
+        IFirebaseAuthSvc[IFirebaseAuthService]
+        IFirebaseStoreSvc[IFirebaseStoreService]
     end
 
     %% Composition Root → 전체 참조
@@ -135,9 +139,11 @@ graph TB
     CurrencyManager --> ServiceLocator
     UpgradeManager --> ServiceLocator
 
-    %% Outgame internal
+    %% Outgame → Core
     RepositoryFactory --> IRepositoryProvider
     FirebaseRepoProvider --> FirebaseInitializer
+    FirebaseRepoProvider --> IFirebaseAuthSvc
+    FirebaseRepoProvider --> IFirebaseStoreSvc
     LocalRepoProvider -.-> IRepositoryProvider
     FirebaseRepoProvider -.-> IRepositoryProvider
 
@@ -152,11 +158,16 @@ graph TB
 
 ```mermaid
 graph LR
-    subgraph "Interfaces"
+    subgraph "Core 인터페이스"
+        IRepo[IRepository&lt;T&gt;]
+        IFirebaseAuthService[IFirebaseAuthService]
+        IFirebaseStoreService[IFirebaseStoreService]
+    end
+
+    subgraph "Outgame 인터페이스"
         IAccountRepo[IAccountRepository]
         ICurrencyRepo[ICurrencyRepository]
         IUpgradeRepo[IUpgradeRepository]
-        IRepo[IRepository&lt;T&gt;]
     end
 
     subgraph "Local Implementations"

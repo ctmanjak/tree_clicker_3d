@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using Firebase;
 using Firebase.Auth;
 
-namespace Outgame
+namespace Core
 {
     public class FirebaseAuthService : IFirebaseAuthService
     {

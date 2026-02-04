@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 
-namespace Outgame
+namespace Core
 {
     public interface IFirebaseAuthService
     {

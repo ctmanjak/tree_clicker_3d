@@ -12,6 +12,7 @@ namespace Outgame
     public class UpgradeManager : MonoBehaviour
     {
         public event Action<Upgrade> OnUpgradePurchased;
+        public event Action<CurrencyType, CurrencyValue> OnCurrencyChanged;
 
         [SerializeField] private List<UpgradeSpecData> _upgradeSpecs = new();
 
@@ -36,6 +37,8 @@ namespace Outgame
 
             if (!ServiceLocator.TryGet(out _currencyManager))
                 throw new InvalidOperationException($"{nameof(CurrencyManager)} is not registered in ServiceLocator");
+
+            _currencyManager.OnCurrencyChanged += HandleCurrencyChanged;
 
             RegisterEffectHandlers();
             await InitializeUpgrades();
@@ -89,7 +92,15 @@ namespace Outgame
 
         private void OnDestroy()
         {
+            if (_currencyManager != null)
+                _currencyManager.OnCurrencyChanged -= HandleCurrencyChanged;
+
             ServiceLocator.Unregister(this);
+        }
+
+        private void HandleCurrencyChanged(CurrencyType type, CurrencyValue amount)
+        {
+            OnCurrencyChanged?.Invoke(type, amount);
         }
 
         public Upgrade GetUpgrade(string upgradeId)

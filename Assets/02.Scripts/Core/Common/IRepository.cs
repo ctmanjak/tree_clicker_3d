@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
-namespace Outgame
+namespace Core
 {
     public interface IRepository<T>
     {

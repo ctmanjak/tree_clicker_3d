@@ -19,7 +19,6 @@ namespace Ingame
 
         private Upgrade _upgrade;
         private UpgradeManager _upgradeManager;
-        private CurrencyManager _currencyManager;
         private AudioManager _audioManager;
         private bool _isSubscribed;
         private bool _wasAffordable;
@@ -32,7 +31,6 @@ namespace Ingame
 
         private void Start()
         {
-            ServiceLocator.TryGet(out _currencyManager);
             ServiceLocator.TryGet(out _audioManager);
 
             if (_upgradeManager == null)
@@ -71,9 +69,9 @@ namespace Ingame
         {
             if (_isSubscribed) return;
 
-            if (_currencyManager != null)
+            if (_upgradeManager != null)
             {
-                _currencyManager.OnCurrencyChanged += OnCurrencyChanged;
+                _upgradeManager.OnCurrencyChanged += OnCurrencyChanged;
             }
 
             if (_upgrade != null)
@@ -88,9 +86,9 @@ namespace Ingame
         {
             if (!_isSubscribed) return;
 
-            if (_currencyManager != null)
+            if (_upgradeManager != null)
             {
-                _currencyManager.OnCurrencyChanged -= OnCurrencyChanged;
+                _upgradeManager.OnCurrencyChanged -= OnCurrencyChanged;
             }
 
             if (_upgrade != null)
