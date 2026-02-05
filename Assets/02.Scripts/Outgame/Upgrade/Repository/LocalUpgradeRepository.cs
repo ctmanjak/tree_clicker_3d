@@ -6,8 +6,10 @@ using UnityEngine;
 
 namespace Outgame
 {
-    public class LocalUpgradeRepository : IUpgradeRepository
+    public class LocalUpgradeRepository : IUpgradeRepository, Core.ILocalRepository<UpgradeSaveData>
     {
+        public string CollectionName => "upgrades";
+
         private readonly Dictionary<string, UpgradeSaveData> _data = new();
 
         private string SavePath => Path.Combine(Application.persistentDataPath, "upgrade_save.json");
@@ -22,6 +24,11 @@ namespace Outgame
         {
             _data[item.Id] = item;
             SaveToFile();
+        }
+
+        public UpgradeSaveData Get(string id)
+        {
+            return _data.GetValueOrDefault(id);
         }
 
         private void SaveToFile()

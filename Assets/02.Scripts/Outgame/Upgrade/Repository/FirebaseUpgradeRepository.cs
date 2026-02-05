@@ -7,7 +7,7 @@ namespace Outgame
 {
     public class FirebaseUpgradeRepository : IUpgradeRepository
     {
-        private const string CollectionName = "upgrades";
+        public string CollectionName => "upgrades";
 
         private readonly IFirebaseStoreService _storeService;
 
