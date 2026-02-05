@@ -7,14 +7,14 @@ namespace Outgame
 {
     public class SyncedUpgradeRepository : IUpgradeRepository
     {
-        private readonly LocalUpgradeRepository _localRepository;
+        private readonly ILocalRepository<UpgradeSaveData> _localRepository;
         private readonly ISyncCoordinator _syncCoordinator;
         private readonly long _timeOffset;
 
         public string CollectionName => _localRepository.CollectionName;
 
         public SyncedUpgradeRepository(
-            LocalUpgradeRepository localRepository,
+            ILocalRepository<UpgradeSaveData> localRepository,
             ISyncCoordinator syncCoordinator,
             long timeOffset = 0)
         {

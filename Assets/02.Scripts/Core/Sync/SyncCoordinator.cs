@@ -94,6 +94,10 @@ namespace Core
             catch (OperationCanceledException)
             {
             }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[SyncCoordinator] Debounce 타이머 처리 중 예외 발생: {ex}");
+            }
         }
 
         private async UniTask FlushPending(bool forceFirebase)
@@ -169,13 +173,15 @@ namespace Core
             if (!HasDirtyItems())
                 return;
 
-            _isSyncInProgress = true;
-            _localSaveCount = 0;
-
-            var snapshot = TakeDirtySnapshot();
+            Dictionary<string, Dictionary<string, Func<IIdentifiable>>> snapshot = null;
 
             try
             {
+                _isSyncInProgress = true;
+                _localSaveCount = 0;
+
+                snapshot = TakeDirtySnapshot();
+
                 var batch = _storeService.CreateWriteBatch();
                 int totalCount = 0;
 
@@ -197,8 +203,12 @@ namespace Core
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"[SyncCoordinator] Firebase WriteBatch 커밋 실패: {ex.Message}");
-                RestoreDirtyItems(snapshot);
+                Debug.LogError($"[SyncCoordinator] Firebase WriteBatch 처리 중 예외 발생: {ex}");
+
+                if (snapshot != null)
+                {
+                    RestoreDirtyItems(snapshot);
+                }
             }
             finally
             {

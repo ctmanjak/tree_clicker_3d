@@ -7,14 +7,14 @@ namespace Outgame
 {
     public class SyncedCurrencyRepository : ICurrencyRepository
     {
-        private readonly LocalCurrencyRepository _localRepository;
+        private readonly ILocalRepository<CurrencySaveData> _localRepository;
         private readonly ISyncCoordinator _syncCoordinator;
         private readonly long _timeOffset;
 
         public string CollectionName => _localRepository.CollectionName;
 
         public SyncedCurrencyRepository(
-            LocalCurrencyRepository localRepository,
+            ILocalRepository<CurrencySaveData> localRepository,
             ISyncCoordinator syncCoordinator,
             long timeOffset = 0)
         {
