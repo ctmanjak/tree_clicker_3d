@@ -3,7 +3,10 @@
     "allow": [
       "Bash(ls:*)",
       "Skill(compound-engineering:plan_review)",
-      "Skill(compound-engineering:workflows:compound)"
+      "Skill(compound-engineering:workflows:compound)",
+      "Bash(tree:*)",
+      "Skill(compound-engineering:workflows:plan)",
+      "Skill(compound-engineering:workflows:work)"
     ]
   }
 }

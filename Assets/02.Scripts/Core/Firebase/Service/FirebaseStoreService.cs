@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Firebase.Extensions;
@@ -80,6 +81,34 @@ namespace Core
         {
             return _firestore.Collection("users").Document(uid)
                 .Collection(collection).Document(documentId);
+        }
+
+        public async UniTask<long> GetServerTimeAsync()
+        {
+            if (!TryGetUserId(out string uid))
+                return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            try
+            {
+                var docRef = _firestore.Collection("users").Document(uid)
+                    .Collection("_metadata").Document("serverTime");
+
+                var data = new Dictionary<string, object>
+                {
+                    { "timestamp", FieldValue.ServerTimestamp }
+                };
+                await docRef.SetAsync(data);
+
+                var snapshot = await docRef.GetSnapshotAsync();
+                var timestamp = snapshot.GetValue<Timestamp>("timestamp");
+
+                return timestamp.ToDateTimeOffset().ToUnixTimeSeconds();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[FirebaseStoreService] 서버 시간 가져오기 실패, 로컬 시간 사용: {ex.Message}");
+                return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
     }
 }

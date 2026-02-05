@@ -11,6 +11,7 @@ public class GameBootstrap : MonoBehaviour
 
     private readonly UniTaskCompletionSource _initializationSource = new();
     private RepositoryFactory _repositoryFactory;
+    private IFlushable _flushableProvider;
 
     private void Awake()
     {
@@ -32,6 +33,19 @@ public class GameBootstrap : MonoBehaviour
             CleanupRepositories();
             Instance = null;
         }
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            _flushableProvider?.ForceFlushAll();
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        _flushableProvider?.ForceFlushAll();
     }
 
     private async UniTaskVoid InitializeAsync()
@@ -57,7 +71,13 @@ public class GameBootstrap : MonoBehaviour
         {
             var initializer = new FirebaseInitializer();
             await initializer.Initialize();
-            providers.Add(new FirebaseRepositoryProvider(initializer.AuthService, initializer.StoreService));
+
+            var hybridProvider = new HybridRepositoryProvider(
+                initializer.AuthService,
+                initializer.StoreService
+            );
+            _flushableProvider = hybridProvider;
+            providers.Add(hybridProvider);
         }
         catch (System.Exception ex)
         {
@@ -70,6 +90,9 @@ public class GameBootstrap : MonoBehaviour
 
     private void CleanupRepositories()
     {
+        _flushableProvider?.Dispose();
+        _flushableProvider = null;
+
         if (_repositoryFactory == null) return;
         ServiceLocator.Unregister(_repositoryFactory.AccountRepository);
         ServiceLocator.Unregister(_repositoryFactory.CurrencyRepository);

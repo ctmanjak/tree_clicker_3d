@@ -6,11 +6,12 @@ using UnityEngine;
 namespace Outgame
 {
     [Serializable, FirestoreData]
-    public class CurrencySaveData : IIdentifiable
+    public class CurrencySaveData : IIdentifiable, ITimestamped
     {
         [SerializeField] private string _id;
         [SerializeField] private string _type;
         [SerializeField] private double _amount;
+        [SerializeField] private long _lastModified;
 
         [FirestoreProperty("id")]
         public string Id { get => _id; set => _id = value; }
@@ -20,5 +21,8 @@ namespace Outgame
 
         [FirestoreProperty("amount")]
         public double Amount { get => _amount; set => _amount = value; }
+
+        [FirestoreProperty("lastModified")]
+        public long LastModified { get => _lastModified; set => _lastModified = value; }
     }
 }

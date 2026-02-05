@@ -10,5 +10,6 @@ namespace Core
         UniTask SetDocument<T>(string collection, T data) where T : IIdentifiable;
         UniTask<List<T>> GetCollection<T>(string collection) where T : IIdentifiable;
         void SetDocumentAsync<T>(string collection, T data) where T : IIdentifiable;
+        UniTask<long> GetServerTimeAsync();
     }
 }
