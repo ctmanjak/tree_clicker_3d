@@ -8,7 +8,7 @@ namespace Outgame
 {
     public class FirebaseCurrencyRepository : ICurrencyRepository
     {
-        private const string CollectionName = "currencies";
+        public string CollectionName => "currencies";
 
         private readonly IFirebaseStoreService _storeService;
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core;
 using Cysharp.Threading.Tasks;
 
 namespace Outgame
@@ -8,8 +9,10 @@ namespace Outgame
     {
         private readonly HybridRepository<CurrencySaveData> _hybrid;
 
+        public string CollectionName => _hybrid.CollectionName;
+
         public HybridCurrencyRepository(
-            ICurrencyRepository localRepository,
+            ILocalRepository<CurrencySaveData> localRepository,
             ICurrencyRepository firebaseRepository,
             long timeOffset = 0)
         {

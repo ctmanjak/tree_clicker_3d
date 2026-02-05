@@ -7,11 +7,11 @@ namespace Outgame
 {
     public class SyncedUpgradeRepository : IUpgradeRepository
     {
-        private const string CollectionName = "upgrades";
-
         private readonly LocalUpgradeRepository _localRepository;
         private readonly ISyncCoordinator _syncCoordinator;
         private readonly long _timeOffset;
+
+        public string CollectionName => _localRepository.CollectionName;
 
         public SyncedUpgradeRepository(
             LocalUpgradeRepository localRepository,
@@ -31,7 +31,8 @@ namespace Outgame
         public void Save(UpgradeSaveData item)
         {
             item.LastModified = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + _timeOffset;
-            _syncCoordinator.RegisterPending(CollectionName, item, _localRepository);
+            _syncCoordinator.RegisterPending(_localRepository.CollectionName, item, _localRepository);
         }
+
     }
 }

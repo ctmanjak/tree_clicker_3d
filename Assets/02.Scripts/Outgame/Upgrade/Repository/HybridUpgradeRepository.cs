@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core;
 using Cysharp.Threading.Tasks;
 
 namespace Outgame
@@ -8,8 +9,10 @@ namespace Outgame
     {
         private readonly HybridRepository<UpgradeSaveData> _hybrid;
 
+        public string CollectionName => _hybrid.CollectionName;
+
         public HybridUpgradeRepository(
-            IUpgradeRepository localRepository,
+            ILocalRepository<UpgradeSaveData> localRepository,
             IUpgradeRepository firebaseRepository,
             long timeOffset = 0)
         {

@@ -5,9 +5,11 @@ using UnityEngine;
 
 namespace Outgame
 {
-    public class LocalCurrencyRepository : ICurrencyRepository
+    public class LocalCurrencyRepository : ICurrencyRepository, Core.ILocalRepository<CurrencySaveData>
     {
         private const string SaveKey = "CurrencyData";
+
+        public string CollectionName => "currencies";
 
         private readonly Dictionary<string, CurrencySaveData> _data = new();
 
@@ -32,6 +34,11 @@ namespace Outgame
         {
             _data[item.Id] = item;
             SaveToPlayerPrefs();
+        }
+
+        public CurrencySaveData Get(string id)
+        {
+            return _data.GetValueOrDefault(id);
         }
 
         private void SaveToPlayerPrefs()

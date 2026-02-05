@@ -68,7 +68,7 @@ namespace Outgame
         }
 
         private async UniTask MergeAndInitialize<T>(
-            IRepository<T> localRepo,
+            ILocalRepository<T> localRepo,
             IRepository<T> firebaseRepo)
             where T : IIdentifiable, ITimestamped
         {
@@ -90,6 +90,26 @@ namespace Outgame
             foreach (var item in merged)
             {
                 localRepo.Save(item);
+            }
+            
+            if (firebaseItems.Count > 0)
+            {
+                var firebaseIds = new HashSet<string>(firebaseItems.Select(f => f.Id));
+                int dirtyCount = 0;
+
+                foreach (var localItem in localItems)
+                {
+                    if (!firebaseIds.Contains(localItem.Id))
+                    {
+                        _syncCoordinator.MarkDirty(localRepo.CollectionName, localItem.Id, localRepo);
+                        dirtyCount++;
+                    }
+                }
+
+                if (dirtyCount > 0)
+                {
+                    Debug.Log($"[SyncCoordinatorProvider] {localRepo.CollectionName}: Firebase에 없는 {dirtyCount}개 항목 dirty 표시");
+                }
             }
         }
 

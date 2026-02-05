@@ -14,9 +14,11 @@ namespace Outgame
         private const float DebounceDelaySeconds = 1f;
         private const int SaveCountThreshold = 5;
 
-        private readonly IRepository<T> _localRepository;
+        private readonly ILocalRepository<T> _localRepository;
         private readonly IRepository<T> _firebaseRepository;
         private readonly long _timeOffset;
+
+        public string CollectionName => _localRepository.CollectionName;
 
         private Dictionary<string, T> _pendingItems = new Dictionary<string, T>();
         private int _localSaveCount;
@@ -24,7 +26,7 @@ namespace Outgame
         private CancellationTokenSource _debounceCts;
 
         public HybridRepository(
-            IRepository<T> localRepository,
+            ILocalRepository<T> localRepository,
             IRepository<T> firebaseRepository,
             long timeOffset = 0)
         {
