@@ -72,12 +72,28 @@ public class GameBootstrap : MonoBehaviour
             var initializer = new FirebaseInitializer();
             await initializer.Initialize();
 
-            var hybridProvider = new HybridRepositoryProvider(
-                initializer.AuthService,
-                initializer.StoreService
-            );
-            _flushableProvider = hybridProvider;
-            providers.Add(hybridProvider);
+            try
+            {
+                var syncProvider = new SyncCoordinatorProvider(
+                    initializer.AuthService,
+                    initializer.StoreService
+                );
+                await syncProvider.Initialize();
+                _flushableProvider = syncProvider;
+                providers.Add(syncProvider);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"SyncCoordinator 초기화 실패, HybridRepository로 전환: {ex.Message}");
+
+                var hybridProvider = new HybridRepositoryProvider(
+                    initializer.AuthService,
+                    initializer.StoreService
+                );
+                await hybridProvider.Initialize();
+                _flushableProvider = hybridProvider;
+                providers.Add(hybridProvider);
+            }
         }
         catch (System.Exception ex)
         {

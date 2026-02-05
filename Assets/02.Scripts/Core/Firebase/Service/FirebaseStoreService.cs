@@ -110,5 +110,51 @@ namespace Core
                 return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
+
+        public IWriteBatchWrapper CreateWriteBatch()
+        {
+            if (!TryGetUserId(out string uid))
+                return new NoOpWriteBatchWrapper();
+            return new FirestoreWriteBatchWrapper(_firestore, uid);
+        }
+
+        private class FirestoreWriteBatchWrapper : IWriteBatchWrapper
+        {
+            private readonly WriteBatch _batch;
+            private readonly FirebaseFirestore _firestore;
+            private readonly string _uid;
+
+            public FirestoreWriteBatchWrapper(FirebaseFirestore firestore, string uid)
+            {
+                _firestore = firestore;
+                _uid = uid;
+                _batch = firestore.StartBatch();
+            }
+
+            public void Set<T>(string collection, string documentId, T data)
+            {
+                var docRef = _firestore.Collection("users").Document(_uid)
+                    .Collection(collection).Document(documentId);
+                _batch.Set(docRef, data);
+            }
+
+            public async UniTask CommitAsync()
+            {
+                await _batch.CommitAsync();
+            }
+        }
+
+        private class NoOpWriteBatchWrapper : IWriteBatchWrapper
+        {
+            public void Set<T>(string collection, string documentId, T data)
+            {
+                Debug.LogWarning("[NoOpWriteBatchWrapper] 로그인되지 않아 WriteBatch 무시됨");
+            }
+
+            public UniTask CommitAsync()
+            {
+                return UniTask.CompletedTask;
+            }
+        }
     }
 }
