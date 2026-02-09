@@ -4,7 +4,6 @@ on:
   push:
     branches: [ web-build ]
 
-# GitHub Pages 배포에 필요한 권한
 permissions:
   contents: read
   pages: write
@@ -72,3 +71,41 @@ jobs:
       # 7. GitHub Pages 배포
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
+
+      # 8. 슬랙 알림 (성공)
+      - name: Slack Notification (Success)
+        if: success()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "✅ WebGL 빌드 & 배포 성공"
+            blocks:
+              - type: section
+                text:
+                  type: mrkdwn
+                  text: |
+                    ✅ *${{ github.repository }}* 빌드 & 배포 완료!
+                    📝 커밋: ${{ github.event.head_commit.message }}
+                    👤 작성자: ${{ github.actor }}
+                    🌐 <https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/|플레이하기>
+
+      # 9. 슬랙 알림 (실패)
+      - name: Slack Notification (Failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "❌ WebGL 빌드 실패"
+            blocks:
+              - type: section
+                text:
+                  type: mrkdwn
+                  text: |
+                    🔥 *${{ github.repository }}* 빌드 실패!
+                    📝 커밋: ${{ github.event.head_commit.message }}
+                    👤 작성자: ${{ github.actor }}
+                    🔗 <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|로그 확인>
