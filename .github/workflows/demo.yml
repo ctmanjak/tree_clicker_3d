@@ -50,7 +50,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: WebGL
-          buildProfile: "Assets/Settings/Build Profiles/Web-Mobile-Development.asset"
+          buildProfile: "Assets/Settings/Build Profiles/Lumberman - Desktop - Development.asset"
 
       # 4. 빌드 결과물 업로드 (Artifact)
       - name: Upload Build
