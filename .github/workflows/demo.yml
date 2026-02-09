@@ -1,8 +1,14 @@
-name: Unity WebGL Build
+name: Unity WebGL Build & Deploy
 
 on:
   push:
     branches: [ web-build ]
+
+# GitHub Pages 배포에 필요한 권한
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -20,11 +26,11 @@ jobs:
           large-packages: true
           docker-images: true
           swap-storage: true
-      
+
       # 1. 코드 가져오기
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       # 2. 캐시 (빌드 속도 향상)
       - name: Cache Library
         uses: actions/cache@v4
@@ -34,7 +40,7 @@ jobs:
           restore-keys: |
             Library-WebGL-
             Library-
-      
+
       # 3. Unity 빌드
       - name: Build WebGL
         uses: game-ci/unity-builder@v4
@@ -44,11 +50,25 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: WebGL
-          buildProfile: 'Assets/Settings/Build Profiles/Lumberman - Desktop - Development.asset'
-      
-      # 4. 빌드 결과물 업로드
+          buildProfile: "Assets/Settings/Build Profiles/Web-Mobile-Development.asset"
+
+      # 4. 빌드 결과물 업로드 (Artifact)
       - name: Upload Build
         uses: actions/upload-artifact@v4
         with:
           name: WebGL-Build
           path: build/WebGL
+
+      # 5. GitHub Pages 배포 준비
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 6. Pages용 Artifact 업로드
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/WebGL/WebGL
+
+      # 7. GitHub Pages 배포
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
