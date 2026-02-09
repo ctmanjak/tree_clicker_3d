@@ -1,0 +1,53 @@
+name: Unity Build
+
+on:
+  push:
+    branches: [ web-build ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 0. 디스크 공간 확보
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+      
+      # 1. 코드 가져오기
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      # 2. 캐시 (빌드 속도 향상)
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Windows-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-Windows-
+            Library-
+      
+      # 3. Unity 빌드 (데스크탑)
+      - name: Build Windows
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows64
+      
+      # 4. 빌드 결과물 업로드
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Build
+          path: build/StandaloneWindows64
