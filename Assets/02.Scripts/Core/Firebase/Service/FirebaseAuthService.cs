@@ -1,34 +1,63 @@
 using System;
 using Cysharp.Threading.Tasks;
+#if !UNITY_WEBGL || UNITY_EDITOR
 using Firebase;
 using Firebase.Auth;
+#endif
 
 namespace Core
 {
     public class FirebaseAuthService : IFirebaseAuthService
     {
+#if !UNITY_WEBGL || UNITY_EDITOR
         private FirebaseAuth _auth;
+#endif
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         public bool IsInitialized => _auth != null;
+#else
+        public bool IsInitialized => false;
+#endif
+
+#if !UNITY_WEBGL || UNITY_EDITOR
         public string CurrentUserId => _auth?.CurrentUser?.UserId ?? string.Empty;
+#else
+        public string CurrentUserId => string.Empty;
+#endif
+
+#if !UNITY_WEBGL || UNITY_EDITOR
         public bool IsLoggedIn => _auth?.CurrentUser != null;
+#else
+        public bool IsLoggedIn => false;
+#endif
 
         public UniTask Initialize()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             _auth = FirebaseAuth.DefaultInstance;
+#endif
             return UniTask.CompletedTask;
         }
 
         public UniTask<FirebaseAuthResult> Register(string email, string password)
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             return ExecuteAuthAsync(() => _auth.CreateUserWithEmailAndPasswordAsync(email, password));
+#else
+            return UniTask.FromResult(new FirebaseAuthResult { Success = false, ErrorMessage = "WebGL에서는 지원되지 않습니다." });
+#endif
         }
 
         public UniTask<FirebaseAuthResult> Login(string email, string password)
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             return ExecuteAuthAsync(() => _auth.SignInWithEmailAndPasswordAsync(email, password));
+#else
+            return UniTask.FromResult(new FirebaseAuthResult { Success = false, ErrorMessage = "WebGL에서는 지원되지 않습니다." });
+#endif
         }
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         private async UniTask<FirebaseAuthResult> ExecuteAuthAsync(
             Func<System.Threading.Tasks.Task<Firebase.Auth.AuthResult>> authOperation)
         {
@@ -64,12 +93,16 @@ namespace Core
                 ErrorMessage = errorMessage,
             };
         }
+#endif
 
         public void Logout()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             _auth.SignOut();
+#endif
         }
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         private string ParseFirebaseError(AggregateException ex)
         {
             foreach (var inner in ex.Flatten().InnerExceptions)
@@ -97,5 +130,6 @@ namespace Core
                 _ => $"인증 오류가 발생했습니다. ({errorCode})",
             };
         }
+#endif
     }
 }

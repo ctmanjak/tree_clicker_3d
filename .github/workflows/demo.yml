@@ -1,4 +1,4 @@
-name: Unity Build
+name: Unity WebGL Build
 
 on:
   push:
@@ -30,24 +30,25 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-Windows-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-WebGL-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-Windows-
+            Library-WebGL-
             Library-
       
-      # 3. Unity 빌드 (데스크탑)
-      - name: Build Windows
+      # 3. Unity 빌드
+      - name: Build WebGL
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: StandaloneWindows64
+          targetPlatform: WebGL
+          buildProfile: 'Assets/Settings/Build Profiles/Web-Mobile-Development.asset'
       
       # 4. 빌드 결과물 업로드
       - name: Upload Build
         uses: actions/upload-artifact@v4
         with:
-          name: Windows-Build
-          path: build/StandaloneWindows64
+          name: WebGL-Build
+          path: build/WebGL

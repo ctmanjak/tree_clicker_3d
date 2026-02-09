@@ -1,20 +1,28 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+#if !UNITY_WEBGL || UNITY_EDITOR
 using Firebase.Extensions;
 using Firebase.Firestore;
+#endif
 using UnityEngine;
 
 namespace Core
 {
     public class FirebaseStoreService : IFirebaseStoreService
     {
+#if !UNITY_WEBGL || UNITY_EDITOR
         private FirebaseFirestore _firestore;
+#endif
         private readonly IFirebaseAuthService _authService;
 
         private const int MAX_DOCUMENT_ID_BYTES = 1500;
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         public bool IsInitialized => _firestore != null;
+#else
+        public bool IsInitialized => false;
+#endif
 
         public FirebaseStoreService(IFirebaseAuthService authService)
         {
@@ -23,12 +31,15 @@ namespace Core
 
         public UniTask Initialize()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             _firestore = FirebaseFirestore.DefaultInstance;
+#endif
             return UniTask.CompletedTask;
         }
 
         public async UniTask SetDocument<T>(string collection, T data) where T : IIdentifiable
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             if (!TryGetUserId(out string uid))
                 return;
 
@@ -40,10 +51,12 @@ namespace Core
 
             var docRef = GetDocumentReference(_firestore, uid, collection, data.Id);
             await docRef.SetAsync(data);
+#endif
         }
 
         public async UniTask<List<T>> GetCollection<T>(string collection) where T : IIdentifiable
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             if (!TryGetUserId(out string uid))
                 return new List<T>();
 
@@ -57,10 +70,14 @@ namespace Core
                 results.Add(doc.ConvertTo<T>());
             }
             return results;
+#else
+            return new List<T>();
+#endif
         }
 
         public void SetDocumentAsync<T>(string collection, T data) where T : IIdentifiable
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             if (!TryGetUserId(out string uid))
                 return;
 
@@ -78,6 +95,7 @@ namespace Core
                     Debug.LogWarning($"Firestore 백그라운드 저장 실패: {task.Exception?.Message}");
                 }
             });
+#endif
         }
 
         private bool TryGetUserId(out string uid)
@@ -122,15 +140,18 @@ namespace Core
             return true;
         }
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         private static DocumentReference GetDocumentReference(
             FirebaseFirestore firestore, string uid, string collection, string documentId)
         {
             return firestore.Collection("users").Document(uid)
                 .Collection(collection).Document(documentId);
         }
+#endif
 
         public async UniTask<long> GetServerTimeAsync()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             if (!TryGetUserId(out string uid))
                 return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
@@ -155,15 +176,23 @@ namespace Core
                 Debug.LogWarning($"[FirebaseStoreService] 서버 시간 가져오기 실패, 로컬 시간 사용: {ex.Message}");
                 return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
+#else
+            return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+#endif
         }
 
         public IWriteBatchWrapper CreateWriteBatch()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             if (!TryGetUserId(out string uid))
                 return new NoOpWriteBatchWrapper();
             return new FirestoreWriteBatchWrapper(_firestore, uid);
+#else
+            return new NoOpWriteBatchWrapper();
+#endif
         }
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         private class FirestoreWriteBatchWrapper : IWriteBatchWrapper
         {
             private readonly WriteBatch _batch;
@@ -194,6 +223,7 @@ namespace Core
                 await _batch.CommitAsync();
             }
         }
+#endif
 
         private class NoOpWriteBatchWrapper : IWriteBatchWrapper
         {

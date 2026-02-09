@@ -1,6 +1,8 @@
 using System;
 using Cysharp.Threading.Tasks;
+#if !UNITY_WEBGL || UNITY_EDITOR
 using Firebase;
+#endif
 using UnityEngine;
 
 namespace Core
@@ -15,6 +17,7 @@ namespace Core
 
         public async UniTask Initialize()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
             if (dependencyStatus != DependencyStatus.Available)
             {
@@ -28,6 +31,9 @@ namespace Core
             await _storeService.Initialize();
 
             Debug.Log("Firebase 초기화 완료");
+#else
+            throw new InvalidOperationException("Firebase는 WebGL에서 지원되지 않습니다.");
+#endif
         }
     }
 }
