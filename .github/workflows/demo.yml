@@ -50,6 +50,7 @@ jobs:
         with:
           targetPlatform: WebGL
           buildProfile: "Assets/Settings/Build Profiles/Lumberman - Desktop - Development1.asset"
+          customParameters: -logFile /github/workspace/unity-build.log
 
       # 4. 빌드 로그 캡처 (실패 시)
       - name: Capture Build Logs
@@ -57,20 +58,10 @@ jobs:
         continue-on-error: true
         id: capture-logs
         run: |
-          LOG_FILE=""
-          for path in \
-            "$GITHUB_WORKSPACE/Logs/Editor.log" \
-            "$HOME/.config/unity3d/Editor.log" \
-            "/github/home/.config/unity3d/Editor.log"; do
-            if [ -f "$path" ]; then
-              LOG_FILE="$path"
-              echo "Found log at: $LOG_FILE"
-              break
-            fi
-          done
+          LOG_FILE="$GITHUB_WORKSPACE/unity-build.log"
 
-          if [ -z "$LOG_FILE" ]; then
-            echo "Searching for Editor.log..."
+          if [ ! -f "$LOG_FILE" ]; then
+            echo "unity-build.log not found, searching for Editor.log..."
             LOG_FILE=$(timeout 10 find /github /home -maxdepth 5 -type f -name "Editor.log" 2>/dev/null | head -1)
           fi
 
