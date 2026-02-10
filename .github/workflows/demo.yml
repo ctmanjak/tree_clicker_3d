@@ -57,33 +57,29 @@ jobs:
         if: failure()
         continue-on-error: true
         id: capture-logs
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          # GitHub API로 현재 job 로그 다운로드 (Unity가 -logfile /dev/stdout으로 출력하므로)
-          JOB_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs" \
-            --jq '.jobs[] | select(.status == "in_progress") | .id' | head -1)
-          echo "JOB_ID: ${JOB_ID:-not found}"
+          echo "=== Log file search ==="
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "RUNNER_TEMP: $RUNNER_TEMP"
 
-          if [ -n "$JOB_ID" ]; then
-            curl -sL \
-              -H "Authorization: Bearer ${GH_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/jobs/${JOB_ID}/logs" \
-              -o /tmp/full-job-log.txt
-            echo "Downloaded log size: $(wc -c < /tmp/full-job-log.txt) bytes"
-          fi
+          echo "--- Workspace .log files ---"
+          find "$GITHUB_WORKSPACE" -name "*.log" -type f 2>/dev/null | head -20
 
-          if [ -s /tmp/full-job-log.txt ]; then
-            grep -iE "(error CS[0-9]|error:|exception|failed|fatal|Aborting batchmode|CompilerOutput|Build completed with a result of 'Failed')" \
-              /tmp/full-job-log.txt | tail -c 100000 > /tmp/filtered-log.txt
+          echo "--- Runner temp .log files ---"
+          find "$RUNNER_TEMP" -name "*.log" -type f 2>/dev/null | head -20
 
-            if [ ! -s /tmp/filtered-log.txt ]; then
-              tail -c 100000 /tmp/full-job-log.txt > /tmp/filtered-log.txt
-            fi
-          else
-            echo "빌드 로그를 가져올 수 없습니다." > /tmp/filtered-log.txt
-          fi
+          echo "--- Workspace Logs/ directory ---"
+          ls -la "$GITHUB_WORKSPACE/Logs/" 2>/dev/null || echo "(not found)"
+
+          echo "--- Runner temp _github_home ---"
+          find "$RUNNER_TEMP/_github_home" -type f 2>/dev/null | head -20
+
+          echo "--- /tmp .log files ---"
+          find /tmp -name "*.log" -type f 2>/dev/null | head -10
+
+          echo "=== Search complete ==="
+
+          echo "진단 모드: 로그 파일 경로를 탐색 중입니다." > /tmp/filtered-log.txt
 
           DELIM="FILTERED_LOG_$(openssl rand -hex 8)"
           {
