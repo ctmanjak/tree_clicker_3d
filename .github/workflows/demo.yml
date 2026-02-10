@@ -52,34 +52,77 @@ jobs:
           targetPlatform: WebGL
           buildProfile: "Assets/Settings/Build Profiles/Lumberman - Desktop - Development1.asset"
 
-      # 4. 빌드 로그 캡처 (실패 시)
-      - name: Capture Build Logs
-        if: failure()
-        continue-on-error: true
-        id: capture-logs
+      # 4. 빌드 결과물 업로드 (Artifact)
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: WebGL-Build
+          path: build/WebGL
+
+      # 5. GitHub Pages 배포 준비
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 6. Pages용 Artifact 업로드
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/WebGL/WebGL
+
+      # 7. GitHub Pages 배포
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+
+      # 8. 슬랙 알림 (성공)
+      - name: Slack Notification (Success)
+        if: success()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "✅ WebGL 빌드 & 배포 성공"
+            blocks:
+              - type: section
+                text:
+                  type: mrkdwn
+                  text: |
+                    ✅ *${{ github.repository }}* 빌드 & 배포 완료!
+                    📝 커밋: ${{ github.event.head_commit.message }}
+                    👤 작성자: ${{ github.actor }}
+                    🌐 <https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/|플레이하기>
+
+  # 빌드 실패 시 AI 분석 + 슬랙 알림 (별도 job — build job 완료 후 로그 API 접근 가능)
+  notify-failure:
+    runs-on: ubuntu-latest
+    needs: build
+    if: failure()
+
+    steps:
+      # 1. 빌드 로그 다운로드
+      - name: Download Build Logs
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "=== Log file search ==="
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          echo "RUNNER_TEMP: $RUNNER_TEMP"
+          JOB_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs" \
+            --jq '.jobs[] | select(.name == "build") | .id')
+          echo "Build JOB_ID: $JOB_ID"
 
-          echo "--- Workspace .log files ---"
-          find "$GITHUB_WORKSPACE" -name "*.log" -type f 2>/dev/null | head -20
+          if [ -n "$JOB_ID" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/actions/jobs/${JOB_ID}/logs" > /tmp/full-job-log.txt 2>/dev/null
+            echo "Log size: $(wc -c < /tmp/full-job-log.txt) bytes"
+          fi
 
-          echo "--- Runner temp .log files ---"
-          find "$RUNNER_TEMP" -name "*.log" -type f 2>/dev/null | head -20
+          if [ -s /tmp/full-job-log.txt ]; then
+            grep -iE "(error CS[0-9]|error:|exception|failed|fatal|Aborting batchmode|CompilerOutput|Build completed with a result of 'Failed')" \
+              /tmp/full-job-log.txt | tail -c 100000 > /tmp/filtered-log.txt
 
-          echo "--- Workspace Logs/ directory ---"
-          ls -la "$GITHUB_WORKSPACE/Logs/" 2>/dev/null || echo "(not found)"
-
-          echo "--- Runner temp _github_home ---"
-          find "$RUNNER_TEMP/_github_home" -type f 2>/dev/null | head -20
-
-          echo "--- /tmp .log files ---"
-          find /tmp -name "*.log" -type f 2>/dev/null | head -10
-
-          echo "=== Search complete ==="
-
-          echo "진단 모드: 로그 파일 경로를 탐색 중입니다." > /tmp/filtered-log.txt
+            if [ ! -s /tmp/filtered-log.txt ]; then
+              tail -c 100000 /tmp/full-job-log.txt > /tmp/filtered-log.txt
+            fi
+          else
+            echo "빌드 로그를 가져올 수 없습니다." > /tmp/filtered-log.txt
+          fi
 
           DELIM="FILTERED_LOG_$(openssl rand -hex 8)"
           {
@@ -88,9 +131,8 @@ jobs:
             echo "${DELIM}"
           } >> "$GITHUB_ENV"
 
-      # 5. AI 실패 분석 (실패 시)
+      # 2. AI 실패 분석
       - name: AI Failure Analysis
-        if: failure()
         continue-on-error: true
         timeout-minutes: 2
         id: ai-analysis
@@ -113,9 +155,8 @@ jobs:
             ${{ env.FILTERED_LOG }}
             --- 로그 끝 ---
 
-      # 5-1. AI 분석 결과 포맷팅
+      # 3. AI 분석 결과 포맷팅
       - name: Format AI Analysis
-        if: failure()
         continue-on-error: true
         id: format-analysis
         env:
@@ -143,49 +184,8 @@ jobs:
             echo "SLACKEOF"
           } >> "$GITHUB_OUTPUT"
 
-      # 6. 빌드 결과물 업로드 (Artifact)
-      - name: Upload Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: WebGL-Build
-          path: build/WebGL
-
-      # 7. GitHub Pages 배포 준비
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      # 8. Pages용 Artifact 업로드
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build/WebGL/WebGL
-
-      # 9. GitHub Pages 배포
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
-
-      # 10. 슬랙 알림 (성공)
-      - name: Slack Notification (Success)
-        if: success()
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: "✅ WebGL 빌드 & 배포 성공"
-            blocks:
-              - type: section
-                text:
-                  type: mrkdwn
-                  text: |
-                    ✅ *${{ github.repository }}* 빌드 & 배포 완료!
-                    📝 커밋: ${{ github.event.head_commit.message }}
-                    👤 작성자: ${{ github.actor }}
-                    🌐 <https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/|플레이하기>
-
-      # 11. 슬랙 알림 (실패)
+      # 4. 슬랙 알림 (실패)
       - name: Slack Notification (Failure)
-        if: failure()
         uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK }}
