@@ -86,6 +86,13 @@ jobs:
             echo "Unity Editor log file not found." > /tmp/filtered-log.txt
           fi
 
+          DELIM="FILTERED_LOG_$(openssl rand -hex 8)"
+          {
+            echo "FILTERED_LOG<<${DELIM}"
+            head -c 80000 /tmp/filtered-log.txt
+            echo "${DELIM}"
+          } >> "$GITHUB_ENV"
+
       # 5. AI 실패 분석 (실패 시)
       - name: AI Failure Analysis
         if: failure()
@@ -108,7 +115,7 @@ jobs:
             - 모든 값은 한국어로 작성
 
             --- 로그 시작 ---
-            $(cat /tmp/filtered-log.txt | head -c 80000)
+            ${{ env.FILTERED_LOG }}
             --- 로그 끝 ---
 
       # 5-1. AI 분석 결과 포맷팅
