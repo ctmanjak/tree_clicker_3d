@@ -114,7 +114,7 @@ jobs:
           fi
 
           if [ -s /tmp/full-job-log.txt ]; then
-            grep -iE "(error CS[0-9]|error:|exception|failed|fatal|Aborting batchmode|CompilerOutput|Build completed with a result of 'Failed')" \
+            grep -iEC3 "(error CS[0-9]|error:|exception|failed|fatal|Aborting batchmode|CompilerOutput|Build completed with a result of 'Failed')" \
               /tmp/full-job-log.txt | tail -c 100000 > /tmp/filtered-log.txt
 
             if [ ! -s /tmp/filtered-log.txt ]; then
@@ -122,10 +122,10 @@ jobs:
             fi
 
             # "Aborting batchmode" 다음 줄이 근본 원인 → 우선 표시
-            ABORT_LINES=$(grep -A1 "Aborting batchmode" /tmp/full-job-log.txt 2>/dev/null | head -5)
+            ABORT_LINES=$(grep -B15 -A5 "Aborting batchmode" /tmp/full-job-log.txt 2>/dev/null | head -30)
             if [ -n "$ABORT_LINES" ]; then
               {
-                echo "[빌드 중단 원인]"
+                echo "[빌드 중단 시점 컨텍스트]"
                 echo "$ABORT_LINES"
                 echo ""
                 echo "[전체 필터 로그]"
@@ -160,7 +160,7 @@ jobs:
             {"causes":[{"summary":"근본 원인 요약","location":"파일 경로:라인","solution":"해결 방법"}]}
 
             Unity 로그 해석 규칙:
-            - "[빌드 중단 원인]" 섹션이 있으면 이것이 근본 원인입니다. "Aborting batchmode due to failure:" 다음 줄이 실제 실패 이유입니다.
+            - "[빌드 중단 시점 컨텍스트]" 섹션이 가장 중요합니다. "Aborting batchmode due to failure:" 다음 줄이 실제 실패 이유이며, 주변 로그에서 원인의 맥락을 파악하세요.
             - "CreateDirectory ... failed", "[Licensing::Module] Error" 같은 메시지는 CI 환경의 일반적인 경고이며, 빌드 실패의 직접 원인이 아닙니다. causes에 포함하지 마세요.
             - 연쇄 에러(같은 원인에서 파생)는 근본 원인 1개로 묶어 causes에 1개만 추가
             - 독립 원인이 여러 개면 causes에 각각 추가
