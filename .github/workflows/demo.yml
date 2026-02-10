@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -50,31 +51,32 @@ jobs:
         with:
           targetPlatform: WebGL
           buildProfile: "Assets/Settings/Build Profiles/Lumberman - Desktop - Development1.asset"
-          customParameters: -logFile /github/workspace/unity-build.log
 
       # 4. 빌드 로그 캡처 (실패 시)
       - name: Capture Build Logs
         if: failure()
         continue-on-error: true
         id: capture-logs
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          LOG_FILE="$GITHUB_WORKSPACE/unity-build.log"
+          # GitHub API로 현재 job 로그 다운로드 (Unity가 -logfile /dev/stdout으로 출력하므로)
+          JOB_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs" \
+            --jq '.jobs[] | select(.status == "in_progress") | .id' | head -1)
 
-          if [ ! -f "$LOG_FILE" ]; then
-            echo "unity-build.log not found, searching for Editor.log..."
-            LOG_FILE=$(timeout 10 find /github /home -maxdepth 5 -type f -name "Editor.log" 2>/dev/null | head -1)
+          if [ -n "$JOB_ID" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/actions/jobs/${JOB_ID}/logs" > /tmp/full-job-log.txt 2>/dev/null
           fi
 
-          if [ -n "$LOG_FILE" ] && [ -f "$LOG_FILE" ]; then
+          if [ -s /tmp/full-job-log.txt ]; then
             grep -iE "(error CS[0-9]|error:|exception|failed|fatal|Aborting batchmode|CompilerOutput|Build completed with a result of 'Failed')" \
-              "$LOG_FILE" | tail -c 100000 > /tmp/filtered-log.txt
+              /tmp/full-job-log.txt | tail -c 100000 > /tmp/filtered-log.txt
 
             if [ ! -s /tmp/filtered-log.txt ]; then
-              echo "No filtered errors found, using raw log tail..."
-              tail -c 100000 "$LOG_FILE" > /tmp/filtered-log.txt
+              tail -c 100000 /tmp/full-job-log.txt > /tmp/filtered-log.txt
             fi
           else
-            echo "Unity Editor log file not found." > /tmp/filtered-log.txt
+            echo "빌드 로그를 가져올 수 없습니다." > /tmp/filtered-log.txt
           fi
 
           DELIM="FILTERED_LOG_$(openssl rand -hex 8)"
