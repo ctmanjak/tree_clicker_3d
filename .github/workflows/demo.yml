@@ -63,9 +63,15 @@ jobs:
           # GitHub API로 현재 job 로그 다운로드 (Unity가 -logfile /dev/stdout으로 출력하므로)
           JOB_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs" \
             --jq '.jobs[] | select(.status == "in_progress") | .id' | head -1)
+          echo "JOB_ID: ${JOB_ID:-not found}"
 
           if [ -n "$JOB_ID" ]; then
-            gh api "repos/${GITHUB_REPOSITORY}/actions/jobs/${JOB_ID}/logs" > /tmp/full-job-log.txt 2>/dev/null
+            curl -sL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/jobs/${JOB_ID}/logs" \
+              -o /tmp/full-job-log.txt
+            echo "Downloaded log size: $(wc -c < /tmp/full-job-log.txt) bytes"
           fi
 
           if [ -s /tmp/full-job-log.txt ]; then
